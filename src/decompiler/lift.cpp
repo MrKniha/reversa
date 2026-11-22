@@ -3,6 +3,7 @@
 // x86 / x86-64 and AArch64, integer subset that compilers emit for ordinary C code at -O0..-O2.
 // Anything else (SSE, string ops, ...) is kept verbatim as an __asm statement so no information
 // is silently lost.
+#include <algorithm>
 #include <cctype>
 #include <map>
 #include <stdexcept>

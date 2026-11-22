@@ -1,4 +1,5 @@
 // Control-flow graph (per function) and call graph (whole program).
+#include <iterator>
 #include <algorithm>
 
 #include "analysis/analysis.hpp"

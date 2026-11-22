@@ -1,4 +1,5 @@
 // Render structured IR as C-like pseudocode split into typed, clickable segments.
+#include <algorithm>
 #include <map>
 
 #include "core/text.hpp"

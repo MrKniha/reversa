@@ -1,4 +1,5 @@
 // Auto-analysis internals (thunks, noreturn, CFG, call graph, xrefs, search) and parser fuzzing.
+#include <algorithm>
 #include <cstdlib>
 #include <fstream>
 #include <random>

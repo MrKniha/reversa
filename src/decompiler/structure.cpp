@@ -5,6 +5,7 @@
 // structurers): loops come from natural loops (back edges to a dominator), if/else regions end
 // at the immediate post-dominator. Anything that does not fit becomes a labelled goto - always
 // correct, never pretty.
+#include <iterator>
 #include <algorithm>
 #include <deque>
 #include <stdexcept>
