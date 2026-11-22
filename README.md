@@ -1,4 +1,4 @@
-<p align="center"><img src="assets/reversa.svg" width="128" alt="Logo REVERSA"></p>
+<p align="center"><img src="assets/logo.svg" width="640" alt="REVERSA – reverse engineering"></p>
 
 # REVERSA
 
