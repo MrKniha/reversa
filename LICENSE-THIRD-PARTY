@@ -43,7 +43,8 @@ Súčasť programu
    Zdroj: https://www.python.org
    Použitie: voliteľný runtime pre skripty a pluginy. Windows balík obsahuje
    "embeddable" distribúciu Pythonu; na Linuxe sa používa systémový Python.
-   REVERSA beží aj bez Pythonu (skripty a pluginy sú potom vypnuté).
+   Zostava bez Pythonu (-DREVERSA_PYTHON=OFF) beží bez neho; skripty a pluginy
+   sú potom vypnuté.
 
 Vývojové nástroje (nie sú súčasťou distribúcie)
 -----------------------------------------------

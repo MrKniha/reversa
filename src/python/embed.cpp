@@ -51,14 +51,6 @@ std::vector<fs::path> package_dirs() {
 
 bool start() {
     if (state != State::NotStarted) return state == State::Ready;
-#if defined(_WIN32) && defined(REVERSA_PYTHON_DLL)
-    // python3XY.dll is delay-loaded: check for it first so a missing runtime is a friendly message
-    if (!LoadLibraryW(L"" REVERSA_PYTHON_DLL)) {
-        state = State::Failed;
-        failure = "chýba " REVERSA_PYTHON_DLL;
-        return false;
-    }
-#endif
     try {
         PyConfig config;
         PyConfig_InitPythonConfig(&config);
