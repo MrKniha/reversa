@@ -3,6 +3,7 @@
 // is written in Python on top of these objects (python/reversa/api.py).
 #include "python/bindings.hpp"
 
+#include <algorithm>
 #include <pybind11/functional.h>
 #include <pybind11/stl.h>
 

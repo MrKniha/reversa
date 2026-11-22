@@ -1,5 +1,6 @@
 #include "core/json.hpp"
 
+#include <cctype>
 #include <cmath>
 #include <cstdio>
 #include <cstdlib>

@@ -1,4 +1,5 @@
 // Format loaders, raw guessing, reader bounds, graceful degradation and the disassembler.
+#include <algorithm>
 #include <filesystem>
 #include <fstream>
 #include <set>

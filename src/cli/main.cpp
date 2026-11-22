@@ -141,8 +141,13 @@ Args parse(const std::vector<std::string>& argv) {
         } else if (starts_with(t, "-") && t.size() > 1) {
             throw UsageError("neznáma voľba: " + t);
         } else if (a.cmd.empty() && !a.demo) {
-            if (t != "analyze" && t != "gui" && t != "info" && t != "search" && t != "script")
-                throw UsageError("neznámy príkaz '" + t + "'");
+            if (t != "analyze" && t != "gui" && t != "info" && t != "search" && t != "script") {
+                std::error_code ec;
+                if (!fs::is_regular_file(path_from_utf8(t), ec)) throw UsageError("neznámy príkaz '" + t + "'");
+                a.cmd = "gui";  // `reversa FILE` (e.g. "Open with") opens the file in the GUI
+                a.file = t;
+                continue;
+            }
             a.cmd = t;
         } else if (a.file.empty()) {
             a.file = t;
@@ -284,6 +289,9 @@ int cmd_script(const Args& a) {
 
 int cmd_gui(const Args& a) {
 #ifdef REVERSA_WITH_GUI
+    if (!gui::display_available())
+        throw ReversaError("Grafické rozhranie sa nedá spustiť: nie je dostupný žiadny displej (DISPLAY ani WAYLAND_DISPLAY). "
+                           "Použite príkaz analyze alebo --demo --no-gui.");
     return gui::run(a);
 #else
     (void)a;
@@ -338,6 +346,9 @@ static int run(const std::vector<std::string>& argv) {
         if (a.cmd == "info") return cmd_info(a);
         if (a.cmd == "search") return cmd_search(a);
         if (a.cmd == "script") return cmd_script(a);
+#ifdef REVERSA_WITH_GUI
+        if (argv.empty() && gui::display_available()) return cmd_gui(a);  // started without arguments (double click): open the GUI
+#endif
         std::cout << HELP;
         return EXIT_USAGE;
     } catch (const ReversaError& e) {
@@ -356,15 +367,3 @@ static int run(const std::vector<std::string>& argv) {
 
 }  // namespace rv::cli
 
-#ifdef _WIN32
-int wmain(int argc, wchar_t** argv) {
-    SetConsoleOutputCP(CP_UTF8);  // Slovak letters on Windows consoles
-    std::vector<std::string> args;
-    for (int i = 1; i < argc; i++) args.push_back(rv::path_to_utf8(std::filesystem::path(argv[i])));
-    return rv::cli::main(args);
-}
-#else
-int main(int argc, char** argv) {
-    return rv::cli::main(std::vector<std::string>(argv + 1, argv + argc));
-}
-#endif
