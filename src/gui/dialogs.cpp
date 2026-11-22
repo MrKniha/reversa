@@ -19,6 +19,8 @@
 #include <QTableWidget>
 #include <QVBoxLayout>
 
+#include "gui/i18n.hpp"
+
 namespace rv::gui {
 
 // ------------------------------------------------------------ settings storage
@@ -27,6 +29,7 @@ UiSettings UiSettings::load(bool system_dark) {
     UiSettings s;
     s.theme = st.value("ui/theme", system_dark ? "dark" : "light").toString();
     s.font_size = st.value("ui/font_size", 10).toInt();
+    s.language = st.value("ui/language").toString();
     s.hints = st.value("ui/hints", true).toBool();
     s.onboarding_done = st.value("ui/onboarding_done", false).toBool();
     st.beginGroup("shortcuts");
@@ -39,6 +42,7 @@ void UiSettings::save() const {
     QSettings st;
     st.setValue("ui/theme", theme);
     st.setValue("ui/font_size", font_size);
+    if (!language.isEmpty()) st.setValue("ui/language", language);
     st.setValue("ui/hints", hints);
     st.setValue("ui/onboarding_done", onboarding_done);
     st.remove("shortcuts");
@@ -57,20 +61,20 @@ QKeySequence UiSettings::key(const CommandDef& c) const {
 namespace {
 struct Step { const char* title; const char* text; };
 const Step STEPS[] = {
-    {"Vitajte v REVERSA",
-     "REVERSA vám pomôže pochopiť, čo robí program, aj keď nemáte jeho zdrojový kód. Ukážeme vám to v 5 krokoch."},
-    {"1. Otvorte súbor",
-     "Tlačidlom „Otvoriť súbor“ vyberte program (ELF z Linuxu, PE/.exe z Windows alebo surové dáta). Ak nemáte čo "
-     "otvoriť, použite skúšobnú binárku – je to malá CTF úloha s heslom. Analýza beží na pozadí a dá sa zrušiť."},
-    {"2. Ľavý panel: funkcie",
-     "Program sa skladá z funkcií. Hlavná funkcia (main) je označená hviezdičkou. Kliknutím funkciu otvoríte, "
-     "filtrom nad zoznamom ju rýchlo nájdete."},
-    {"3. Stred: listing, pseudokód a grafy",
-     "Listing ukazuje inštrukcie procesora, Pseudokód ich prepis do čitateľného kódu podobného C a grafy ukazujú "
-     "štruktúru funkcie a volania. Prepínate ich kartami alebo klávesmi 1 až 4. Modré mená sú klikateľné."},
-    {"4. Pravý panel: detaily a x-refs",
-     "Tu vidíte, kto funkciu alebo reťazec používa (cross-referencie). Funkciu môžete premenovať (N), pridať "
-     "komentár (;) alebo záložku (B). Všetko sa dá vrátiť (Ctrl+Z) a uložiť do projektu (Ctrl+S)."},
+    {QT_TR_NOOP("Vitajte v REVERSA"),
+     QT_TR_NOOP("REVERSA vám pomôže pochopiť, čo robí program, aj keď nemáte jeho zdrojový kód. Ukážeme vám to v 5 krokoch.")},
+    {QT_TR_NOOP("1. Otvorte súbor"),
+     QT_TR_NOOP("Tlačidlom „Otvoriť súbor“ vyberte program (ELF z Linuxu, PE/.exe z Windows alebo surové dáta). Ak nemáte čo "
+     "otvoriť, použite skúšobnú binárku – je to malá CTF úloha s heslom. Analýza beží na pozadí a dá sa zrušiť.")},
+    {QT_TR_NOOP("2. Ľavý panel: funkcie"),
+     QT_TR_NOOP("Program sa skladá z funkcií. Hlavná funkcia (main) je označená hviezdičkou. Kliknutím funkciu otvoríte, "
+     "filtrom nad zoznamom ju rýchlo nájdete.")},
+    {QT_TR_NOOP("3. Stred: listing, pseudokód a grafy"),
+     QT_TR_NOOP("Listing ukazuje inštrukcie procesora, Pseudokód ich prepis do čitateľného kódu podobného C a grafy ukazujú "
+     "štruktúru funkcie a volania. Prepínate ich kartami alebo klávesmi 1 až 4. Modré mená sú klikateľné.")},
+    {QT_TR_NOOP("4. Pravý panel: detaily a x-refs"),
+     QT_TR_NOOP("Tu vidíte, kto funkciu alebo reťazec používa (cross-referencie). Funkciu môžete premenovať (N), pridať "
+     "komentár (;) alebo záložku (B). Všetko sa dá vrátiť (Ctrl+Z) a uložiť do projektu (Ctrl+S).")},
 };
 }  // namespace
 
@@ -82,8 +86,8 @@ OnboardingDialog::OnboardingDialog(QWidget* parent) : QDialog(parent) {
     for (auto& s : STEPS) {
         auto* w = new QWidget;
         auto* l = new QVBoxLayout(w);
-        auto* t = new QLabel(QStringLiteral("<h2>%1</h2>").arg(QString::fromUtf8(s.title)));
-        auto* x = new QLabel(QString::fromUtf8(s.text));
+        auto* t = new QLabel(QStringLiteral("<h2>%1</h2>").arg(T(s.title)));
+        auto* x = new QLabel(T(s.text));
         x->setWordWrap(true);
         l->addWidget(t);
         l->addWidget(x);
@@ -136,12 +140,19 @@ SettingsDialog::SettingsDialog(const UiSettings& current, const std::vector<Comm
     theme_->addItem(tr("Svetlý"), "light");
     theme_->addItem(tr("Tmavý"), "dark");
     theme_->setCurrentIndex(current.theme == "dark" ? 1 : 0);
+    language_ = new QComboBox;
+    language_->setObjectName("language");
+    for (auto& l : languages()) {
+        language_->addItem(l.native, l.code);
+        if (l.code == current_language()) language_->setCurrentIndex(language_->count() - 1);
+    }
     font_ = new QSpinBox;
     font_->setRange(7, 24);
     font_->setValue(current.font_size);
     hints_ = new QCheckBox(tr("Zobrazovať vysvetlivky nad panelmi (pre začiatočníkov)"));
     hints_->setChecked(current.hints);
     onboarding_ = new QCheckBox(tr("Znova ukázať úvodného sprievodcu"));
+    form->addRow(tr("Jazyk:"), language_);
     form->addRow(tr("Motív:"), theme_);
     form->addRow(tr("Veľkosť písma kódu:"), font_);
     form->addRow(hints_);
@@ -180,6 +191,7 @@ SettingsDialog::SettingsDialog(const UiSettings& current, const std::vector<Comm
 UiSettings SettingsDialog::result() const {
     UiSettings s = base_;
     s.theme = theme_->currentData().toString();
+    s.language = language_->currentData().toString();
     s.font_size = font_->value();
     s.hints = hints_->isChecked();
     if (onboarding_->isChecked()) s.onboarding_done = false;
@@ -190,6 +202,13 @@ UiSettings SettingsDialog::result() const {
 }
 
 bool SettingsDialog::reshow_onboarding() const { return onboarding_->isChecked(); }
+
+QIcon app_icon() {
+    QIcon icon;
+    icon.addFile(":/icons/reversa-32.png");
+    icon.addFile(":/icons/reversa-256.png");
+    return icon;
+}
 
 // ------------------------------------------------------------ table viewer
 void show_table(QWidget* parent, const QString& title, const QString& intro, const QStringList& headers,

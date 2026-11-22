@@ -1,6 +1,7 @@
 // GUI smoke test (QTest, offscreen): demo -> analysis -> navigation -> rename -> search -> notes
 // -> undo -> save -> settings. Run: QT_QPA_PLATFORM=offscreen reversa_gui_tests
 #include <QComboBox>
+#include <QMenuBar>
 #include <QDir>
 #include <QFile>
 #include <QSettings>
@@ -16,6 +17,7 @@
 #include "cli/cli.hpp"
 #include "gui/dialogs.hpp"
 #include "gui/graph_view.hpp"
+#include "gui/i18n.hpp"
 #include "gui/main_window.hpp"
 #ifdef REVERSA_WITH_PYTHON
 #include "python/embed.hpp"
@@ -233,6 +235,40 @@ private Q_SLOTS:
         MainWindow w(args);
         QCOMPARE(w.command("rename")->shortcut(), QKeySequence("Ctrl+R"));
         QSettings().remove("shortcuts");
+    }
+
+    void languages() {
+        QCOMPARE(int(gui::languages().size()), 5);
+        QCOMPARE(pick_language("de"), QString("de"));
+        QCOMPARE(pick_language("xx"), QString("en"));
+        QCOMPARE(pick_language(""), QString("en"));
+        UiSettings s = UiSettings::load(false);
+        s.language = "fr";
+        s.save();
+        QCOMPARE(UiSettings::load(false).language, QString("fr"));
+        QSettings().remove("ui/language");
+        QSettings().setValue("ui/onboarding_done", true);  // no modal guide when the window is shown
+
+        const std::pair<const char*, const char*> menus[] = {
+            {"en", "&File"}, {"de", "&Datei"}, {"fr", "&Fichier"}, {"zh", "文件(&F)"}};
+        for (auto& [code, file_menu] : menus) {
+            set_language(code);
+            QCOMPARE(current_language(), QString(code));
+            QVERIFY(T("Volá") != QString::fromUtf8("Volá"));  // free-function strings (views.cpp)
+            cli::Args args;
+            args.no_plugins = true;
+            MainWindow w(args);
+            QCOMPARE(w.menuBar()->actions().at(0)->text(), QString::fromUtf8(file_menu));
+            if (QByteArray(code) == "zh" || QByteArray(code) == "en") {
+                w.resize(1280, 800);
+                w.show();
+                w.open_demo();
+                wait_ready(w);
+                shot(w, code == QByteArray("zh") ? "lang_zh" : "lang_en");
+            }
+        }
+        set_language("sk");
+        QCOMPARE(T("Volá"), QString::fromUtf8("Volá"));
     }
 };
 
