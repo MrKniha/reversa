@@ -73,4 +73,5 @@ def main() -> int:
 
 
 if __name__ == "__main__":
+    sys.stdout.reconfigure(encoding="utf-8", errors="replace")  # Windows pipes default to cp1252
     sys.exit(main())
