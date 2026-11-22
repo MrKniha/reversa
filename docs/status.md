@@ -1,114 +1,115 @@
-# Stav projektu
+# Project status
 
-Verzia **0.2.0** (prepis do C++ s Qt GUI), stav k 22. 11. 2026. Tento dokument
-je záverečná kontrolná slučka podľa špecifikácie (sekcia 8.3). Každý bod má
-dôkaz: test, príkaz a jeho výsledok. Stavy: **prešlo**, **neprešlo**,
-**nebolo možné overiť**.
+Version **0.2.0** (C++ rewrite with a Qt GUI), status as of 22 Nov 2026. This document is the
+final check loop required by the specification (section 8.3). Every item has evidence: a test, a
+command and its result. States: **passed**, **failed**, **could not be verified**.
 
-Overené lokálne (Linux x86-64, GCC 13, Qt 6.4.2) a v GitHub Actions na
-Ubuntu 24.04 (GCC, systémové Qt 6.4) a Windows Server 2022 (MSVC 2022, Qt 6.8.3).
+Verified locally (Linux x86-64, GCC 13, Qt 6.4.2) and in GitHub Actions on Ubuntu 24.04 (GCC,
+system Qt 6.4) and Windows Server 2022 (MSVC 2022, Qt 6.8.3).
 
-## Súhrn kontrol
+## Summary of checks
 
-| Kontrola | Príkaz | Výsledok |
+| Check | Command | Result |
 |---|---|---|
-| C++ testy | `ctest` → `reversa_tests` | 59 testov, 0 zlyhalo (formáty, disassembler, analýza, fuzzing, dekompilátor + golden pseudokód, golden fakty vzoriek, session, projekty, C ABI a C++ SDK, pluginy vrátane chybných, skripty, CLI) |
-| GUI test | `ctest` → `reversa_gui_tests` (QTest, `QT_QPA_PLATFORM=offscreen`) | 6/6 prešlo: demo → analýza → navigácia → grafy → premenovanie funkcie aj premennej → komentár, záložka → hľadanie → undo/redo → uloženie a otvorenie projektu → chybový súbor → motív; zrušenie analýzy; pluginy na pracovnom vlákne; sprievodca a skratky |
-| Licencie | `check_licenses .` (tools/check_licenses.cpp) | `License check: PASSED` (Capstone, SQLite, Qt) |
-| Preklady GUI | `i18n_check .` (tools/i18n_check.cpp) | `219 texts, 4 languages: OK` |
-| Headless | `headless_check build/bin/reversa .` (tools/headless_check.cpp) | `headless check OK: 10 samples` (reporty .md/.html, projekty, demo, skript v C++) |
-| Linux balík | `cpack -G DEB`, `apt install ./reversa_0.2.0_amd64.deb` | CI: inštalácia, `reversa --version`, skript z `/usr/lib/reversa/examples`, plugin preložený len proti nainštalovaným hlavičkám SDK, `--demo --no-gui` |
-| Windows balík | `cpack -G ZIP` (windeployqt) | CI: zip, test z čistého `PATH` (len balík poskytuje Qt): `--version`, skript `.dll`, `--demo --no-gui` |
-| CI na GitHube | `.github/workflows/ci.yml` (licencie, Linux, Windows) | prešlo, pozri [Záznam CI](#záznam-ci) |
+| C++ tests | `ctest` → `reversa_tests` | 59 tests, 0 failed (formats, disassembler, analysis, fuzzing, decompiler + golden pseudocode, golden facts of the samples, session, projects, C ABI and C++ SDK, plugins including broken ones, scripts, CLI) |
+| GUI test | `ctest` → `reversa_gui_tests` (QTest, `QT_QPA_PLATFORM=offscreen`) | 7/7 passed: demo → analysis → navigation → graphs → rename of a function and a variable → comment, bookmark → search → undo/redo → save and reopen the project → broken file → theme; cancelling the analysis; plugins on the worker thread; guide and shortcuts; languages |
+| Licenses | `check_licenses .` (tools/check_licenses.cpp) | `License check: PASSED` (Capstone, SQLite, Qt) |
+| GUI translations | `i18n_check .` (tools/i18n_check.cpp) | `219 texts, 4 languages: OK` (sk, de, fr, zh; English is the source language) |
+| Headless | `headless_check build/bin/reversa .` (tools/headless_check.cpp) | `headless check OK: 10 samples` (.md/.html reports, projects, demo, C++ script) |
+| Linux package | `cpack -G DEB`, `apt install ./reversa_0.2.0_amd64.deb` | CI: install, `reversa --version`, script from `/usr/lib/reversa/examples`, a plugin built only against the installed SDK headers, `--demo --no-gui` |
+| Windows package | `cpack -G ZIP` (windeployqt) | CI: zip, test with a clean `PATH` (only the package provides Qt): `--version`, `.dll` script, `--demo --no-gui` |
+| CI on GitHub | `.github/workflows/ci.yml` (licenses, Linux, Windows) | passed, see [CI log](#ci-log) |
 
-## Akceptačné kritériá (8.2)
+## Acceptance criteria (8.2)
 
-| # | Kritérium | Stav | Dôkaz |
+| # | Criterion | State | Evidence |
 |---|---|---|---|
-| 1 | Inštalácia podľa README a `reversa --demo` do 5 minút | prešlo (automaticky), s reálnym používateľom **nebolo možné overiť** | Hotové balíky z CI (zip / .deb) sa inštalujú jedným krokom; CI ich po zostavení nainštaluje a spustí. |
-| 2 | Do 3 minút funkcie, reťazce, x-refs, call graph, pseudokód `main` bez manuálu | prešlo (automaticky), s reálnym nováčikom **nebolo možné overiť** | `GuiTest::demo_workflow`: po analýze dema je vybraná `main`, zoznam funkcií, listing, pseudokód, x-refs v Detailoch, CFG aj graf volaní sa vykreslia. Sprievodca (5 krokov) pri prvom spustení. |
-| 3 | Premenovanie sa prejaví všade a prežije uloženie | prešlo | C++ „rename propagates everywhere, undo and redo", „project roundtrip…", „C ABI host…" (premenovanie z pluginu, undo); GUI: premenovanie → zoznam funkcií a listing, uloženie, opätovné otvorenie projektu. |
-| 4 | ≤ 10-riadkový skript vypíše volajúcich `strcmp` | prešlo | `examples/scripts/strcmp_callers.cpp` (8 riadkov kódu v C++): „scripts: run…", „cli: C++ scripts and plugins…"; v CI cez `reversa script` aj z nainštalovaných balíkov. |
-| 5 | Plugin z tutoriálu sa načíta, vykoná hook, jeho pád nezloží aplikáciu | prešlo | `test_tutorial_plugin_hooks`, `test_crashing_plugin_is_isolated`, `test_bad_plugins_never_stop_loading`, GUI `plugins_on_worker_thread`. |
-| 6 | Poškodená binárka: nespadne, priateľská chyba, načíta, čo vie | prešlo | C++ „corrupted ELF header falls back to raw", „truncated PE reports but loads", fuzzing (mutácie, orezanie, náhodné dáta), „load errors"; GUI: prázdny súbor → priateľská chyba. |
-| 7 | Tutoriál „prvá analýza za 10 minút" (walkthrough) | prešlo (dokument), s reálnym nováčikom **nebolo možné overiť** | README, `docs/quickstart.md`, `docs/tutorials.md`. Kroky zodpovedajú GUI testu. |
-| 8 | `reversa analyze subor.exe --report report.md` headless v CI | prešlo | „cli: analyze writes Markdown, HTML, JSON and a project", `headless_check` (aj `.exe` vzorky) v CI na Linuxe aj Windows. |
-| 9 | Licenčná kontrola v CI, LICENSE-THIRD-PARTY kompletný | prešlo | Job `licenses` v CI. |
-| 10 | Všetky testy v CI zelené, release build + balíčky pre 2 platformy | prešlo | [Záznam CI](#záznam-ci): Release build, `.deb` a Windows zip ako artefakty CI. |
+| 1 | Install following the README and `reversa --demo` within 5 minutes | passed (automatically); with a real user **could not be verified** | The ready-made packages from CI (zip / .deb) install in one step; CI installs and runs them after the build. |
+| 2 | Within 3 minutes: functions, strings, x-refs, call graph, pseudocode of `main` without a manual | passed (automatically); with a real beginner **could not be verified** | `GuiTest::demo_workflow`: after analysing the demo, `main` is selected and the function list, listing, pseudocode, x-refs in Details, CFG and call graph are drawn. Guide (5 steps) on the first start. |
+| 3 | A rename shows up everywhere and survives saving | passed | C++ "rename propagates everywhere, undo and redo", "project roundtrip…", "C ABI host…" (rename from a plugin, undo); GUI: rename → function list and listing, save, reopen the project. |
+| 4 | A script of ≤ 10 lines prints the callers of `strcmp` | passed | `examples/scripts/strcmp_callers.cpp` (8 lines of C++): "scripts: run…", "cli: C++ scripts and plugins…"; in CI through `reversa script`, also from the installed packages. |
+| 5 | The tutorial plugin loads, runs a hook, and its crash does not bring down the application | passed | "example plugin: all hooks run…", "bad plugins are reported and never stop loading" (crashing plugin isolated), GUI `plugins_on_worker_thread`. |
+| 6 | Damaged binary: no crash, friendly error, loads what it can | passed | C++ "corrupted ELF header falls back to raw", "truncated PE reports but loads", fuzzing (mutations, truncation, random data), "load errors"; GUI: empty file → friendly error. |
+| 7 | Tutorial "first analysis in 10 minutes" (walkthrough) | passed (document); with a real beginner **could not be verified** | `docs/quickstart.md`, `docs/tutorials.md`. The steps match the GUI test. |
+| 8 | `reversa analyze file.exe --report report.md` headless in CI | passed | "cli: analyze writes Markdown, HTML, JSON and a project", `headless_check` (also `.exe` samples) in CI on Linux and Windows. |
+| 9 | License check in CI, LICENSE-THIRD-PARTY complete | passed | Job `licenses` in CI. |
+| 10 | All tests green in CI, release build + packages for 2 platforms | passed | [CI log](#ci-log): release build, `.deb` and Windows zip as CI artifacts. |
 
-## MUST-HAVE funkcie (4.1)
+## MUST-HAVE features (4.1)
 
-| # | Funkcia | Stav | Dôkaz |
+| # | Feature | State | Evidence |
 |---|---|---|---|
-| 1 | ELF, PE, surové dáta s ručnou architektúrou | prešlo | C++ „load all samples", „raw shellcode analysis"; `test_raw_analysis_with_manual_arch` |
-| 2 | Detekcia architektúry, endianity, bitov, kompilátora | prešlo | C++ „headers of the hello samples", „format detection and raw arch guess", „PE details" |
-| 3 | Disassembler s farebnou syntaxou a klikateľnými operandmi | prešlo | C++ „x86-64 flow and references", „arm64 adrp tracking and flow"; GUI listing s farbami a odkazmi (GUI test klikne cez odkazy, screenshoty `REVERSA_SHOTS`). |
-| 4 | Funkcie: meno, adresa, veľkosť, počet volaní/x-refs | prešlo | Panel Funkcie (Meno, Adresa, Volaní, Veľkosť); C++ „CFG loops, call graph neighbourhood, function_containing" |
-| 5 | Reťazce ASCII a UTF-16 s odkazmi | prešlo | `test_string_xrefs_point_into_functions`, golden súbory; karta Reťazce (stĺpec Odkazy) |
-| 6 | Importy, exporty, relokácie, sekcie s hex dumpom | prešlo | C++ „ELF details", „PE details"; GUI karty Importy, Exporty, Sekcie a hex, *Pokročilé → Relokácie* |
-| 7 | X-refs: volané z, čítané z, zapisované z | prešlo | C++ „string, data pointer and read xrefs", „x86 memory access kinds…"; panel Detaily |
-| 8 | Graf volaní (filter, hľadanie, zoom) | prešlo | GUI karta Graf volaní (hĺbka, importy, zoom kolieskom, dvojklik); C++ call graph test |
-| 9 | CFG so zvýraznením slučiek | prešlo | C++ „CFG loops…"; GUI: slučky oranžovo, spätné hrany prerušovane |
-| 10 | Pseudokód: volania, vetvenia, slučky, premenné | prešlo | C++ dekompilátor testy + golden pseudokód všetkých 10 vzoriek; `test_every_function_decompiles_without_crash` |
-| 11 | Premenovanie funkcií a premenných s propagáciou, undo/redo | prešlo | C++ testy premenovania; GUI test (funkcia aj premenná, Späť/Znova) |
-| 12 | Komentáre a záložky | prešlo | „C ABI host…" (komentáre, záložky, undo); GUI test; karta Záložky |
-| 13 | Hľadanie: reťazce, bajty, hex vzory, inštrukcie, regex v pseudokóde | prešlo | C++ „search: bytes, strings, instructions, pseudocode, errors"; „cli: demo, info, search"; GUI hľadanie a *Pokročilé* hľadania |
-| 14 | API pre skripty + 3 ukážkové skripty | prešlo | API v C/C++ (`sdk/include/reversa`), skripty `strcmp_callers`, `function_table`, `annotate_and_view` v `examples/scripts`; testy „scripts: run…", „C++ SDK wraps the host…", `docs/scripting-tutorial.md`. Python API bolo na žiadosť používateľa nahradené C++. |
-| 15 | Ukladanie projektu | prešlo | C++ „project roundtrip…", „project migrations…"; „projects written by REVERSA 0.1 (Python) still open", „project is plain SQLite…" |
-| 16 | Report Markdown/HTML | prešlo | „cli: analyze writes Markdown, HTML, JSON and a project"; GUI *Súbor → Exportovať report* |
-| 17 | Pluginy: priečinky, entry point, háčiky, verzia API | prešlo | `tests/cpp/test_plugins.cpp` (plugin v C++ aj v C, chybné knižnice, iná verzia API, zlyhaný háčik, `REVERSA_PLUGIN_PATH`), GUI `plugins_on_worker_thread`, *Pokročilé → Pluginy* |
-| 18 | Undo/redo v celom GUI | prešlo | GUI test: premenovanie, premenná, komentár, záložka vrátené cez príkaz Späť, potom Znova |
-| 19 | Tmavý/svetlý motív, vlastné skratky | prešlo | GUI test: prepnutie motívu, uloženie vlastnej skratky (`Ctrl+R` pre Premenovať) a jej použitie v novom okne |
-| 20 | Stabilný import poškodených súborov | prešlo | fuzz testy (3), „load errors", „project save errors…", poškodený projekt v „project roundtrip…" |
+| 1 | ELF, PE, raw data with a manual architecture | passed | C++ "load all samples", "raw shellcode analysis", "cli: raw firmware with a manual architecture" |
+| 2 | Detecting architecture, endianness, bitness, compiler | passed | C++ "headers of the hello samples", "format detection and raw arch guess", "PE details" |
+| 3 | Disassembler with coloured syntax and clickable operands | passed | C++ "x86-64 flow and references", "arm64 adrp tracking and flow"; GUI listing with colours and links (the GUI test clicks through links, screenshots with `REVERSA_SHOTS`). |
+| 4 | Functions: name, address, size, number of calls/x-refs | passed | Functions panel (Name, Address, Callers, Size); C++ "CFG loops, call graph neighbourhood, function_containing" |
+| 5 | ASCII and UTF-16 strings with references | passed | "string, data pointer and read xrefs", golden facts; Strings tab (References column) |
+| 6 | Imports, exports, relocations, sections with a hex dump | passed | C++ "ELF details", "PE details"; GUI tabs Imports, Exports, Sections and hex, *Advanced → Relocations* |
+| 7 | X-refs: called from, read from, written from | passed | C++ "string, data pointer and read xrefs", "x86 memory access kinds…"; Details panel |
+| 8 | Call graph (filter, search, zoom) | passed | GUI Call graph tab (depth, imports, wheel zoom, double click); C++ call graph test |
+| 9 | CFG with highlighted loops | passed | C++ "CFG loops…"; GUI: loops in orange, back edges dashed |
+| 10 | Pseudocode: calls, branches, loops, variables | passed | C++ decompiler tests + golden pseudocode of all 10 samples |
+| 11 | Renaming functions and variables with propagation, undo/redo | passed | C++ rename tests; GUI test (function and variable, Undo/Redo) |
+| 12 | Comments and bookmarks | passed | "C ABI host…" (comments, bookmarks, undo); GUI test; Bookmarks tab |
+| 13 | Search: strings, bytes, hex patterns, instructions, regex in pseudocode | passed | C++ "search: bytes, strings, instructions, pseudocode, errors"; "cli: demo, info, search"; GUI search and *Advanced* searches |
+| 14 | API for scripts + 3 example scripts | passed | C/C++ API (`sdk/include/reversa`), scripts `strcmp_callers`, `function_table`, `annotate_and_view` in `examples/scripts`; tests "scripts: run…", "C++ SDK wraps the host…", `docs/scripting-tutorial.md`. The Python API was replaced by C++ at the user's request. |
+| 15 | Saving the project | passed | C++ "project roundtrip…", "project migrations…", "projects written by REVERSA 0.1 (Python) still open", "project is plain SQLite…" |
+| 16 | Markdown/HTML report | passed | "cli: analyze writes Markdown, HTML, JSON and a project"; GUI *File → Export report* |
+| 17 | Plugins: folders, entry point, hooks, API version | passed | `tests/cpp/test_plugins.cpp` (plugin in C++ and in C, broken libraries, other API version, failed hook, `REVERSA_PLUGIN_PATH`), GUI `plugins_on_worker_thread`, *Advanced → Plugins* |
+| 18 | Undo/redo in the whole GUI | passed | GUI test: rename, variable, comment, bookmark undone with the Undo command, then Redo |
+| 19 | Dark/light theme, custom shortcuts | passed | GUI test: theme switch, saving a custom shortcut (`Ctrl+R` for Rename) and using it in a new window |
+| 20 | Stable import of damaged files | passed | fuzz tests (3), "load errors", "project save errors…", damaged project in "project roundtrip…" |
 
-## Bezpečnostné hranice
+## Security boundaries
 
-| Hranica | Stav | Dôkaz |
+| Boundary | State | Evidence |
 |---|---|---|
-| Analyzovaný súbor sa nespúšťa | prešlo | V kóde nie je spúšťanie procesov nad analyzovaným súborom (`src/` neobsahuje `system`, `popen`, `CreateProcess`). |
-| Žiadna telemetria, žiadna sieť | prešlo | `src/` nepoužíva sieť; GUI je natívne, nepočúva na porte (webový server z 0.1 je odstránený). |
-| Žiadne funkcie na obchádzanie DRM, licencií, anti-cheatu | prešlo | [docs/safety.md](safety.md#etika). Takáto funkcia neexistuje. |
-| Závislosti so zámkom a kontrolou licencií | prešlo | Pevný git tag (Capstone), vcpkg baseline, Actions pripnuté na commity, job `licenses`. Testy a nástroje nepotrebujú žiadne ďalšie balíky. |
-| Pluginy a skripty sú sandboxované | **neprešlo** (vedomé obmedzenie) | Izolácia chýb áno, sandbox nie. Zdokumentované v README, plugin-tutorial.md, SECURITY.md. Roadmapa. |
+| The analysed file is never run | passed | The code does not start processes on the analysed file (`src/` contains no `system`, `popen`, `CreateProcess`). |
+| No telemetry, no network | passed | `src/` uses no network; the GUI is native and listens on no port (the web server of 0.1 was removed). |
+| No features to bypass DRM, licenses, anti-cheat | passed | [docs/safety.md](safety.md#ethics). No such feature exists. |
+| Locked dependencies and license check | passed | Pinned git tag (Capstone), vcpkg baseline, Actions pinned to commits, job `licenses`. Tests and tools need no extra packages. |
+| Plugins and scripts are sandboxed | **failed** (known limitation) | Error isolation yes, sandbox no. Documented in plugin-tutorial.md, safety.md and SECURITY.md. Roadmap. |
 
-## Odchýlky od zadania
+## Deviations from the specification
 
-- Debugger nie je súčasťou (NICE-TO-HAVE, bod 22).
-- GUI je len po slovensky. Texty sú v `tr()`, anglický preklad cez Qt Linguist
-  je v pláne.
-- Webové GUI z verzie 0.1 bolo nahradené natívnym Qt GUI (požiadavka „kód nech je
-  v C++"). Aj skripty a pluginy sú v C/C++ („sprav aby všetko bolo v c++ aj tie
-  scripty"); Python skripty a pluginy z 0.1 už nefungujú.
-- REA nemohla urobiť plnú analýzu (chýba Ghidra, sťahovanie blokované).
-  Pozri [research.md](research.md).
+- No debugger (NICE-TO-HAVE, item 22).
+- The specification asked for Slovak documentation; at the user's request the whole project
+  (code, GUI, documentation) is in English. The GUI is also available in Slovak, German, French
+  and Chinese.
+- The web GUI of version 0.1 was replaced by a native Qt GUI (the user asked for the code to be in
+  C++). Scripts and plugins are also in C/C++; Python scripts and plugins from 0.1 no longer work.
+- REA could not do a full analysis (no Ghidra, downloads blocked). See [research.md](research.md).
 
-## Známe obmedzenia
+## Known limitations
 
-Pozri [architecture.md](architecture.md#známe-obmedzenia). Žiadne z nich nie je
-kritické pre akceptačné kritériá.
+See [architecture.md](architecture.md#known-limitations). None of them is critical for the
+acceptance criteria.
 
-## Záznam CI
+## CI log
 
-Beh [45052061572](https://github.com/MrKniha/reversa/actions/runs/45052061572)
-na vetve `cpp` (22. 11. 2026): **všetky joby zelené**.
+Run [45052061572](https://github.com/MrKniha/reversa/actions/runs/45052061572) on branch `cpp`
+(22 Nov 2026): **all jobs green**. Later runs on `main` (Python removed, English everywhere) are
+listed on the [Actions page](https://github.com/MrKniha/reversa/actions/workflows/ci.yml).
 
-| Job | Výsledok |
+| Job | Result |
 |---|---|
-| licenses | prešlo |
-| Linux (Ubuntu 24.04) | ctest 2/2 (42 C++ testov + GUI test), pytest 80/80, headless 10 vzoriek, `.deb` (2 MB) nainštalovaný a spustený |
-| Windows (Server 2022, MSVC) | ctest 2/2, pytest 80/80, headless 10 vzoriek, zip (27 MB) otestovaný s čistým `PATH` |
+| licenses | passed |
+| Linux (Ubuntu 24.04) | ctest 2/2 (42 C++ tests + GUI test), pytest 80/80, headless 10 samples, `.deb` (2 MB) installed and run |
+| Windows (Server 2022, MSVC) | ctest 2/2, pytest 80/80, headless 10 samples, zip (27 MB) tested with a clean `PATH` |
 
-Chyby nájdené v CI a opravené: chýbajúce `#include` pre MSVC, Python DLL sa
-nedá linkovať s `/DELAYLOAD`, CRLF v golden súboroch (pridaný `.gitattributes`),
-názov súboru v reporte pri Windows cestách, CLI test spúšťal GUI.
+Problems found in CI and fixed: missing `#include` for MSVC, the Python DLL cannot be linked with
+`/DELAYLOAD`, CRLF in golden files (added `.gitattributes`), the file name in reports with Windows
+paths, a CLI test started the GUI, the `max` macro from `windows.h` (`NOMINMAX`).
 
-## Záznam postupu
+## Progress log
 
-| Dátum | Krok |
+| Date | Step |
 |---|---|
-| 2026-11-22 | Verzia 0.1 v Pythone (pozri históriu gitu): výskum, jadro, dekompilátor, webové GUI, CI. |
-| 2026-11-22 | Rozhodnutie používateľa: celý kód v C++. Prepis jadra (formáty, disassembler, analýza, dekompilátor) s overením zhody výstupov proti 0.1 na všetkých vzorkách. |
-| 2026-11-22 | Session, SQLite projekty (kompatibilné s 0.1), reporty, CLI s rovnakými príkazmi a výstupmi. |
-| 2026-11-22 | Python API cez pybind11, vstavaný interpret pre `reversa script` a pluginy; testy 0.1 prenesené do C++ a `tests/python`. |
-| 2026-11-22 | Qt GUI, GUI test, balíčky (.deb, Windows zip), CI pre Linux a Windows, dokumentácia. |
-| 2026-11-22 | Python odstránený: pluginy a skripty v C/C++ cez stabilné C ABI (`sdk/include/reversa`), testy a nástroje repozitára v C++, Windows zip cez CPack. |
+| 2026-11-22 | Version 0.1 in Python (see the git history): research, core, decompiler, web GUI, CI. |
+| 2026-11-22 | User decision: all code in C++. Rewrite of the core (formats, disassembler, analysis, decompiler), with outputs checked against 0.1 on all samples. |
+| 2026-11-22 | Session, SQLite projects (compatible with 0.1), reports, CLI with the same commands and outputs. |
+| 2026-11-22 | Python API through pybind11, embedded interpreter for `reversa script` and plugins; tests of 0.1 moved to C++ and `tests/python`. |
+| 2026-11-22 | Qt GUI, GUI test, packages (.deb, Windows zip), CI for Linux and Windows, documentation. |
+| 2026-11-22 | GUI languages (English, Slovak, German, French, Chinese), crayfish logo, English CLI and reports. |
+| 2026-11-22 | Python removed: C/C++ plugins and scripts over a stable C ABI (`sdk/include/reversa`), tests and repository tools in C++, Windows zip through CPack. |
+| 2026-11-22 | Whole project in English: GUI source language, documentation, README. |

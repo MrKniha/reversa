@@ -91,14 +91,14 @@ MainWindow::MainWindow(cli::Args args, QWidget* parent) : QMainWindow(parent), a
         return r;
     };
     ask_unsaved = [this](const QString& text) {
-        return QMessageBox::question(this, tr("Neuložené zmeny"), text,
+        return QMessageBox::question(this, tr("Unsaved changes"), text,
                                      QMessageBox::Save | QMessageBox::Discard | QMessageBox::Cancel, QMessageBox::Save);
     };
     show_error = [this](const QString& title, const QString& text, const QString& detail) {
         QMessageBox box(QMessageBox::Warning, title, text, QMessageBox::Ok, this);
         if (!detail.isEmpty()) {
             box.setDetailedText(detail);
-            auto* copy = box.addButton(tr("Skopírovať detail pre správcu"), QMessageBox::ActionRole);
+            auto* copy = box.addButton(tr("Copy details for the maintainer"), QMessageBox::ActionRole);
             connect(copy, &QPushButton::clicked, this, [detail] { QApplication::clipboard()->setText(detail); });
         }
         box.exec();
@@ -120,34 +120,34 @@ MainWindow::~MainWindow() {
 // ------------------------------------------------------------ construction
 void MainWindow::build_commands() {
     command_defs_ = {
-        {"open", tr("Otvoriť súbor…"), QKeySequence::Open},
-        {"demo", tr("Skúšobná binárka"), QKeySequence()},
-        {"save", tr("Uložiť projekt"), QKeySequence::Save},
-        {"save_as", tr("Uložiť projekt ako…"), QKeySequence("Ctrl+Shift+S")},
-        {"undo", tr("Vrátiť späť"), QKeySequence::Undo},
-        {"redo", tr("Znova"), QKeySequence("Ctrl+Y")},
-        {"rename", tr("Premenovať"), QKeySequence("N")},
-        {"comment", tr("Komentár"), QKeySequence(";")},
-        {"bookmark", tr("Záložka"), QKeySequence("B")},
-        {"goto", tr("Skočiť na adresu…"), QKeySequence("G")},
-        {"back", tr("Späť v histórii"), QKeySequence("Alt+Left")},
-        {"search", tr("Hľadať"), QKeySequence::Find},
+        {"open", tr("Open file…"), QKeySequence::Open},
+        {"demo", tr("Sample binary"), QKeySequence()},
+        {"save", tr("Save project"), QKeySequence::Save},
+        {"save_as", tr("Save project as…"), QKeySequence("Ctrl+Shift+S")},
+        {"undo", tr("Undo"), QKeySequence::Undo},
+        {"redo", tr("Redo"), QKeySequence("Ctrl+Y")},
+        {"rename", tr("Rename"), QKeySequence("N")},
+        {"comment", tr("Comment"), QKeySequence(";")},
+        {"bookmark", tr("Bookmark"), QKeySequence("B")},
+        {"goto", tr("Go to address…"), QKeySequence("G")},
+        {"back", tr("Back in history"), QKeySequence("Alt+Left")},
+        {"search", tr("Search"), QKeySequence::Find},
         {"listing", tr("Listing"), QKeySequence("1")},
-        {"pseudocode", tr("Pseudokód"), QKeySequence("2")},
-        {"cfg", tr("Graf funkcie"), QKeySequence("3")},
-        {"callgraph", tr("Graf volaní"), QKeySequence("4")},
-        {"report_md", tr("Exportovať report (Markdown)…"), QKeySequence()},
-        {"report_html", tr("Exportovať report (HTML)…"), QKeySequence()},
-        {"search_hex", tr("Hľadať bajty (hex vzor)…"), QKeySequence("Ctrl+Shift+H")},
-        {"search_insn", tr("Hľadať inštrukcie (regex)…"), QKeySequence("Ctrl+Shift+I")},
-        {"search_code", tr("Hľadať v pseudokóde (regex)…"), QKeySequence("Ctrl+Shift+P")},
-        {"plugins", tr("Pluginy"), QKeySequence()},
-        {"diagnostics", tr("Diagnostika načítania"), QKeySequence()},
-        {"relocations", tr("Relokácie"), QKeySequence()},
-        {"theme", tr("Prepnúť svetlý/tmavý motív"), QKeySequence("Ctrl+Shift+T")},
-        {"settings", tr("Nastavenia…"), QKeySequence("Ctrl+,")},
-        {"help", tr("Úvodný sprievodca"), QKeySequence::HelpContents},
-        {"quit", tr("Koniec"), QKeySequence::Quit},
+        {"pseudocode", tr("Pseudocode"), QKeySequence("2")},
+        {"cfg", tr("Function graph"), QKeySequence("3")},
+        {"callgraph", tr("Call graph"), QKeySequence("4")},
+        {"report_md", tr("Export report (Markdown)…"), QKeySequence()},
+        {"report_html", tr("Export report (HTML)…"), QKeySequence()},
+        {"search_hex", tr("Search bytes (hex pattern)…"), QKeySequence("Ctrl+Shift+H")},
+        {"search_insn", tr("Search instructions (regex)…"), QKeySequence("Ctrl+Shift+I")},
+        {"search_code", tr("Search pseudocode (regex)…"), QKeySequence("Ctrl+Shift+P")},
+        {"plugins", tr("Plugins"), QKeySequence()},
+        {"diagnostics", tr("Load diagnostics"), QKeySequence()},
+        {"relocations", tr("Relocations"), QKeySequence()},
+        {"theme", tr("Toggle light/dark theme"), QKeySequence("Ctrl+Shift+T")},
+        {"settings", tr("Settings…"), QKeySequence("Ctrl+,")},
+        {"help", tr("Getting started guide"), QKeySequence::HelpContents},
+        {"quit", tr("Quit"), QKeySequence::Quit},
     };
     auto add = [this](const QString& id, std::function<void()> fn) {
         auto* a = new QAction(this);
@@ -201,43 +201,41 @@ QAction* MainWindow::command(const QString& id) const {
 void MainWindow::build_ui() {
     setWindowIcon(app_icon());
     // menus
-    auto* file = menuBar()->addMenu(tr("&Súbor"));
+    auto* file = menuBar()->addMenu(tr("&File"));
     for (auto id : {"open", "demo", "save", "save_as"}) file->addAction(command(id));
     file->addSeparator();
     file->addAction(command("report_md"));
     file->addAction(command("report_html"));
     file->addSeparator();
     file->addAction(command("quit"));
-    auto* edit = menuBar()->addMenu(tr("&Upraviť"));
+    auto* edit = menuBar()->addMenu(tr("&Edit"));
     for (auto id : {"undo", "redo"}) edit->addAction(command(id));
     edit->addSeparator();
     for (auto id : {"rename", "comment", "bookmark"}) edit->addAction(command(id));
-    auto* go = menuBar()->addMenu(tr("&Prejsť"));
+    auto* go = menuBar()->addMenu(tr("&Go"));
     for (auto id : {"goto", "back", "search"}) go->addAction(command(id));
     go->addSeparator();
     for (auto id : {"listing", "pseudocode", "cfg", "callgraph"}) go->addAction(command(id));
-    auto* adv = menuBar()->addMenu(tr("P&okročilé"));
+    auto* adv = menuBar()->addMenu(tr("&Advanced"));
     for (auto id : {"search_hex", "search_insn", "search_code"}) adv->addAction(command(id));
     adv->addSeparator();
     for (auto id : {"plugins", "diagnostics", "relocations"}) adv->addAction(command(id));
     adv->addSeparator();
-    auto* future = adv->addAction(tr("Patchovanie, diffing, emulácia a debugger – v ďalších verziách (pozri docs/architecture.md)"));
+    auto* future = adv->addAction(tr("Patching, diffing, emulation and debugger: in later versions (see docs/architecture.md)"));
     future->setEnabled(false);
-    auto* view = menuBar()->addMenu(tr("&Zobraziť"));
+    auto* view = menuBar()->addMenu(tr("&View"));
     view->addAction(command("theme"));
     view->addAction(command("settings"));
-    auto* help = menuBar()->addMenu(tr("Pomo&c"));
+    auto* help = menuBar()->addMenu(tr("&Help"));
     help->addAction(command("help"));
-    help->addAction(tr("O programe REVERSA"), this, [this] {
-        QMessageBox::about(this, tr("O programe REVERSA"),
-                           tr("<b>REVERSA %1</b><br>Open-source nástroj na reverzné inžinierstvo (MIT).<br>"
-                              "Statická analýza – analyzovaný program sa nikdy nespúšťa.<br>"
-                              "Knižnice: Qt (LGPL-3.0), Capstone (BSD-3-Clause), SQLite (public domain).")
+    help->addAction(tr("About REVERSA"), this, [this] {
+        QMessageBox::about(this, tr("About REVERSA"),
+                           tr("<b>REVERSA %1</b><br>Open-source reverse engineering tool (MIT).<br>Static analysis: the analysed program is never run.<br>Libraries: Qt (LGPL-3.0), Capstone (BSD-3-Clause), SQLite (public domain).")
                                .arg(REVERSA_VERSION));
     });
 
     // toolbar
-    auto* tb = addToolBar(tr("Hlavný panel"));
+    auto* tb = addToolBar(tr("Main toolbar"));
     tb->setObjectName("main_toolbar");
     tb->setMovable(false);
     tb->setToolButtonStyle(Qt::ToolButtonTextBesideIcon);
@@ -250,42 +248,41 @@ void MainWindow::build_ui() {
     tb->addSeparator();
     search_box_ = new QLineEdit;
     search_box_->setObjectName("search_box");
-    search_box_->setPlaceholderText(tr("Hľadať funkciu, reťazec alebo adresu (Ctrl+F)…"));
+    search_box_->setPlaceholderText(tr("Search for a function, string or address (Ctrl+F)…"));
     search_box_->setClearButtonEnabled(true);
     search_box_->setMinimumWidth(360);
     connect(search_box_, &QLineEdit::returnPressed, this, [this] { run_search(search_box_->text()); });
     tb->addWidget(search_box_);
     auto* adv_btn = new QToolButton;
-    adv_btn->setText(tr("Pokročilé"));
+    adv_btn->setText(tr("Advanced"));
     adv_btn->setMenu(adv);
     adv_btn->setPopupMode(QToolButton::InstantPopup);
     tb->addWidget(adv_btn);
     tb->addSeparator();
     tb->addAction(command("theme"));
-    command("theme")->setIconText(tr("Motív"));
+    command("theme")->setIconText(tr("Theme"));
     tb->addAction(command("settings"));
-    command("settings")->setIconText(tr("Nastavenia"));
+    command("settings")->setIconText(tr("Settings"));
     tb->addAction(command("help"));
-    command("help")->setIconText(tr("Pomoc"));
+    command("help")->setIconText(tr("Help"));
 
     // left: functions
     auto* left = new QWidget;
     auto* ll = new QVBoxLayout(left);
     ll->setContentsMargins(4, 4, 4, 4);
     func_filter_ = new QLineEdit;
-    func_filter_->setPlaceholderText(tr("Filtrovať…"));
+    func_filter_->setPlaceholderText(tr("Filter…"));
     func_filter_->setClearButtonEnabled(true);
     functions_ = new QTreeWidget;
     functions_->setObjectName("functions");
-    functions_->setHeaderLabels({tr("Meno"), tr("Adresa"), tr("Volaní"), tr("Veľkosť")});
+    functions_->setHeaderLabels({tr("Name"), tr("Address"), tr("Callers"), tr("Size")});
     functions_->setRootIsDecorated(false);
     functions_->setSortingEnabled(true);
     functions_->setUniformRowHeights(true);
     functions_->header()->setStretchLastSection(false);
     functions_->header()->setSectionResizeMode(0, QHeaderView::Stretch);
     for (int c = 1; c < 4; c++) functions_->header()->setSectionResizeMode(c, QHeaderView::ResizeToContents);
-    functions_->setToolTip(tr("Zoznam všetkých funkcií programu. Stĺpec Volaní = koľko iných funkcií ju volá. "
-                              "Importy (šedé) sú funkcie z knižníc."));
+    functions_->setToolTip(tr("All functions of the program. Callers column = how many other functions call it. Imports (grey) are functions from libraries."));
     ll->addWidget(func_filter_);
     ll->addWidget(functions_);
     connect(func_filter_, &QLineEdit::textChanged, this, [this](const QString& f) {
@@ -298,7 +295,7 @@ void MainWindow::build_ui() {
         go_to(Addr(it->data(0, Qt::UserRole).toULongLong()));
         if (tabs_->currentIndex() > T_CALLS) tabs_->setCurrentIndex(T_LISTING);
     });
-    auto* ldock = new QDockWidget(tr("Funkcie"), this);
+    auto* ldock = new QDockWidget(tr("Functions"), this);
     ldock->setObjectName("dock_functions");
     ldock->setWidget(left);
     ldock->setFeatures(QDockWidget::DockWidgetMovable | QDockWidget::DockWidgetFloatable);
@@ -311,7 +308,7 @@ void MainWindow::build_ui() {
     details_ = new QTextBrowser;
     details_->setObjectName("details");
     details_->setOpenLinks(false);
-    details_->setHtml(tr("<p>Kliknite na funkciu, adresu alebo reťazec – tu uvidíte, kto ich používa (cross-referencie).</p>"));
+    details_->setHtml(tr("<p>Click a function, address or string to see here who uses it (cross-references).</p>"));
     connect(details_, &QTextBrowser::anchorClicked, this, &MainWindow::on_link);
     auto* btns = new QHBoxLayout;
     for (auto id : {"rename", "comment", "bookmark"}) {
@@ -321,7 +318,7 @@ void MainWindow::build_ui() {
     }
     rl->addWidget(details_);
     rl->addLayout(btns);
-    auto* rdock = new QDockWidget(tr("Detaily"), this);
+    auto* rdock = new QDockWidget(tr("Details"), this);
     rdock->setObjectName("dock_details");
     rdock->setWidget(right);
     rdock->setFeatures(QDockWidget::DockWidgetMovable | QDockWidget::DockWidgetFloatable);
@@ -332,12 +329,7 @@ void MainWindow::build_ui() {
     auto* central = new QStackedWidget;
     welcome_ = new QTextBrowser;
     welcome_->setOpenLinks(false);
-    welcome_->setHtml(tr("<div style=\"margin:40px\"><h1>REVERSA</h1>"
-                         "<p style=\"font-size:large\">Otvorte binárny súbor (ELF, PE alebo surové dáta) alebo vyskúšajte "
-                         "skúšobnú binárku. Všetko dôležité sa vyanalyzuje automaticky.</p>"
-                         "<p><a href=\"open\">Otvoriť súbor…</a> &nbsp;·&nbsp; <a href=\"demo\">Skúšobná binárka</a> "
-                         "&nbsp;·&nbsp; <a href=\"help\">Úvodný sprievodca</a></p>"
-                         "<p style=\"color:gray\">REVERSA analyzuje staticky: skúmaný program sa nikdy nespúšťa.</p></div>"));
+    welcome_->setHtml(tr("<div style=\"margin:40px\"><h1>REVERSA</h1><p style=\"font-size:large\">Open a binary file (ELF, PE or raw data) or try the sample binary. Everything important is analysed automatically.</p><p><a href=\"open\">Open file…</a> &nbsp;·&nbsp; <a href=\"demo\">Sample binary</a> &nbsp;·&nbsp; <a href=\"help\">Getting started guide</a></p><p style=\"color:gray\">REVERSA analyses statically: the program under study is never run.</p></div>"));
     connect(welcome_, &QTextBrowser::anchorClicked, this, [this](const QUrl& u) {
         if (auto* a = command(u.toString())) a->trigger();
     });
@@ -372,16 +364,12 @@ void MainWindow::build_ui() {
     };
     listing_ = browser("listing");
     pseudo_ = browser("pseudocode");
-    tabs_->addTab(page(listing_, tr("Listing ukazuje inštrukcie procesora za sebou. Modré mená sú klikateľné – kliknutím "
-                                   "skočíte na cieľ skoku alebo volania.")), tr("Listing"));
-    tabs_->addTab(page(pseudo_, tr("Pseudokód je čitateľný prepis funkcie do jazyka podobného C. Je dočasný – pri "
-                                  "pochybnostiach overte v listingu. Kliknutím na premennú ju vyberiete, klávesom N "
-                                  "premenujete.")), tr("Pseudokód"));
+    tabs_->addTab(page(listing_, tr("The listing shows the processor instructions in order. Blue names are clickable: click to jump to the target of a jump or call.")), tr("Listing"));
+    tabs_->addTab(page(pseudo_, tr("Pseudocode is a readable rewrite of the function in a C-like language. It is provisional: when in doubt, check the listing. Click a variable to select it, press N to rename it.")), tr("Pseudocode"));
     cfg_ = new GraphView;
     cfg_->setObjectName("cfg");
-    tabs_->addTab(page(cfg_, tr("Graf toku riadenia (CFG) ukazuje bloky funkcie a skoky medzi nimi. Zelená = podmienka "
-                               "splnená, červená = nesplnená, oranžový rámik = slučka. Kolieskom približujete.")),
-                  tr("Graf funkcie"));
+    tabs_->addTab(page(cfg_, tr("The control flow graph (CFG) shows the blocks of a function and the jumps between them. Green = condition true, red = false, orange frame = loop. Zoom with the mouse wheel.")),
+                  tr("Function graph"));
     callgraph_ = new GraphView;
     callgraph_->setObjectName("callgraph");
     auto* cg_bar = new QWidget;
@@ -390,10 +378,10 @@ void MainWindow::build_ui() {
     cg_depth_ = new QSpinBox;
     cg_depth_->setRange(1, 6);
     cg_depth_->setValue(2);
-    cg_imports_ = new QCheckBox(tr("Zobraziť importy"));
+    cg_imports_ = new QCheckBox(tr("Show imports"));
     cg_imports_->setChecked(true);
-    auto* fit = new QPushButton(tr("Prispôsobiť"));
-    cgl->addWidget(new QLabel(tr("Hĺbka:")));
+    auto* fit = new QPushButton(tr("Fit"));
+    cgl->addWidget(new QLabel(tr("Depth:")));
     cgl->addWidget(cg_depth_);
     cgl->addWidget(cg_imports_);
     cgl->addStretch();
@@ -401,9 +389,8 @@ void MainWindow::build_ui() {
     connect(cg_depth_, qOverload<int>(&QSpinBox::valueChanged), this, [this] { refresh_graphs(); });
     connect(cg_imports_, &QCheckBox::toggled, this, [this] { refresh_graphs(); });
     connect(fit, &QPushButton::clicked, callgraph_, &GraphView::fit);
-    tabs_->addTab(page(callgraph_, tr("Tento graf ukazuje, ktoré funkcie volajú ktoré – dvojklik otvorí funkciu. "
-                                     "Kolieskom myši približujete, ťahaním posúvate."), cg_bar),
-                  tr("Graf volaní"));
+    tabs_->addTab(page(callgraph_, tr("This graph shows which functions call which. Double-click opens a function. Zoom with the mouse wheel, drag to pan."), cg_bar),
+                  tr("Call graph"));
     for (auto* g : {cfg_, callgraph_}) {
         connect(g, &GraphView::nodeActivated, this, [this](Addr a) {
             go_to(a);
@@ -442,7 +429,7 @@ void MainWindow::build_ui() {
     };
     auto filtered = [this](QTableWidget* t, const QString& hint) {
         auto* f = new QLineEdit;
-        f->setPlaceholderText(tr("Filtrovať…"));
+        f->setPlaceholderText(tr("Filter…"));
         f->setClearButtonEnabled(true);
         connect(f, &QLineEdit::textChanged, t, [t](const QString& text) {
             for (int r = 0; r < t->rowCount(); r++) {
@@ -461,17 +448,15 @@ void MainWindow::build_ui() {
     bookmarks_ = table("bookmarks");
     search_ = table("search_results");
     {
-        auto [f, h] = filtered(strings_, tr("Reťazce sú texty nájdené v súbore. Stĺpec Odkazy ukazuje, koľko miest v kóde "
-                                            "ich používa – kliknutím ich nájdete."));
-        tabs_->addTab(page(strings_, h, f), tr("Reťazce"));
+        auto [f, h] = filtered(strings_, tr("Strings are texts found in the file. The References column shows how many places in the code use them; click to find them."));
+        tabs_->addTab(page(strings_, h, f), tr("Strings"));
     }
     {
-        auto [f, h] = filtered(imports_, tr("Importy sú funkcie, ktoré program používa z iných knižníc (napr. printf, "
-                                            "strcmp). Často prezradia, čo program robí."));
-        tabs_->addTab(page(imports_, h, f), tr("Importy"));
+        auto [f, h] = filtered(imports_, tr("Imports are functions the program uses from other libraries (e.g. printf, strcmp). They often reveal what the program does."));
+        tabs_->addTab(page(imports_, h, f), tr("Imports"));
     }
-    tabs_->addTab(page(exports_, tr("Exporty sú funkcie a dáta, ktoré súbor ponúka iným programom (typické pre knižnice).")),
-                  tr("Exporty"));
+    tabs_->addTab(page(exports_, tr("Exports are functions and data the file offers to other programs (typical for libraries).")),
+                  tr("Exports"));
     hex_ = new QPlainTextEdit;
     hex_->setObjectName("hex");
     hex_->setReadOnly(true);
@@ -486,35 +471,32 @@ void MainWindow::build_ui() {
         Addr a = Addr(it->data(Qt::UserRole).toULongLong());
         hex_->setPlainText(hexdump_text(session_->binary, a, 64 * 1024));
     });
-    tabs_->addTab(page(split, tr("Sekcie sú časti súboru: kód (.text), dáta (.data, .rodata) a ďalšie. Kliknutím zobrazíte "
-                                "ich bajty v hexadecimálnom výpise (prvých 64 KiB). Práva: r = čítanie, w = zápis, "
-                                "x = spúšťanie.")),
-                  tr("Sekcie a hex"));
-    tabs_->addTab(page(bookmarks_, tr("Záložky a komentáre, ktoré ste pridali. Pridáte ich v paneli Detaily alebo klávesmi "
-                                     "B a ;.")),
-                  tr("Záložky"));
-    tabs_->addTab(page(search_, tr("Výsledky posledného hľadania. Dvojklikom skočíte na miesto v kóde.")),
-                  tr("Výsledky hľadania"));
+    tabs_->addTab(page(split, tr("Sections are parts of the file: code (.text), data (.data, .rodata) and others. Click one to see its bytes in a hex dump (first 64 KiB). Permissions: r = read, w = write, x = execute.")),
+                  tr("Sections and hex"));
+    tabs_->addTab(page(bookmarks_, tr("Bookmarks and comments you added. Add them in the Details panel or with the keys B and ;.")),
+                  tr("Bookmarks"));
+    tabs_->addTab(page(search_, tr("Results of the last search. Double-click to jump to the place in the code.")),
+                  tr("Search results"));
     views_combo_ = new QComboBox;
     views_combo_->setObjectName("views_combo");
     views_text_ = new QTextBrowser;
     views_text_->setObjectName("views");
     connect(views_combo_, qOverload<int>(&QComboBox::currentIndexChanged), this, [this] { refresh_views_tab(); });
-    tabs_->addTab(page(views_text_, tr("Vlastné pohľady pridané pluginmi alebo skriptami: program.add_view(\"Názov\", funkcia)."),
+    tabs_->addTab(page(views_text_, tr("Custom views added by plugins or scripts: program.add_view(\"Name\", function)."),
                        views_combo_),
-                  tr("Pohľady"));
+                  tr("Views"));
     connect(tabs_, &QTabWidget::currentChanged, this, [this](int i) {
         if (i == T_CFG || i == T_CALLS) refresh_graphs();
         if (i == T_VIEWS) refresh_views_tab();
     });
 
     // status bar
-    status_ = new QLabel(tr("Pripravené – otvorte súbor"));
+    status_ = new QLabel(tr("Ready: open a file"));
     progress_ = new QProgressBar;
     progress_->setRange(0, 100);
     progress_->setMaximumWidth(260);
     progress_->hide();
-    cancel_btn_ = new QPushButton(tr("Zrušiť"));
+    cancel_btn_ = new QPushButton(tr("Cancel"));
     cancel_btn_->hide();
     connect(cancel_btn_, &QPushButton::clicked, this, &MainWindow::cancel_analysis);
     statusBar()->addWidget(status_, 1);
@@ -546,11 +528,11 @@ void MainWindow::showEvent(QShowEvent* e) {
 void MainWindow::open_path(const QString& path) {
     if (busy() || !confirm_discard()) return;
     try {
-        status_->setText(tr("Načítavam…"));
+        status_->setText(tr("Loading…"));
         auto s = Session::open(s8(path), args_.options);
         start_session(std::move(s), QFileInfo(path).fileName());
     } catch (const std::exception& e) {
-        status_->setText(tr("Chyba"));
+        status_->setText(tr("Error"));
         report_error(e);
     }
 }
@@ -575,7 +557,7 @@ void MainWindow::start_session(std::unique_ptr<Session> s, const QString& label)
     });
     cancel_ = false;
     set_busy(true);
-    status_->setText(tr("Analyzujem %1 na pozadí…").arg(label));
+    status_->setText(tr("Analysing %1 in the background…").arg(label));
     Session* sess = session_.get();
     worker_ = std::thread([this, sess] {
         auto done = [this](bool ok, QString err, QString detail) {
@@ -597,11 +579,11 @@ void MainWindow::start_session(std::unique_ptr<Session> s, const QString& label)
                 &cancel_);
             done(true, {}, {});
         } catch (const Cancelled&) {
-            done(false, tr("Analýza bola zrušená."), {});
+            done(false, tr("Analysis cancelled."), {});
         } catch (const ReversaError& e) {
             done(false, q(e.what()), q(e.detail));
         } catch (const std::exception& e) {
-            done(false, tr("Neočakávaná chyba pri analýze: %1").arg(q(e.what())), q(e.what()));
+            done(false, tr("Unexpected error during analysis: %1").arg(q(e.what())), q(e.what()));
         }
     });
 }
@@ -609,7 +591,7 @@ void MainWindow::start_session(std::unique_ptr<Session> s, const QString& label)
 void MainWindow::cancel_analysis() {
     if (busy()) {
         cancel_ = true;
-        status_->setText(tr("Ruším analýzu…"));
+        status_->setText(tr("Cancelling analysis…"));
     }
 }
 
@@ -622,7 +604,7 @@ void MainWindow::on_analysis_done(bool ok, const QString& error, const QString& 
         session_.reset();
         static_cast<QStackedWidget*>(centralWidget())->setCurrentIndex(0);
         status_->setText(error);
-        if (!cancel_) show_error(tr("Analýza zlyhala"), error, detail);
+        if (!cancel_) show_error(tr("Analysis failed"), error, detail);
         update_actions();
         update_title();
         Q_EMIT analysisFinished(false);
@@ -630,7 +612,7 @@ void MainWindow::on_analysis_done(bool ok, const QString& error, const QString& 
     }
     static_cast<QStackedWidget*>(centralWidget())->setCurrentIndex(1);
     auto& a = *session_->analysis;
-    status_->setText(tr("Hotovo: %1 funkcií, %2 reťazcov, %3 x-refs za %4 s")
+    status_->setText(tr("Done: %1 functions, %2 strings, %3 x-refs in %4 s")
                          .arg(a.functions.size())
                          .arg(a.strings.size())
                          .arg(a.xrefs.size())
@@ -655,7 +637,7 @@ void MainWindow::set_busy(bool b) {
 
 bool MainWindow::confirm_discard() {
     if (!session_ || !session_->dirty) return true;
-    int r = ask_unsaved(tr("Máte neuložené zmeny. Chcete ich uložiť do projektu?"));
+    int r = ask_unsaved(tr("You have unsaved changes. Do you want to save them to a project?"));
     if (r == QMessageBox::Cancel) return false;
     if (r == QMessageBox::Save) return save_project();
     return true;
@@ -726,7 +708,7 @@ void MainWindow::on_link(const QUrl& url) {
     if (href.startsWith("v:")) {
         selected_var_ = s8(href.mid(2));
         refresh_code();
-        message(tr("Vybraná premenná – klávesom N ju premenujete."));
+        message(tr("Variable selected: press N to rename it."));
         return;
     }
     if (auto a = addr_from_link(href)) {
@@ -739,7 +721,7 @@ void MainWindow::on_link(const QUrl& url) {
 
 void MainWindow::cmd_back() {
     if (history_.empty()) {
-        message(tr("História je prázdna."));
+        message(tr("History is empty."));
         return;
     }
     Addr a = history_.back();
@@ -748,12 +730,12 @@ void MainWindow::cmd_back() {
 }
 
 void MainWindow::cmd_goto() {
-    auto r = ask(tr("Skočiť na adresu"), tr("Adresa alebo meno (napr. 0x401000 alebo main):"));
+    auto r = ask(tr("Go to address"), tr("Address or name (e.g. 0x401000 or main):"));
     if (!r || r->trimmed().isEmpty()) return;
     auto a = session_->resolve(s8(r->trimmed()));
     if (!a) a = parse_address(*r);
     if (!a || !session_->binary.is_mapped(*a)) {
-        show_error(tr("Nenašiel som"), tr("'%1' nie je meno ani adresa v tomto súbore.").arg(*r), {});
+        show_error(tr("Not found"), tr("'%1' is not a name or an address in this file.").arg(*r), {});
         return;
     }
     go_to(*a);
@@ -802,7 +784,7 @@ void MainWindow::refresh_functions() {
         it->setData(0, Qt::UserRole, qulonglong(addr));
         if (fn.kind != "normal") {
             for (int c = 0; c < 4; c++) it->setForeground(c, dim);
-            it->setToolTip(0, tr("Importovaná funkcia%1").arg(fn.library.empty() ? QString() : " z " + q(fn.library)));
+            it->setToolTip(0, tr("Imported function%1").arg(fn.library.empty() ? QString() : " z " + q(fn.library)));
         }
         items << it;
     }
@@ -816,8 +798,8 @@ void MainWindow::refresh_functions() {
 void MainWindow::refresh_code() {
     if (!session_ || !session_->analysis) return;
     if (!current_func_) {
-        listing_->setHtml(tr("<p>Vyberte funkciu vľavo.</p>"));
-        pseudo_->setHtml(tr("<p>Vyberte funkciu vľavo.</p>"));
+        listing_->setHtml(tr("<p>Select a function on the left.</p>"));
+        pseudo_->setHtml(tr("<p>Select a function on the left.</p>"));
         return;
     }
     int lv = listing_->verticalScrollBar()->value(), pv = pseudo_->verticalScrollBar()->value();
@@ -828,10 +810,10 @@ void MainWindow::refresh_code() {
         listing_->setHtml(listing_html(*session_, *current_func_, pal_, current_addr_));
         auto* fn = session_->analysis->function(*current_func_);
         if (fn && fn->kind == "normal") pseudo_->setHtml(pseudocode_html(*session_, *current_func_, pal_, selected_var_));
-        else pseudo_->setHtml(tr("<p>%1 je importovaná funkcia – jej kód je v inej knižnici, pseudokód sa preto nedá zobraziť.</p>")
+        else pseudo_->setHtml(tr("<p>%1 is an imported function: its code is in another library, so no pseudocode can be shown.</p>")
                                   .arg(q(session_->name_of(*current_func_)).toHtmlEscaped()));
     } catch (const std::exception& e) {
-        pseudo_->setHtml(tr("<p>Pseudokód sa nepodarilo vytvoriť: %1</p>").arg(q(e.what()).toHtmlEscaped()));
+        pseudo_->setHtml(tr("<p>Could not create pseudocode: %1</p>").arg(q(e.what()).toHtmlEscaped()));
     }
     if (same) {
         listing_->verticalScrollBar()->setValue(lv);
@@ -880,7 +862,7 @@ void MainWindow::refresh_tables() {
         rows.push_back({hexq(st.addr), text, q(st.encoding), QString::number(a.xrefs.count_to(st.addr))});
         addrs.push_back(st.addr);
     }
-    fill_table(strings_, {tr("Adresa"), tr("Text"), tr("Kódovanie"), tr("Odkazy")}, rows, addrs);
+    fill_table(strings_, {tr("Address"), tr("Text"), tr("Encoding"), tr("References")}, rows, addrs);
     // put the text column last so it stretches
     strings_->horizontalHeader()->moveSection(1, 3);
 
@@ -892,7 +874,7 @@ void MainWindow::refresh_tables() {
         rows.push_back({q(im.name), q(im.library), hexq(im.thunk ? *im.thunk : im.slot), QString::number(a.callers(at).size())});
         addrs.push_back(at);
     }
-    fill_table(imports_, {tr("Meno"), tr("Knižnica"), tr("PLT/IAT"), tr("Volaní")}, rows, addrs);
+    fill_table(imports_, {tr("Name"), tr("Library"), tr("PLT/IAT"), tr("Callers")}, rows, addrs);
 
     rows.clear();
     addrs.clear();
@@ -900,10 +882,10 @@ void MainWindow::refresh_tables() {
         rows.push_back({q(ex.name), hexq(ex.addr), ex.ordinal ? QString::number(*ex.ordinal) : QString(), q(ex.forwarder)});
         addrs.push_back(ex.addr);
     }
-    fill_table(exports_, {tr("Meno"), tr("Adresa"), tr("Ordinál"), tr("Presmerovanie")}, rows, addrs);
+    fill_table(exports_, {tr("Name"), tr("Address"), tr("Ordinal"), tr("Forwarder")}, rows, addrs);
     if (b.exports.empty()) {
         exports_->setRowCount(1);
-        exports_->setItem(0, 0, new QTableWidgetItem(tr("Tento súbor nič neexportuje (bežné pri spustiteľných programoch).")));
+        exports_->setItem(0, 0, new QTableWidgetItem(tr("This file exports nothing (common for executables).")));
     }
 
     rows.clear();
@@ -912,7 +894,7 @@ void MainWindow::refresh_tables() {
         rows.push_back({q(sec.name), hexq(sec.addr), hexq(sec.size), hexq(sec.offset), q(sec.perms()), q(sec.kind())});
         addrs.push_back(sec.addr);
     }
-    fill_table(sections_, {tr("Meno"), tr("Adresa"), tr("Veľkosť"), tr("Offset"), tr("Práva"), tr("Druh")}, rows, addrs);
+    fill_table(sections_, {tr("Name"), tr("Address"), tr("Size"), tr("Offset"), tr("Permissions"), tr("Kind")}, rows, addrs);
 
     rows.clear();
     addrs.clear();
@@ -921,17 +903,17 @@ void MainWindow::refresh_tables() {
         return f ? q(s.name_of(f->addr)) : QString();
     };
     for (auto& [ad, label] : s.annotations.bookmarks) {
-        rows.push_back({hexq(ad), tr("záložka"), q(label), func_name(ad)});
+        rows.push_back({hexq(ad), tr("bookmark"), q(label), func_name(ad)});
         addrs.push_back(ad);
     }
     for (auto& [ad, text] : s.annotations.comments) {
-        rows.push_back({hexq(ad), tr("komentár"), q(text), func_name(ad)});
+        rows.push_back({hexq(ad), tr("comment"), q(text), func_name(ad)});
         addrs.push_back(ad);
     }
-    fill_table(bookmarks_, {tr("Adresa"), tr("Typ"), tr("Text"), tr("Funkcia")}, rows, addrs);
+    fill_table(bookmarks_, {tr("Address"), tr("Type"), tr("Text"), tr("Function")}, rows, addrs);
     if (rows.empty()) {
         bookmarks_->setRowCount(1);
-        bookmarks_->setItem(0, 0, new QTableWidgetItem(tr("Zatiaľ žiadne záložky ani komentáre.")));
+        bookmarks_->setItem(0, 0, new QTableWidgetItem(tr("No bookmarks or comments yet.")));
     }
 }
 
@@ -943,7 +925,7 @@ void MainWindow::refresh_graphs() {
     if (tab == T_CFG) {
         const Function* fn = current_func_ ? a.function(*current_func_) : nullptr;
         if (!fn || fn->kind != "normal") {
-            cfg_->set_message(tr("Graf toku riadenia (CFG) sa dá zobraziť len pre funkciu s kódom v tomto súbore. Vyberte funkciu vľavo."),
+            cfg_->set_message(tr("The control flow graph (CFG) can only be shown for a function whose code is in this file. Select a function on the left."),
                               pal_.dim);
             return;
         }
@@ -958,7 +940,7 @@ void MainWindow::refresh_graphs() {
             size_t shown = 0;
             for (Addr ad : blk.insns) {
                 if (++shown > 40) {
-                    text += tr("\n… ďalších %1 inštrukcií").arg(blk.insns.size() - 40);
+                    text += tr("\n… %1 more instructions").arg(blk.insns.size() - 40);
                     break;
                 }
                 const Insn* ins = a.insn(ad);
@@ -1011,7 +993,7 @@ void MainWindow::refresh_graphs() {
         for (auto& [x, y] : g.edges)
             if (keep.count(x) && keep.count(y)) edges.push_back({x, y, {}, false});
         callgraph_->set_graph(nodes, edges, root.value_or(0), pal_.dim, pal_.text);
-        if (g.nodes.size() > LIMIT) message(tr("Graf volaní je veľký – zobrazených prvých %1 z %2 funkcií. Vyberte funkciu a zmenšite hĺbku.")
+        if (g.nodes.size() > LIMIT) message(tr("The call graph is large: showing the first %1 of %2 functions. Select a function and reduce the depth.")
                                                 .arg(LIMIT).arg(g.nodes.size()), 8000);
     }
 }
@@ -1029,14 +1011,14 @@ void MainWindow::refresh_views_tab() {
     }
     if (tabs_->currentIndex() != T_VIEWS) return;
     if (names.isEmpty()) {
-        views_text_->setMarkdown(tr("Žiadne vlastné pohľady. Pridáte ich skriptom alebo pluginom: `program.add_view(\"Názov\", funkcia)`."));
+        views_text_->setMarkdown(tr("No custom views. Add them with a script or plugin: `program.add_view(\"Name\", function)`."));
         return;
     }
     int i = std::max(0, views_combo_->currentIndex());
     try {
         views_text_->setMarkdown(q(session_->views[size_t(i)].second()));
     } catch (const std::exception& e) {
-        views_text_->setPlainText(tr("Pohľad zlyhal: %1").arg(q(e.what())));
+        views_text_->setPlainText(tr("View failed: %1").arg(q(e.what())));
     }
 }
 
@@ -1061,15 +1043,15 @@ void MainWindow::cmd_rename() {
             for (auto& ln : session_->decompile(*current_func_))
                 for (auto& seg : ln.segs)
                     if (seg.kind == "var" && seg.key == selected_var_) old = q(seg.text);
-            auto r = ask(tr("Premenovať premennú"), tr("Nové meno premennej %1 (prázdne = pôvodné meno):").arg(old), old);
+            auto r = ask(tr("Rename variable"), tr("New name for variable %1 (empty = original name):").arg(old), old);
             if (!r) return;
             session_->rename_var(*current_func_, selected_var_, s8(r->trimmed()));
-            message(tr("Premenná premenovaná."));
+            message(tr("Variable renamed."));
             return;
         }
         auto target = current_addr_ ? current_addr_ : current_func_;
         if (!target) {
-            message(tr("Najprv vyberte funkciu alebo adresu."));
+            message(tr("Select a function or address first."));
             return;
         }
         // In the listing, the selected instruction belongs to a function: rename the function itself
@@ -1080,10 +1062,10 @@ void MainWindow::cmd_rename() {
             if (!fn->blocks.count(*target)) target = fn->addr;
         }
         QString old = q(session_->name_of(*target));
-        auto r = ask(tr("Premenovať"), tr("Nové meno pre %1 (prázdne = pôvodné meno):").arg(old), old);
+        auto r = ask(tr("Rename"), tr("New name for %1 (empty = original name):").arg(old), old);
         if (!r) return;
         session_->rename(*target, s8(r->trimmed()));
-        message(tr("Premenované."));
+        message(tr("Renamed."));
     } catch (const std::exception& e) {
         report_error(e);
     }
@@ -1092,9 +1074,9 @@ void MainWindow::cmd_rename() {
 void MainWindow::cmd_comment() {
     if (!session_ || !session_->analysis) return;
     auto target = current_addr_ ? current_addr_ : current_func_;
-    if (!target) return message(tr("Najprv vyberte funkciu alebo adresu."));
+    if (!target) return message(tr("Select a function or address first."));
     auto it = session_->annotations.comments.find(*target);
-    auto r = ask(tr("Komentár"), tr("Komentár k adrese %1 (prázdny = zmazať):").arg(hexq(*target)),
+    auto r = ask(tr("Comment"), tr("Comment for address %1 (empty = delete):").arg(hexq(*target)),
                  it != session_->annotations.comments.end() ? q(it->second) : QString());
     if (!r) return;
     try {
@@ -1107,9 +1089,9 @@ void MainWindow::cmd_comment() {
 void MainWindow::cmd_bookmark() {
     if (!session_ || !session_->analysis) return;
     auto target = current_addr_ ? current_addr_ : current_func_;
-    if (!target) return message(tr("Najprv vyberte funkciu alebo adresu."));
+    if (!target) return message(tr("Select a function or address first."));
     auto it = session_->annotations.bookmarks.find(*target);
-    auto r = ask(tr("Záložka"), tr("Názov záložky pre %1 (prázdny = zmazať):").arg(hexq(*target)),
+    auto r = ask(tr("Bookmark"), tr("Bookmark name for %1 (empty = delete):").arg(hexq(*target)),
                  it != session_->annotations.bookmarks.end() ? q(it->second) : q(session_->name_of(*target)));
     if (!r) return;
     try {
@@ -1122,21 +1104,21 @@ void MainWindow::cmd_bookmark() {
 void MainWindow::cmd_undo() {
     if (!session_) return;
     auto d = session_->undo();
-    message(d ? tr("Vrátené: %1").arg(q(*d)) : tr("Nie je čo vrátiť."));
+    message(d ? tr("Undone: %1").arg(q(*d)) : tr("Nothing to undo."));
     update_actions();
 }
 
 void MainWindow::cmd_redo() {
     if (!session_) return;
     auto d = session_->redo();
-    message(d ? tr("Zopakované: %1").arg(q(*d)) : tr("Nie je čo zopakovať."));
+    message(d ? tr("Redone: %1").arg(q(*d)) : tr("Nothing to redo."));
     update_actions();
 }
 
 // ------------------------------------------------------------ files
 void MainWindow::cmd_open() {
-    QString path = QFileDialog::getOpenFileName(this, tr("Otvoriť binárny súbor alebo projekt"), {},
-                                                tr("Všetky súbory (*);;Projekty REVERSA (*.rvproj)"));
+    QString path = QFileDialog::getOpenFileName(this, tr("Open a binary file or project"), {},
+                                                tr("All files (*);;REVERSA projects (*.rvproj)"));
     if (!path.isEmpty()) open_path(path);
 }
 
@@ -1148,7 +1130,7 @@ bool MainWindow::save_project(const QString& path) {
     }
     try {
         std::string out = session_->save(s8(path));
-        message(tr("Projekt uložený: %1").arg(q(out)), 8000);
+        message(tr("Project saved: %1").arg(q(out)), 8000);
         update_title();
         return true;
     } catch (const std::exception& e) {
@@ -1160,22 +1142,22 @@ bool MainWindow::save_project(const QString& path) {
 void MainWindow::cmd_save_as() {
     if (!session_) return;
     QString def = q(session_->project_path ? *session_->project_path : default_project_path(session_->binary.path));
-    QString path = QFileDialog::getSaveFileName(this, tr("Uložiť projekt"), def, tr("Projekty REVERSA (*.rvproj)"));
+    QString path = QFileDialog::getSaveFileName(this, tr("Save project"), def, tr("REVERSA projects (*.rvproj)"));
     if (!path.isEmpty()) save_project(path);
 }
 
 void MainWindow::cmd_report(const QString& fmt) {
     if (!session_ || !session_->analysis) return;
     QString base = QFileInfo(q(session_->binary.path)).completeBaseName();
-    QString path = QFileDialog::getSaveFileName(this, tr("Exportovať report"), base + "-report." + fmt,
+    QString path = QFileDialog::getSaveFileName(this, tr("Export report"), base + "-report." + fmt,
                                                 fmt == "html" ? tr("HTML (*.html)") : tr("Markdown (*.md)"));
     if (path.isEmpty()) return;
     try {
         std::string text = build_report(*session_, s8(fmt));
         QFile f(path);
         if (!f.open(QIODevice::WriteOnly) || f.write(text.data(), qint64(text.size())) != qint64(text.size()))
-            throw ReversaError(s8(tr("Súbor '%1' sa nepodarilo zapísať.").arg(path)), s8(f.errorString()));
-        message(tr("Report uložený: %1").arg(path), 8000);
+            throw ReversaError(s8(tr("Could not write the file '%1'.").arg(path)), s8(f.errorString()));
+        message(tr("Report saved: %1").arg(path), 8000);
     } catch (const std::exception& e) {
         report_error(e);
     }
@@ -1192,35 +1174,35 @@ void MainWindow::run_search(const QString& text) {
     auto resolved = s.resolve(query);
     if (!resolved) resolved = parse_address(text);
     if (resolved && s.binary.is_mapped(*resolved)) {
-        rows.push_back({hexq(*resolved), tr("adresa / meno"), q(s.name_of(*resolved))});
+        rows.push_back({hexq(*resolved), tr("address / name"), q(s.name_of(*resolved))});
         addrs.push_back(*resolved);
     }
     QString needle = text.trimmed();
     for (auto& [ad, fn] : a.functions) {
         QString n = q(s.name_of(ad));
         if (n.contains(needle, Qt::CaseInsensitive) && !(resolved && *resolved == ad)) {
-            rows.push_back({hexq(ad), fn.kind == "normal" ? tr("funkcia") : tr("import"), n});
+            rows.push_back({hexq(ad), fn.kind == "normal" ? tr("function") : tr("import"), n});
             addrs.push_back(ad);
         }
     }
     try {
         for (auto& [ad, t] : s.search_strings(query)) {
-            rows.push_back({hexq(ad), tr("reťazec"), q(utf8_prefix(t, 200))});
+            rows.push_back({hexq(ad), tr("string"), q(utf8_prefix(t, 200))});
             addrs.push_back(ad);
         }
     } catch (const std::exception&) {
     }
-    fill_table(search_, {tr("Adresa"), tr("Typ"), tr("Text")}, rows, addrs);
+    fill_table(search_, {tr("Address"), tr("Type"), tr("Text")}, rows, addrs);
     tabs_->setCurrentIndex(T_SEARCH);
-    message(tr("Nájdených %1 výsledkov pre „%2“.").arg(rows.size()).arg(needle));
+    message(tr("Found %1 results for “%2”.").arg(rows.size()).arg(needle));
     if (resolved && s.binary.is_mapped(*resolved)) go_to(*resolved);
 }
 
 void MainWindow::cmd_advanced_search(const QString& kind) {
     if (!session_ || !session_->analysis) return;
-    QString title = kind == "hex" ? tr("Hľadať bajty") : kind == "insn" ? tr("Hľadať inštrukcie") : tr("Hľadať v pseudokóde");
-    QString label = kind == "hex" ? tr("Hex vzor, ?? = ľubovoľný bajt (napr. 48 8b ?? 05):")
-                                  : tr("Regulárny výraz (napr. call\\s+0x[0-9a-f]+):");
+    QString title = kind == "hex" ? tr("Search bytes") : kind == "insn" ? tr("Search instructions") : tr("Search pseudocode");
+    QString label = kind == "hex" ? tr("Hex pattern, ?? = any byte (e.g. 48 8b ?? 05):")
+                                  : tr("Regular expression (e.g. call\\s+0x[0-9a-f]+):");
     auto r = ask(title, label);
     if (!r || r->trimmed().isEmpty()) return;
     std::vector<QStringList> rows;
@@ -1233,7 +1215,7 @@ void MainWindow::cmd_advanced_search(const QString& kind) {
         };
         if (kind == "hex") {
             for (Addr ad : session_->search_bytes(s8(*r))) {
-                rows.push_back({hexq(ad), tr("bajty"), fname(ad)});
+                rows.push_back({hexq(ad), tr("bytes"), fname(ad)});
                 addrs.push_back(ad);
             }
         } else {
@@ -1247,9 +1229,9 @@ void MainWindow::cmd_advanced_search(const QString& kind) {
         report_error(e);
         return;
     }
-    fill_table(search_, {tr("Adresa"), kind == "hex" ? tr("Typ") : tr("Funkcia"), kind == "hex" ? tr("Funkcia") : tr("Text")}, rows, addrs);
+    fill_table(search_, {tr("Address"), kind == "hex" ? tr("Type") : tr("Function"), kind == "hex" ? tr("Function") : tr("Text")}, rows, addrs);
     tabs_->setCurrentIndex(T_SEARCH);
-    message(tr("Nájdených %1 výsledkov.").arg(rows.size()));
+    message(tr("Found %1 results.").arg(rows.size()));
 }
 
 // ------------------------------------------------------------ dialogs
@@ -1262,7 +1244,7 @@ void MainWindow::cmd_settings() {
     apply_settings();
     if (settings_.language != old_language) {
         set_language(settings_.language);  // new dialogs use it at once; menus and panels after a restart
-        QMessageBox::information(this, tr("Jazyk"), tr("Jazyk sa úplne zmení po reštarte REVERSA."));
+        QMessageBox::information(this, tr("Language"), tr("The language changes fully after REVERSA restarts."));
     }
     if (d.reshow_onboarding()) cmd_onboarding();
 }
@@ -1279,11 +1261,10 @@ void MainWindow::cmd_diagnostics() {
     std::vector<QStringList> rows;
     for (auto& d : session_->diagnostics())
         rows.push_back({q(d.severity), q(d.message), d.location ? hexq(*d.location) + " (" + q(d.where) + ")" : QString(), q(d.detail)});
-    show_table(this, tr("Diagnostika načítania"),
-               rows.empty() ? tr("Súbor sa načítal bez problémov.")
-                            : tr("Problémy, ktoré sa našli pri načítaní a analýze. Žiadny z nich nie je fatálny – REVERSA "
-                                 "zobrazí všetko, čo sa dalo prečítať."),
-               {tr("Závažnosť"), tr("Správa"), tr("Miesto"), tr("Detail pre správcu")}, rows);
+    show_table(this, tr("Load diagnostics"),
+               rows.empty() ? tr("The file loaded without problems.")
+                            : tr("Problems found while loading and analysing. None of them is fatal: REVERSA shows everything that could be read."),
+               {tr("Severity"), tr("Message"), tr("Location"), tr("Details for the maintainer")}, rows);
 }
 
 void MainWindow::cmd_relocations() {
@@ -1291,18 +1272,16 @@ void MainWindow::cmd_relocations() {
     std::vector<QStringList> rows;
     for (auto& r : session_->binary.relocations)
         rows.push_back({hexq(r.addr), q(r.type), q(r.symbol), QString::number(r.addend)});
-    show_table(this, tr("Relokácie"), tr("Miesta, ktoré zavádzač operačného systému upraví pri spustení programu."),
-               {tr("Adresa"), tr("Typ"), tr("Symbol"), tr("Addend")}, rows);
+    show_table(this, tr("Relocations"), tr("Places the operating system loader patches when the program starts."),
+               {tr("Address"), tr("Type"), tr("Symbol"), tr("Addend")}, rows);
 }
 
 void MainWindow::cmd_plugins() {
     std::vector<QStringList> rows;
     QString intro;
-    if (args_.no_plugins) intro = tr("Pluginy sú vypnuté (--no-plugins).");
+    if (args_.no_plugins) intro = tr("Plugins are disabled (--no-plugins).");
     else {
-        intro = tr("Pluginy sú knižnice .so/.dll v C alebo C++. Načítavajú sa z priečinka %1, z premennej "
-                   "REVERSA_PLUGIN_PATH a z volieb --plugins. Bežia priamo v REVERSA – inštalujte len pluginy, "
-                   "ktorým dôverujete.").arg(q(plugins::default_dirs().front()));
+        intro = tr("Plugins are .so/.dll libraries written in C or C++. They are loaded from the folder %1, from the REVERSA_PLUGIN_PATH variable and from --plugins options. They run inside REVERSA, so only install plugins you trust.").arg(q(plugins::default_dirs().front()));
         if (session_ && session_->plugins) {
             Json info = plugins::info(session_->plugins);
             for (auto& p : info.as_array()) {
@@ -1313,7 +1292,7 @@ void MainWindow::cmd_plugins() {
             }
         }
     }
-    show_table(this, tr("Pluginy"), intro, {tr("Meno"), tr("Verzia"), tr("Stav"), tr("Háčiky"), tr("Chyba"), tr("Popis")}, rows);
+    show_table(this, tr("Plugins"), intro, {tr("Name"), tr("Version"), tr("Status"), tr("Hooks"), tr("Error"), tr("Description")}, rows);
 }
 
 }  // namespace rv::gui

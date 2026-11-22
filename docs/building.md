@@ -1,11 +1,12 @@
-# Zostavenie zo zdrojov
+# Building from source
 
-Hotové balíky pre Windows a Linux sú v [README](../README.md#inštalácia). Tento návod je pre vývojárov a pre tých, ktorí chcú REVERSA zostaviť sami.
+Ready-made packages for Windows and Linux are listed in the [README](../README.md#installation).
+This guide is for developers and for anyone who wants to build REVERSA themselves.
 
-## Zostavenie
+## Build
 
-Potrebujete C++20 kompilátor (GCC 11+, Clang 14+ alebo Visual Studio 2022),
-CMake 3.21+, Qt 6.2+ a SQLite 3. Capstone stiahne CMake automaticky v pevnej verzii.
+You need a C++20 compiler (GCC 11+, Clang 14+ or Visual Studio 2022), CMake 3.21+, Qt 6.2+ and
+SQLite 3. CMake downloads Capstone automatically at a pinned version.
 
 **Linux (Debian/Ubuntu):**
 
@@ -19,9 +20,9 @@ cmake --build build
 
 Fedora: `sudo dnf install gcc-c++ cmake ninja-build qt6-qtbase-devel sqlite-devel`.
 
-**Windows:** nainštalujte Visual Studio 2022 (Desktop development with C++),
-Qt 6 (Qt Online Installer, komponent MSVC 2022 64-bit) a vcpkg (`git clone https://github.com/microsoft/vcpkg` a
-`bootstrap-vcpkg.bat`). V „x64 Native Tools Command Prompt":
+**Windows:** install Visual Studio 2022 (Desktop development with C++), Qt 6 (Qt Online
+Installer, component MSVC 2022 64-bit) and vcpkg (`git clone https://github.com/microsoft/vcpkg`
+and `bootstrap-vcpkg.bat`). In the "x64 Native Tools Command Prompt":
 
 ```bat
 git clone https://github.com/MrKniha/reversa.git && cd reversa
@@ -31,26 +32,26 @@ cmake --build build --config Release
 build\bin\reversa.exe --demo
 ```
 
-Voľby CMake: `-DREVERSA_GUI=OFF` (len príkazový riadok, bez Qt), `-DREVERSA_TESTS=OFF`.
+CMake options: `-DREVERSA_GUI=OFF` (command line only, no Qt), `-DREVERSA_TESTS=OFF`.
 
-## Testy
+## Tests
 
 ```bash
-ctest --test-dir build --output-on-failure           # C++ testy (API, pluginy, CLI, golden súbory) a GUI test
-build/bin/headless_check build/bin/reversa .         # end-to-end kontrola všetkých vzoriek
-build/bin/check_licenses .                           # licencie závislostí
-build/bin/i18n_check .                               # úplnosť prekladov GUI
+ctest --test-dir build --output-on-failure           # C++ tests (API, plugins, CLI, golden files) and the GUI test
+build/bin/headless_check build/bin/reversa .         # end-to-end check of all samples
+build/bin/check_licenses .                           # dependency licenses
+build/bin/i18n_check .                               # GUI translations are complete
 ```
 
-Na vývoj pozri [CONTRIBUTING.md](../CONTRIBUTING.md).
+For development, see [CONTRIBUTING.md](../CONTRIBUTING.md).
 
-## Pluginy a skripty z buildu
+## Plugins and scripts from the build
 
-Príklady v `examples/` sa preložia spolu s programom do `build/bin/examples`:
+The examples in `examples/` are built together with the program into `build/bin/examples`:
 
 ```bash
 ./build/bin/reversa script build/bin/examples/scripts/strcmp_callers.so samples/bin/login_x64.elf
 ./build/bin/reversa analyze samples/bin/login_x64.elf --plugins build/bin/examples/plugins
 ```
 
-Návody: [scripting-tutorial.md](scripting-tutorial.md), [plugin-tutorial.md](plugin-tutorial.md).
+Guides: [scripting-tutorial.md](scripting-tutorial.md), [plugin-tutorial.md](plugin-tutorial.md).

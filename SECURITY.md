@@ -1,23 +1,23 @@
-# Bezpečnostná politika
+# Security policy
 
-## Hlásenie zraniteľností
+## Reporting vulnerabilities
 
-Zraniteľnosti v REVERSA (napr. pád, čítanie mimo pamäte alebo spustenie kódu pri otvorení
-škodlivej binárky či projektu) hláste **súkromne** cez GitHub Security Advisories
-repozitára („Report a vulnerability“), nie verejným issue. Odpovieme do 7 dní.
+Report vulnerabilities in REVERSA (for example a crash, an out-of-bounds read or code execution
+when a malicious binary or project is opened) **privately** through the repository's GitHub
+Security Advisories ("Report a vulnerability"), not in a public issue. We reply within 7 days.
 
-Uveďte verziu (`reversa --version`), OS, kroky na reprodukciu a ak je to bezpečné, vzorku
-(zabalenú v ZIP s heslom `infected`).
+Include the version (`reversa --version`), your OS, steps to reproduce and, if it is safe, a sample
+(in a ZIP archive with the password `infected`).
 
-## Model hrozieb (MVP)
+## Threat model (MVP)
 
-- REVERSA **nikdy nespúšťa** analyzovaný kód – analýza je čisto statická.
-- Parsery formátov sú v C++ a každé čítanie zo súboru ide cez `Reader` s kontrolou hraníc.
-  Sú fuzzované v CI (`tests/cpp/test_analysis.cpp`, dlhší beh: `REVERSA_FUZZ_ITERS`).
-  Disassembler Capstone je natívna knižnica v C.
-- GUI je natívne (Qt), nepočúva na žiadnom sieťovom porte. REVERSA nemá telemetriu.
-- **Pluginy a skripty sú natívne knižnice (.so/.dll) bez sandboxu** – bežia v procese REVERSA
-  s vašimi právami. Spúšťajte len tie, ktorým dôverujete. REVERSA ich načítava len z
-  `~/.reversa/plugins`, z `REVERSA_PLUGIN_PATH` a z priečinkov zadaných cez `--plugins`.
-- Projektový súbor `.rvproj` obsahuje kópiu analyzovanej binárky. Ak analyzujete malvér,
-  zaobchádzajte s projektom ako so vzorkou malvéru.
+- REVERSA **never runs** the analysed code. The analysis is purely static.
+- The format parsers are written in C++ and every read from the file goes through `Reader`, which
+  checks bounds. They are fuzzed in CI (`tests/cpp/test_analysis.cpp`, longer run:
+  `REVERSA_FUZZ_ITERS`). The Capstone disassembler is a native C library.
+- The GUI is native (Qt) and listens on no network port. REVERSA has no telemetry.
+- **Plugins and scripts are native libraries (.so/.dll) without a sandbox.** They run inside the
+  REVERSA process with your permissions. Only run the ones you trust. REVERSA loads them only from
+  `~/.reversa/plugins`, from `REVERSA_PLUGIN_PATH` and from folders given with `--plugins`.
+- A project file `.rvproj` contains a copy of the analysed binary. If you analyse malware, treat
+  the project like a malware sample.

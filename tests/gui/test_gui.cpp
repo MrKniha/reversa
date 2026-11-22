@@ -76,7 +76,7 @@ private Q_SLOTS:
         QVERIFY(find_function(w.functions_view(), "main") >= 0);
         QVERIFY(w.listing_view()->toPlainText().contains("main:"));
         QVERIFY(w.pseudocode_view()->toPlainText().contains("check_password"));
-        QVERIFY(w.details_view()->toPlainText().contains("Volá"));
+        QVERIFY(w.details_view()->toPlainText().contains("Calls"));
         w.resize(1400, 860);
         shot(w, "listing");
         w.command("pseudocode")->trigger();
@@ -241,25 +241,25 @@ private Q_SLOTS:
         QSettings().setValue("ui/onboarding_done", true);  // no modal guide when the window is shown
 
         const std::pair<const char*, const char*> menus[] = {
-            {"en", "&File"}, {"de", "&Datei"}, {"fr", "&Fichier"}, {"zh", "文件(&F)"}};
+            {"sk", "&Súbor"}, {"de", "&Datei"}, {"fr", "&Fichier"}, {"zh", "文件(&F)"}};
         for (auto& [code, file_menu] : menus) {
             set_language(code);
             QCOMPARE(current_language(), QString(code));
-            QVERIFY(T("Volá") != QString::fromUtf8("Volá"));  // free-function strings (views.cpp)
+            QVERIFY(T("Calls") != QString("Calls"));  // free-function strings (views.cpp)
             cli::Args args;
             args.no_plugins = true;
             MainWindow w(args);
             QCOMPARE(w.menuBar()->actions().at(0)->text(), QString::fromUtf8(file_menu));
-            if (QByteArray(code) == "zh" || QByteArray(code) == "en") {
+            if (QByteArray(code) == "zh" || QByteArray(code) == "sk") {
                 w.resize(1280, 800);
                 w.show();
                 w.open_demo();
                 wait_ready(w);
-                shot(w, code == QByteArray("zh") ? "lang_zh" : "lang_en");
+                shot(w, code == QByteArray("zh") ? "lang_zh" : "lang_sk");
             }
         }
-        set_language("sk");
-        QCOMPARE(T("Volá"), QString::fromUtf8("Volá"));
+        set_language("en");  // English is the source language: no translation table
+        QCOMPARE(T("Calls"), QString("Calls"));
     }
 };
 
