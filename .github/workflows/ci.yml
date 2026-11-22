@@ -11,85 +11,47 @@ env:
   PYTHONIOENCODING: utf-8  # Windows runners default to cp1252, which lacks Slovak letters
 
 jobs:
-  test:
-    name: tests (${{ matrix.os }}, Python ${{ matrix.python }})
+  licenses:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+      - name: License check
+        run: python3 scripts/check_licenses.py
+
+  build:
+    name: build + tests (${{ matrix.os }})
     runs-on: ${{ matrix.os }}
     strategy:
       fail-fast: false
       matrix:
-        os: [ubuntu-latest, windows-latest]
-        python: ["3.10", "3.13"]
-    steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-python@v5
-        with:
-          python-version: ${{ matrix.python }}
-      - name: Install (locked runtime dependencies + dev tools)
-        run: |
-          python -m pip install --upgrade pip
-          pip install --require-hashes -r requirements.lock
-          pip install -e ".[dev]"
-      - name: License check
-        run: python scripts/check_licenses.py
-      - name: Tests with coverage
-        run: |
-          coverage run -m pytest
-          coverage report --fail-under=80
-      - name: Headless check
-        run: python scripts/headless_check.py headless-out
-
-  ui-smoke:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-python@v5
-        with:
-          python-version: "3.12"
-      - uses: actions/setup-node@v4
-        with:
-          node-version: "20"
-      - run: pip install --require-hashes -r requirements.lock && pip install -e .
-      - run: npm install --no-save playwright@1.48.2 && npx playwright install --with-deps chromium
-      - run: node tests/ui/smoke.mjs
-
-  package:
-    name: package (${{ matrix.os }})
-    needs: [test]
-    runs-on: ${{ matrix.os }}
-    strategy:
-      matrix:
         include:
-          - os: ubuntu-latest
-            exe: dist/reversa
-            artifact: reversa-linux-x64
-          - os: windows-latest
-            exe: dist/reversa.exe
-            artifact: reversa-windows-x64
+          - os: ubuntu-24.04
+            cmake_args: -G Ninja -DCMAKE_BUILD_TYPE=Release
+          - os: windows-2022
+            cmake_args: >-
+              -G "Visual Studio 17 2022" -A x64
+              -DCMAKE_TOOLCHAIN_FILE=C:/vcpkg/scripts/buildsystems/vcpkg.cmake
+              -DVCPKG_TARGET_TRIPLET=x64-windows-static-md
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
         with:
           python-version: "3.12"
-      - name: Wheel
-        run: |
-          pip install build
-          python -m build
-      - name: Standalone executable (no Python needed on the target machine)
+      - name: Linux packages
+        if: runner.os == 'Linux'
+        run: sudo apt-get update && sudo apt-get install -y ninja-build libsqlite3-dev
+      - name: Configure
+        shell: bash
+        run: cmake -S . -B build ${{ matrix.cmake_args }} -DREVERSA_GUI=OFF -DPython_EXECUTABLE="$(python -c 'import sys; print(sys.executable)')"
+      - name: Build
+        run: cmake --build build --config Release --parallel
+      - name: C++ tests
+        run: ctest --test-dir build -C Release --output-on-failure
+      - name: Python API tests
         shell: bash
         run: |
-          pip install --require-hashes -r requirements.lock
-          pip install . pyinstaller==6.22.3
-          pyinstaller --onefile --name reversa --collect-all reversa --collect-all capstone src/reversa/__main__.py
-      - name: Smoke test the executable
+          python -m pip install --require-hashes -r tests/requirements-dev.lock
+          REVERSA_BUILD_DIR=build python -m pytest -q tests/python
+      - name: Headless check
         shell: bash
-        run: |
-          ${{ matrix.exe }} --version
-          ${{ matrix.exe }} --demo --no-gui
-          ${{ matrix.exe }} analyze samples/bin/login_x64.exe --report report.md --no-plugins
-      - uses: actions/upload-artifact@v4
-        with:
-          name: ${{ matrix.artifact }}
-          path: |
-            dist/*.whl
-            dist/*.tar.gz
-            ${{ matrix.exe }}
+        run: python scripts/headless_check.py build/bin/reversa headless-out

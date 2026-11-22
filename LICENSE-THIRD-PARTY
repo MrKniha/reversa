@@ -1,34 +1,57 @@
 REVERSA – licencie tretích strán
 ================================
 
-REVERSA (MIT) pri behu používa len tieto komponenty tretích strán. Úplný zoznam
-overuje skript scripts/check_licenses.py v CI (každá runtime závislosť musí byť
-uvedená tu a mať povolenú licenciu).
+REVERSA (MIT) je napísaná v C++. Pri zostavení a behu používa len tieto komponenty
+tretích strán. Úplnosť zoznamu overuje skript scripts/check_licenses.py v CI (každá
+závislosť z CMakeLists.txt, vcpkg.json a tests/requirements-dev.lock musí byť uvedená
+tu a mať povolenú licenciu).
 
-Runtime závislosti
-------------------
+Súčasť programu
+---------------
 
-1. Capstone (Python bindings "capstone" + natívna knižnica libcapstone)
-   Verzia: >=5.0.1,<6 (testované 5.0.9)
+1. Capstone
+   Verzia: 5.0.9 (CMake FetchContent, pevný git tag)
    Licencia: BSD-3-Clause
    Copyright (c) 2013, COSEINC; Nguyen Anh Quynh and contributors
    Zdroj: https://github.com/capstone-engine/capstone
-   Použitie: disassembler (dynamicky linkovaná knižnica, bez úprav).
-   Kompatibilita: BSD-3-Clause je kompatibilná s MIT; povinnosť: zachovať
-   copyright a text licencie pri redistribúcii (pip balík ho obsahuje).
+   Použitie: disassembler, staticky zlinkovaný bez úprav.
+   Povinnosť: zachovať copyright a text licencie pri redistribúcii.
 
-Štandardná knižnica Pythonu (CPython)
-   Licencia: PSF-2.0 (sqlite3, http.server, json, ...)
-   SQLite: public domain.
+2. SQLite
+   Licencia: public domain
+   Zdroj: https://sqlite.org (Linux: systémový balík libsqlite3, Windows: vcpkg, verzia
+   zamknutá cez builtin-baseline vo vcpkg.json)
+   Použitie: formát projektu .rvproj.
 
-Vývojové (nie sú súčasťou distribúcie)
---------------------------------------
+3. Qt 6 (QtCore, QtGui, QtWidgets)
+   Licencia: LGPL-3.0-only
+   Zdroj: https://www.qt.io, https://code.qt.io
+   Použitie: grafické rozhranie. Qt je linkované dynamicky a distribuované ako
+   samostatné, vymeniteľné knižnice (Windows: Qt6*.dll vedľa reversa.exe, Linux:
+   systémové balíky). Používateľ môže Qt nahradiť vlastnou verziou, čím sú splnené
+   podmienky LGPL. Zdrojový kód Qt je dostupný na code.qt.io. Kód Qt nie je upravený.
+
+4. pybind11
+   Verzia: v2.13.6 (CMake FetchContent, pevný git tag)
+   Licencia: BSD-3-Clause
+   Copyright (c) 2016 Wenzel Jakob
+   Zdroj: https://github.com/pybind/pybind11
+   Použitie: Python API (modul _reversa) a vstavaný interpret pre skripty a pluginy.
+
+5. Python (CPython)
+   Licencia: PSF-2.0
+   Zdroj: https://www.python.org
+   Použitie: voliteľný runtime pre skripty a pluginy. Windows balík obsahuje
+   "embeddable" distribúciu Pythonu; na Linuxe sa používa systémový Python.
+   REVERSA beží aj bez Pythonu (skripty a pluginy sú potom vypnuté).
+
+Vývojové nástroje (nie sú súčasťou distribúcie)
+-----------------------------------------------
 - pytest – MIT
-- coverage – Apache-2.0
-- Playwright (iba UI smoke test v CI) – Apache-2.0
-- PyInstaller (iba zostavenie samostatného programu v CI) – GPL-2.0 s bootloader výnimkou;
-  výsledný program môže byť šírený pod vlastnou licenciou. Program obsahuje
-  interpret CPython (PSF-2.0) a Capstone (BSD-3-Clause).
+- iniconfig – MIT
+- packaging – Apache-2.0
+- pluggy – MIT
+- colorama – BSD-3-Clause (len Windows)
 
 Inšpirácia (bez prebratia kódu)
 -------------------------------
