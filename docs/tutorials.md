@@ -17,8 +17,8 @@ Neznáme pojmy nájdete v [slovníku](glossary.md).
    ```bash
    reversa --demo
    ```
-   Otvorí sa prehliadač s rozhraním REVERSA a súborom `login_x64.elf`. Vľavo je
-   zoznam funkcií, v strede listing (disassembly), vpravo pseudokód.
+   Otvorí sa okno REVERSA so súborom `login_x64.elf`. Vľavo je zoznam funkcií,
+   v strede listing (disassembly) a ďalšie karty, vpravo detaily a x-refs.
 
 2. **Pozrite si reťazce (2 min).** Kliknite na kartu **Reťazce**. Uvidíte texty ako
    `Usage: login <user> <password>`, `Wrong password.` a `Access granted. Flag: ...`.

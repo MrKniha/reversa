@@ -638,6 +638,7 @@ void MainWindow::on_analysis_done(bool ok, const QString& error, const QString& 
                          .arg(a.strings.size())
                          .arg(a.xrefs.size())
                          .arg(a.duration, 0, 'f', 2));
+    status_->setToolTip(tr("%1\nSHA-256: %2").arg(q(session_->binary.path), q(session_->binary.sha256())));
     seen_revision_ = session_->events.revision;
     std::optional<Addr> start = a.main ? a.main : session_->binary.entry;
     refresh_all();

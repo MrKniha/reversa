@@ -73,7 +73,8 @@ def test_errors_are_friendly(tmp_path):
     code, out, _ = run(tmp_path, "analyze", str(bad), "--no-plugins")
     assert code == 0 and "poškodený" in out
     assert run(tmp_path, "analyze", str(bad), "--no-plugins", "--fail-on-error")[0] == 1
-    assert run(tmp_path)[0] == 2
+    if os.name != "nt":  # without arguments and without a display: help + usage error (Windows opens the GUI)
+        assert run(tmp_path)[0] == 2
     code, _, err = run(tmp_path, "analyze")
     assert code == 2 and "vyžaduje súbor" in err
     assert run(tmp_path, "--version")[1].startswith("REVERSA ")

@@ -54,7 +54,10 @@ def fresh(name: str, **kw):
 
 
 def env_for_child(tmp_path) -> dict:
-    return dict(os.environ, PYTHONPATH=PYDIR, HOME=str(tmp_path), USERPROFILE=str(tmp_path), PYTHONIOENCODING="utf-8")
+    env = dict(os.environ, PYTHONPATH=PYDIR, HOME=str(tmp_path), USERPROFILE=str(tmp_path), PYTHONIOENCODING="utf-8")
+    for var in ("DISPLAY", "WAYLAND_DISPLAY", "QT_QPA_PLATFORM"):  # never open a GUI window from a test
+        env.pop(var, None)
+    return env
 
 
 @pytest.fixture(autouse=True)
