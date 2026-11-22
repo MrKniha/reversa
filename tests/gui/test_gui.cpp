@@ -240,7 +240,8 @@ private Q_SLOTS:
     void languages() {
         QCOMPARE(int(gui::languages().size()), 5);
         QCOMPARE(pick_language("de"), QString("de"));
-        QVERIFY(pick_language("xx") != "xx");
+        QCOMPARE(pick_language("xx"), QString("en"));
+        QCOMPARE(pick_language(""), QString("en"));
         UiSettings s = UiSettings::load(false);
         s.language = "fr";
         s.save();

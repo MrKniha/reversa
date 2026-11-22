@@ -10,7 +10,7 @@ a volaní, Python API, pluginy a natívne grafické rozhranie (Qt).
 - Architektúry: x86, x86-64, AArch64 (ARM64), ARM 32-bit (len disassembly)
 - Statická analýza: súbor sa **nikdy nespúšťa**. Bez cloudu, bez telemetrie.
 - Platformy: **Windows a Linux** (64-bit)
-- Jazyky GUI: slovenčina, angličtina, nemčina, francúzština, čínština (zjednodušená)
+- Jazyky GUI: angličtina (predvolená), slovenčina, nemčina, francúzština, čínština (zjednodušená)
 - Napísané v **C++20** s grafickým rozhraním **Qt 6**; Python slúži len na skripty
   a pluginy. Prečo: [docs/architecture.md](docs/architecture.md#prečo-c-a-qt).
 - Licencia: MIT
@@ -72,8 +72,8 @@ Celý postup s riešením: [docs/quickstart.md](docs/quickstart.md) a
 | `F1` | úvodný sprievodca |
 
 Všetky skratky zmeníte v *Zobraziť → Nastavenia*. Tam nastavíte aj veľkosť
-písma, jazyk a vypnete vysvetlivky pre začiatočníkov. Pri prvom spustení sa
-jazyk vyberie podľa systému (inak angličtina); po zmene jazyka reštartujte REVERSA. Analýza beží na pozadí
+písma, jazyk a vypnete vysvetlivky pre začiatočníkov. Predvolený jazyk je
+angličtina; po zmene jazyka reštartujte REVERSA. Analýza beží na pozadí
 a tlačidlom *Zrušiť* v stavovom riadku ju zastavíte.
 
 ## Inštalácia
