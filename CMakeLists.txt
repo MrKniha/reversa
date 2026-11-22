@@ -36,6 +36,7 @@ file(GLOB CORE_SOURCES CONFIGURE_DEPENDS
 add_library(reversa_core STATIC ${CORE_SOURCES})
 target_include_directories(reversa_core PUBLIC src)
 target_link_libraries(reversa_core PUBLIC capstone SQLite::SQLite3)
+target_compile_definitions(reversa_core PUBLIC REVERSA_VERSION="${PROJECT_VERSION}")
 
 if(REVERSA_PYTHON)
   find_package(Python 3.10 COMPONENTS Interpreter Development REQUIRED)
@@ -47,9 +48,12 @@ if(REVERSA_PYTHON)
   target_link_libraries(_reversa PRIVATE reversa_bindings)
 endif()
 
+include(cmake/embed.cmake)
+rv_embed(rv_demo_elf ${CMAKE_SOURCE_DIR}/assets/demo/login_x64.elf ${CMAKE_BINARY_DIR}/generated/demo_elf.cpp)
+
 file(GLOB CLI_SOURCES CONFIGURE_DEPENDS src/cli/*.cpp)
 if(CLI_SOURCES)
-  add_executable(reversa ${CLI_SOURCES})
+  add_executable(reversa ${CLI_SOURCES} ${CMAKE_BINARY_DIR}/generated/demo_elf.cpp)
   target_link_libraries(reversa PRIVATE reversa_core)
   if(REVERSA_PYTHON)
     target_link_libraries(reversa PRIVATE reversa_bindings pybind11::embed)

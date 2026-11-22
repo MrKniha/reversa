@@ -117,6 +117,7 @@ std::string html_escape(std::string_view s) {
             case '<': out += "&lt;"; break;
             case '>': out += "&gt;"; break;
             case '"': out += "&quot;"; break;
+            case '\'': out += "&#x27;"; break;
             default: out += c;
         }
     }
@@ -148,4 +149,13 @@ std::string utf8_prefix(const std::string& s, size_t chars) {
 
 namespace rv {
 std::string hex_digits(uint64_t v) { return format_hex(v).substr(2); }
+}  // namespace rv
+
+namespace rv {
+size_t utf8_length(const std::string& s) {
+    size_t n = 0;
+    for (unsigned char c : s)
+        if ((c & 0xC0) != 0x80) n++;
+    return n;
+}
 }  // namespace rv
