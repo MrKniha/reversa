@@ -9,8 +9,8 @@ namespace rv {
 
 std::string Xref::label() const {
     static const std::map<std::string, std::string> L = {
-        {"call", "volané z"}, {"jump", "skok z"}, {"read", "čítané z"}, {"write", "zapisované z"},
-        {"addr", "adresa použitá v"}, {"data", "ukazovateľ v dátach"}};
+        {"call", "called from"}, {"jump", "jump from"}, {"read", "read from"}, {"write", "written from"},
+        {"addr", "address used in"}, {"data", "pointer in data"}};
     auto it = L.find(kind);
     return it != L.end() ? it->second : kind;
 }
@@ -92,7 +92,7 @@ std::vector<String> find_strings(Binary& b, size_t min_len, bool include_code) {
         if (out.size() >= MAX_STRINGS) { limit = true; break; }
     }
     if (limit)
-        b.warn("Nájdených viac ako 200000 reťazcov – zobrazujem prvých 200000.", std::nullopt, "", "info");
+        b.warn("More than 200000 strings found; showing the first 200000.", std::nullopt, "", "info");
     std::stable_sort(out.begin(), out.end(), [](auto& x, auto& y) { return x.addr < y.addr; });
     return out;
 }
@@ -116,10 +116,10 @@ static std::vector<int> parse_hex_pattern(const std::string& pattern) {
         int v = -2;
         try { v = std::stoi(t, &used, 16); } catch (...) {}
         if (v < 0 || v > 255 || used != t.size())
-            throw ReversaError("'" + t + "' nie je hexadecimálny bajt. Príklad vzoru: 48 8b ?? 05");
+            throw ReversaError("'" + t + "' is not a hexadecimal byte. Example pattern: 48 8b ?? 05");
         out.push_back(v);
     }
-    if (out.empty()) throw ReversaError("Prázdny vzor bajtov.");
+    if (out.empty()) throw ReversaError("Empty byte pattern.");
     return out;
 }
 
@@ -154,7 +154,7 @@ std::vector<std::pair<Addr, std::string>> search_text(const std::vector<std::pai
     std::string ql = lower(q);
     if (regex) {
         try { rx = std::regex(q, std::regex::ECMAScript | std::regex::icase); }
-        catch (const std::regex_error& e) { throw ReversaError(std::string("Neplatný regulárny výraz: ") + e.what()); }
+        catch (const std::regex_error& e) { throw ReversaError(std::string("Invalid regular expression: ") + e.what()); }
     }
     for (auto& [addr, text] : items) {
         bool m = regex ? std::regex_search(text, rx) : contains(lower(text), ql);

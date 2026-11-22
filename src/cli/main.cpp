@@ -50,34 +50,34 @@ namespace {
 
 constexpr int EXIT_OK = 0, EXIT_ERROR = 1, EXIT_USAGE = 2;
 
-const char* HELP = R"(použitie: reversa [-h] [--version] [--demo] [--no-gui] {analyze,gui,info,search,script} ...
+const char* HELP = R"(usage: reversa [-h] [--version] [--demo] [--no-gui] {analyze,gui,info,search,script} ...
 
-REVERSA – open-source nástroj na reverzné inžinierstvo.
+REVERSA: open-source reverse engineering tool.
 
-príkazy:
-  analyze FILE        analyzovať súbor bez GUI (headless)
-      --report FILE       uložiť report (.md alebo .html)
-      --json              vypísať súhrn ako JSON
-      --project FILE      uložiť projekt (.rvproj)
-      --pseudocode FUNC   vypísať pseudokód funkcie (meno alebo adresa)
-      --fail-on-error     návratový kód 1, ak boli chyby pri načítaní
-  gui [FILE]          spustiť grafické rozhranie
-  info FILE           základné informácie o súbore
-  search FILE         hľadať v súbore: --string TEXT [--regex] | --hex '48 8b ?? 05' |
-                      --insn REGEX | --code REGEX (regex cez pseudokód)
-  script SCRIPT [ARGS...]   spustiť Python skript s dostupným modulom reversa
+commands:
+  analyze FILE        analyse a file without the GUI (headless)
+      --report FILE       save a report (.md or .html)
+      --json              print the summary as JSON
+      --project FILE      save a project (.rvproj)
+      --pseudocode FUNC   print the pseudocode of a function (name or address)
+      --fail-on-error     exit code 1 if loading reported errors
+  gui [FILE]          start the graphical interface
+  info FILE           basic information about a file
+  search FILE         search a file: --string TEXT [--regex] | --hex '48 8b ?? 05' |
+                      --insn REGEX | --code REGEX (regex over pseudocode)
+  script SCRIPT [ARGS...]   run a Python script with the reversa module available
 
-spoločné voľby:
-  --arch {x86,x86-64,arm,arm64}   ručne nastavená architektúra (pre surové dáta)
-  --base ADDR                     základná adresa pre surové dáta, napr. 0x8000000
-  --raw                           načítať ako surové dáta (ignorovať hlavičky)
-  --plugins DIR                   priečinok s pluginmi (môže sa opakovať)
-  --no-plugins                    nenačítať žiadne pluginy
+common options:
+  --arch {x86,x86-64,arm,arm64}   set the architecture by hand (for raw data)
+  --base ADDR                     base address for raw data, e.g. 0x8000000
+  --raw                           load as raw data (ignore headers)
+  --plugins DIR                   plugin folder (may be repeated)
+  --no-plugins                    load no plugins
 
-ďalšie voľby:
-  --demo              spustiť ukážkovú analýzu (v GUI, s --no-gui v termináli)
-  --no-gui            pri --demo vypísať výsledky do terminálu
-  --version           vypísať verziu
+other options:
+  --demo              run the sample analysis (in the GUI; with --no-gui in the terminal)
+  --no-gui            with --demo, print the results to the terminal
+  --version           print the version
 )";
 
 struct UsageError : std::runtime_error {
@@ -102,7 +102,7 @@ std::optional<uint64_t> parse_int(const std::string& v) {  // Python int(v, 0)
 Args parse(const std::vector<std::string>& argv) {
     Args a;
     auto need = [&](size_t& i, const std::string& opt) -> std::string {
-        if (i + 1 >= argv.size()) throw UsageError("voľba " + opt + " vyžaduje hodnotu");
+        if (i + 1 >= argv.size()) throw UsageError("option " + opt + " requires a value");
         return argv[++i];
     };
     for (size_t i = 0; i < argv.size(); i++) {
@@ -127,23 +127,23 @@ Args parse(const std::vector<std::string>& argv) {
         else if (t == "--arch") {
             std::string v = need(i, t);
             if (v != "x86" && v != "x86-64" && v != "arm" && v != "arm64")
-                throw UsageError("neplatná architektúra '" + v + "' (možnosti: x86, x86-64, arm, arm64)");
+                throw UsageError("invalid architecture '" + v + "' (choices: x86, x86-64, arm, arm64)");
             a.options.arch = v;
         } else if (t == "--base") {
             std::string v = need(i, t);
             auto x = parse_int(v);
-            if (!x) throw UsageError("neplatná adresa '" + v + "'");
+            if (!x) throw UsageError("invalid address '" + v + "'");
             a.options.base = *x;
         } else if (t == "--string" || t == "--hex" || t == "--insn" || t == "--code") {
-            if (!a.search_kind.empty()) throw UsageError("použite len jednu z volieb --string, --hex, --insn, --code");
+            if (!a.search_kind.empty()) throw UsageError("use only one of --string, --hex, --insn, --code");
             a.search_kind = t.substr(2);
             a.query = need(i, t);
         } else if (starts_with(t, "-") && t.size() > 1) {
-            throw UsageError("neznáma voľba: " + t);
+            throw UsageError("unknown option: " + t);
         } else if (a.cmd.empty() && !a.demo) {
             if (t != "analyze" && t != "gui" && t != "info" && t != "search" && t != "script") {
                 std::error_code ec;
-                if (!fs::is_regular_file(path_from_utf8(t), ec)) throw UsageError("neznámy príkaz '" + t + "'");
+                if (!fs::is_regular_file(path_from_utf8(t), ec)) throw UsageError("unknown command '" + t + "'");
                 a.cmd = "gui";  // `reversa FILE` (e.g. "Open with") opens the file in the GUI
                 a.file = t;
                 continue;
@@ -152,13 +152,13 @@ Args parse(const std::vector<std::string>& argv) {
         } else if (a.file.empty()) {
             a.file = t;
         } else {
-            throw UsageError("nadbytočný argument: " + t);
+            throw UsageError("unexpected argument: " + t);
         }
     }
     if ((a.cmd == "analyze" || a.cmd == "info" || a.cmd == "search" || a.cmd == "script") && a.file.empty())
-        throw UsageError("príkaz " + a.cmd + " vyžaduje súbor");
+        throw UsageError("command " + a.cmd + " requires a file");
     if (a.cmd == "search" && a.search_kind.empty())
-        throw UsageError("search vyžaduje jednu z volieb --string, --hex, --insn, --code");
+        throw UsageError("search requires one of --string, --hex, --insn, --code");
     return a;
 }
 
@@ -177,13 +177,13 @@ void attach_plugins(Session& s, const Args& a) {
 #else
     (void)s;
     if (!a.plugin_dirs.empty())
-        std::fprintf(stderr, "Upozornenie: táto zostava REVERSA nemá Python, pluginy sa nenačítajú.\n");
+        std::fprintf(stderr, "Warning: this REVERSA build has no Python, plugins are not loaded.\n");
 #endif
 }
 
 void write_file(const std::string& path, const std::string& text) {
     std::ofstream f(path_from_utf8(path), std::ios::binary);
-    if (!f) throw ReversaError("Súbor '" + path + "' sa nepodarilo zapísať.");
+    if (!f) throw ReversaError("Could not write the file '" + path + "'.");
     f << text;
 }
 
@@ -194,29 +194,29 @@ int cmd_analyze(const Args& a) {
     if (a.json) {
         std::cout << info.dump(2) << "\n";
     } else {
-        std::cout << "Súbor:        " << info.get("file").as_string() << "\n";
-        std::cout << "Formát:       " << info.get("format").as_string() << " / " << info.get("arch").as_string() << " ("
+        std::cout << "File:         " << info.get("file").as_string() << "\n";
+        std::cout << "Format:       " << info.get("format").as_string() << " / " << info.get("arch").as_string() << " ("
                   << info.get("bits").as_int() << "-bit, " << info.get("endian").as_string() << ")\n";
-        std::cout << "Kompilátor:   " << info.get("compiler").as_string() << "\n";
-        std::cout << "Funkcie:      " << info.get("functions").as_int() << " (+ " << info.get("imports").as_int()
-                  << " importov), reťazce: " << info.get("strings").as_int() << ", x-refs: " << info.get("xrefs").as_int() << "\n";
-        std::string main = info.get("main").is_null() ? "nenájdená" : info.get("main").as_string();
-        std::cout << "Hlavná fn.:   " << main << "   (analýza " << info.get("seconds").dump() << " s)\n";
+        std::cout << "Compiler:     " << info.get("compiler").as_string() << "\n";
+        std::cout << "Functions:    " << info.get("functions").as_int() << " (+ " << info.get("imports").as_int()
+                  << " imports), strings: " << info.get("strings").as_int() << ", x-refs: " << info.get("xrefs").as_int() << "\n";
+        std::string main = info.get("main").is_null() ? "not found" : info.get("main").as_string();
+        std::cout << "Main func.:   " << main << "   (analysis " << info.get("seconds").dump() << " s)\n";
         for (auto& d : info.get("diagnostics").as_array())
             std::cout << "  ! " << d.get("severity").as_string() << ": " << d.get("message").as_string() << "\n";
     }
     if (!a.pseudocode.empty()) {
         auto f = s->resolve(a.pseudocode);
-        if (!f) throw ReversaError("'" + a.pseudocode + "' som nenašiel (ani ako meno, ani ako adresu).");
+        if (!f) throw ReversaError("'" + a.pseudocode + "' not found (neither as a name nor as an address).");
         auto* fn = s->analysis->functions.count(*f) ? &s->analysis->functions.at(*f) : s->analysis->function_containing(*f);
-        if (!fn) throw ReversaError("Na " + format_hex(*f) + " nie je žiadna funkcia.");
+        if (!fn) throw ReversaError("There is no function at " + format_hex(*f) + ".");
         std::cout << s->pseudocode(fn->addr) << "\n";
     }
     if (!a.report.empty()) {
         write_file(a.report, build_report(*s, ends_with(a.report, ".html") ? "html" : "md"));
-        std::cout << "Report uložený: " << path_to_utf8(fs::absolute(path_from_utf8(a.report))) << "\n";
+        std::cout << "Report saved: " << path_to_utf8(fs::absolute(path_from_utf8(a.report))) << "\n";
     }
-    if (!a.project.empty()) std::cout << "Projekt uložený: " << s->save(a.project) << "\n";
+    if (!a.project.empty()) std::cout << "Project saved: " << s->save(a.project) << "\n";
     if (a.fail_on_error)
         for (auto& d : info.get("diagnostics").as_array())
             if (d.get("severity").as_string() == "error") return EXIT_ERROR;
@@ -227,7 +227,7 @@ int cmd_info(const Args& a) {
     auto s = open_session(a);
     const Binary& b = s->binary;
     std::cout << b.format << " " << b.arch << " " << b.bits << "-bit " << b.endian
-              << ", entry=" << (b.entry && *b.entry ? format_hex(*b.entry) : "-") << ", kompilátor: " << b.compiler << "\n";
+              << ", entry=" << (b.entry && *b.entry ? format_hex(*b.entry) : "-") << ", compiler: " << b.compiler << "\n";
     for (auto& sec : b.sections) {
         char line[256];
         std::snprintf(line, sizeof line, "  %-20s 0x%-12llx %10llu  %s\n", sec.name.c_str(), (unsigned long long)sec.addr,
@@ -248,7 +248,7 @@ int cmd_search(const Args& a) {
     else if (a.search_kind == "insn") hits = s->search_instructions(a.query);
     else hits = s->search_pseudocode(a.query);
     for (auto& [addr, text] : hits) std::cout << format_hex(addr) << "  " << text << "\n";
-    std::cerr << hits.size() << " výsledkov\n";
+    std::cerr << hits.size() << " results\n";
     return EXIT_OK;
 }
 
@@ -257,11 +257,11 @@ int cmd_demo_terminal() {
     auto s = open_demo();
     s->analyze();
     Json info = summary(*s);
-    std::cout << "REVERSA demo – ukážková binárka 'login' (CTF úloha: nájdite heslo)\n\n";
-    std::cout << "Formát " << info.get("format").as_string() << " " << info.get("arch").as_string() << ", "
-              << info.get("functions").as_int() << " funkcií, " << info.get("strings").as_int() << " reťazcov, analýza "
+    std::cout << "REVERSA demo: sample binary 'login' (CTF task: find the password)\n\n";
+    std::cout << "Format " << info.get("format").as_string() << " " << info.get("arch").as_string() << ", "
+              << info.get("functions").as_int() << " functions, " << info.get("strings").as_int() << " strings, analysis "
               << info.get("seconds").dump() << " s\n\n";
-    std::cout << "Funkcie, ktoré volajú strcmp (porovnanie reťazcov):\n";
+    std::cout << "Functions that call strcmp (string comparison):\n";
     if (auto cs = s->resolve("strcmp"))
         for (Addr c : s->analysis->callers(*cs)) {
             std::string n = s->name_of(c);
@@ -269,11 +269,11 @@ int cmd_demo_terminal() {
             std::cout << "  " << n << " " << format_hex(c) << "\n";
         }
     Addr main = s->analysis->main.value_or(0);
-    std::cout << "\nPseudokód hlavnej funkcie '" << s->name_of(main) << "':\n\n" << s->pseudocode(main) << "\n";
+    std::cout << "\nPseudocode of the main function '" << s->name_of(main) << "':\n\n" << s->pseudocode(main) << "\n";
     double secs = std::chrono::duration<double>(std::chrono::steady_clock::now() - t0).count();
     char buf[32];
     std::snprintf(buf, sizeof buf, "%.2f", secs);
-    std::cout << "\nHotovo za " << buf << " s. GUI spustíte príkazom: reversa --demo\n";
+    std::cout << "\nDone in " << buf << " s. Start the GUI with: reversa --demo\n";
     return EXIT_OK;
 }
 
@@ -282,7 +282,7 @@ int cmd_script(const Args& a) {
     return py::run_script(a.file, a.script_args);
 #else
     (void)a;
-    throw ReversaError("Táto zostava REVERSA je bez Pythonu, skripty nie sú dostupné.",
+    throw ReversaError("This REVERSA build has no Python, scripts are not available.",
                        "build with -DREVERSA_PYTHON=ON");
 #endif
 }
@@ -290,12 +290,12 @@ int cmd_script(const Args& a) {
 int cmd_gui(const Args& a) {
 #ifdef REVERSA_WITH_GUI
     if (!gui::display_available())
-        throw ReversaError("Grafické rozhranie sa nedá spustiť: nie je dostupný žiadny displej (DISPLAY ani WAYLAND_DISPLAY). "
-                           "Použite príkaz analyze alebo --demo --no-gui.");
+        throw ReversaError("Cannot start the graphical interface: no display is available (neither DISPLAY nor WAYLAND_DISPLAY). "
+                           "Use the analyze command or --demo --no-gui.");
     return gui::run(a);
 #else
     (void)a;
-    throw ReversaError("Táto zostava REVERSA je bez grafického rozhrania. Použite --no-gui alebo príkaz analyze.",
+    throw ReversaError("This REVERSA build has no graphical interface. Use --no-gui or the analyze command.",
                        "build with -DREVERSA_GUI=ON");
 #endif
 }
@@ -328,7 +328,7 @@ static int run(const std::vector<std::string>& argv) {
     try {
         a = parse(argv);
     } catch (const UsageError& e) {
-        std::cerr << "reversa: chyba: " << e.what() << "\nPomoc: reversa --help\n";
+        std::cerr << "reversa: error: " << e.what() << "\nHelp: reversa --help\n";
         return EXIT_USAGE;
     }
     if (a.help) {
@@ -352,15 +352,15 @@ static int run(const std::vector<std::string>& argv) {
         std::cout << HELP;
         return EXIT_USAGE;
     } catch (const ReversaError& e) {
-        std::cerr << "Chyba: " << e.what() << "\n";
+        std::cerr << "Error: " << e.what() << "\n";
         if (!e.detail.empty()) {
             auto lines = split(trim(e.detail), '\n');
-            std::cerr << "Detail pre správcu: " << (lines.empty() ? "" : lines.back()) << "\n";
+            std::cerr << "Details for the maintainer: " << (lines.empty() ? "" : lines.back()) << "\n";
         }
         return EXIT_ERROR;
     } catch (const std::exception& e) {  // last resort: friendly message + details
-        std::cerr << "Neočakávaná chyba: " << e.what()
-                  << "\nProsím, nahláste ju (SECURITY.md / issues) aj s týmto detailom.\n";
+        std::cerr << "Unexpected error: " << e.what()
+                  << "\nPlease report it (SECURITY.md / issues) with these details.\n";
         return EXIT_ERROR;
     }
 }

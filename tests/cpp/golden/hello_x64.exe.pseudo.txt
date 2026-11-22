@@ -1,11 +1,11 @@
 == __mingw_invalidParameterHandler 140001000
-// Dočasný pseudokód (REVERSA MVP): typy sú odhadnuté z veľkosti prístupov, overte v listingu.
+// Provisional pseudocode (REVERSA MVP): types are guessed from access sizes, check the listing.
 void __mingw_invalidParameterHandler()
 {
     return;
 }
 == pre_c_init 140001010
-// Dočasný pseudokód (REVERSA MVP): typy sú odhadnuté z veľkosti prístupov, overte v listingu.
+// Provisional pseudocode (REVERSA MVP): types are guessed from access sizes, check the listing.
 int64_t pre_c_init()
 {
     int64_t v1;
@@ -50,7 +50,7 @@ int64_t pre_c_init()
     }
 }
 == pre_cpp_init 140001140
-// Dočasný pseudokód (REVERSA MVP): typy sú odhadnuté z veľkosti prístupov, overte v listingu.
+// Provisional pseudocode (REVERSA MVP): types are guessed from access sizes, check the listing.
 void pre_cpp_init()
 {
     int64_t stack_20;
@@ -63,7 +63,7 @@ void pre_cpp_init()
     return;
 }
 == __tmainCRTStartup 140001190
-// Dočasný pseudokód (REVERSA MVP): typy sú odhadnuté z veľkosti prístupov, overte v listingu.
+// Provisional pseudocode (REVERSA MVP): types are guessed from access sizes, check the listing.
 int32_t __tmainCRTStartup()
 {
     int64_t v1;
@@ -187,7 +187,7 @@ label_1400011de:
     }
 }
 == WinMainCRTStartup 1400013e0
-// Dočasný pseudokód (REVERSA MVP): typy sú odhadnuté z veľkosti prístupov, overte v listingu.
+// Provisional pseudocode (REVERSA MVP): types are guessed from access sizes, check the listing.
 void WinMainCRTStartup()
 {
     *(int32_t *)(data_1400097c0) = 1;
@@ -195,7 +195,7 @@ void WinMainCRTStartup()
     return;
 }
 == mainCRTStartup 140001410
-// Dočasný pseudokód (REVERSA MVP): typy sú odhadnuté z veľkosti prístupov, overte v listingu.
+// Provisional pseudocode (REVERSA MVP): types are guessed from access sizes, check the listing.
 void mainCRTStartup()
 {
     *(int32_t *)(data_1400097c0) = 0;
@@ -203,7 +203,7 @@ void mainCRTStartup()
     return;
 }
 == atexit 140001440
-// Dočasný pseudokód (REVERSA MVP): typy sú odhadnuté z veľkosti prístupov, overte v listingu.
+// Provisional pseudocode (REVERSA MVP): types are guessed from access sizes, check the listing.
 void atexit()
 {
     _onexit();
@@ -211,20 +211,20 @@ void atexit()
     return;
 }
 == __gcc_register_frame 140001460
-// Dočasný pseudokód (REVERSA MVP): typy sú odhadnuté z veľkosti prístupov, overte v listingu.
+// Provisional pseudocode (REVERSA MVP): types are guessed from access sizes, check the listing.
 void __gcc_register_frame()
 {
     atexit(__gcc_deregister_frame);
     return;
 }
 == __gcc_deregister_frame 140001470
-// Dočasný pseudokód (REVERSA MVP): typy sú odhadnuté z veľkosti prístupov, overte v listingu.
+// Provisional pseudocode (REVERSA MVP): types are guessed from access sizes, check the listing.
 void __gcc_deregister_frame()
 {
     return;
 }
 == printf 140001480
-// Dočasný pseudokód (REVERSA MVP): typy sú odhadnuté z veľkosti prístupov, overte v listingu.
+// Provisional pseudocode (REVERSA MVP): types are guessed from access sizes, check the listing.
 int64_t printf(int64_t a1, int64_t a2, int64_t a3, int64_t a4)
 {
     int64_t stack_30;
@@ -239,7 +239,7 @@ int64_t printf(int64_t a1, int64_t a2, int64_t a3, int64_t a4)
     return *(int32_t *)(v1 - 4);
 }
 == sum_to 1400014d4
-// Dočasný pseudokód (REVERSA MVP): typy sú odhadnuté z veľkosti prístupov, overte v listingu.
+// Provisional pseudocode (REVERSA MVP): types are guessed from access sizes, check the listing.
 int32_t sum_to(int32_t a1)
 {
     int32_t local_8;
@@ -256,7 +256,7 @@ int32_t sum_to(int32_t a1)
     return local_4;
 }
 == classify 14000150a
-// Dočasný pseudokód (REVERSA MVP): typy sú odhadnuté z veľkosti prístupov, overte v listingu.
+// Provisional pseudocode (REVERSA MVP): types are guessed from access sizes, check the listing.
 int32_t classify(int32_t a1)
 {
     int32_t arg_10;
@@ -275,7 +275,7 @@ int32_t classify(int32_t a1)
     return v1;
 }
 == greet 140001532
-// Dočasný pseudokód (REVERSA MVP): typy sú odhadnuté z veľkosti prístupov, overte v listingu.
+// Provisional pseudocode (REVERSA MVP): types are guessed from access sizes, check the listing.
 void greet(int32_t a1)
 {
     int32_t local_4;
@@ -292,7 +292,7 @@ void greet(int32_t a1)
     return;
 }
 == main 1400015ad
-// Dočasný pseudokód (REVERSA MVP): typy sú odhadnuté z veľkosti prístupov, overte v listingu.
+// Provisional pseudocode (REVERSA MVP): types are guessed from access sizes, check the listing.
 int32_t main(int32_t a1, int64_t a2)
 {
     int32_t local_4;
@@ -310,7 +310,7 @@ int32_t main(int32_t a1, int64_t a2)
     return 0;
 }
 == __do_global_dtors 140001640
-// Dočasný pseudokód (REVERSA MVP): typy sú odhadnuté z veľkosti prístupov, overte v listingu.
+// Provisional pseudocode (REVERSA MVP): types are guessed from access sizes, check the listing.
 void __do_global_dtors()
 {
     int64_t v1;
@@ -334,7 +334,7 @@ void __do_global_dtors()
     return;
 }
 == __do_global_ctors 140001690
-// Dočasný pseudokód (REVERSA MVP): typy sú odhadnuté z veľkosti prístupov, overte v listingu.
+// Provisional pseudocode (REVERSA MVP): types are guessed from access sizes, check the listing.
 void __do_global_ctors()
 {
     int64_t v1;
@@ -377,7 +377,7 @@ void __do_global_ctors()
     return;
 }
 == __main 140001710
-// Dočasný pseudokód (REVERSA MVP): typy sú odhadnuté z veľkosti prístupov, overte v listingu.
+// Provisional pseudocode (REVERSA MVP): types are guessed from access sizes, check the listing.
 void __main()
 {
     if (data_14000c030 == 0) {
@@ -389,13 +389,13 @@ void __main()
     }
 }
 == _setargv 140001730
-// Dočasný pseudokód (REVERSA MVP): typy sú odhadnuté z veľkosti prístupov, overte v listingu.
+// Provisional pseudocode (REVERSA MVP): types are guessed from access sizes, check the listing.
 int32_t _setargv()
 {
     return 0;
 }
 == __dyn_tls_dtor 140001740
-// Dočasný pseudokód (REVERSA MVP): typy sú odhadnuté z veľkosti prístupov, overte v listingu.
+// Provisional pseudocode (REVERSA MVP): types are guessed from access sizes, check the listing.
 int32_t __dyn_tls_dtor(int64_t a1, int32_t a2)
 {
     if (a2 == 3) {
@@ -409,7 +409,7 @@ int32_t __dyn_tls_dtor(int64_t a1, int32_t a2)
     }
 }
 == __dyn_tls_init 140001770
-// Dočasný pseudokód (REVERSA MVP): typy sú odhadnuté z veľkosti prístupov, overte v listingu.
+// Provisional pseudocode (REVERSA MVP): types are guessed from access sizes, check the listing.
 int32_t __dyn_tls_init(int64_t a1, int32_t a2)
 {
     int64_t v1;
@@ -449,13 +449,13 @@ int32_t __dyn_tls_init(int64_t a1, int32_t a2)
     }
 }
 == __tlregdtor 140001800
-// Dočasný pseudokód (REVERSA MVP): typy sú odhadnuté z veľkosti prístupov, overte v listingu.
+// Provisional pseudocode (REVERSA MVP): types are guessed from access sizes, check the listing.
 int32_t __tlregdtor()
 {
     return 0;
 }
 == _matherr 140001810
-// Dočasný pseudokód (REVERSA MVP): typy sú odhadnuté z veľkosti prístupov, overte v listingu.
+// Provisional pseudocode (REVERSA MVP): types are guessed from access sizes, check the listing.
 int64_t _matherr(int64_t a1)
 {
     int64_t v1;
@@ -483,18 +483,18 @@ int64_t _matherr(int64_t a1)
         return 0;
     } else {
         v3 = data_1400091e4;
-        goto **(int32_t *)(v3 + *(int32_t *)(a1) * 4) + v3;  // nepriamy skok (napr. switch) – zatiaľ nerozbalený
+        goto **(int32_t *)(v3 + *(int32_t *)(a1) * 4) + v3;  // indirect jump (e.g. switch): not expanded yet
     }
 }
 == _fpreset 140001910
-// Dočasný pseudokód (REVERSA MVP): typy sú odhadnuté z veľkosti prístupov, overte v listingu.
+// Provisional pseudocode (REVERSA MVP): types are guessed from access sizes, check the listing.
 void _fpreset()
 {
     __asm("fninit");
     return;
 }
 == __report_error 140001920
-// Dočasný pseudokód (REVERSA MVP): typy sú odhadnuté z veľkosti prístupov, overte v listingu.
+// Provisional pseudocode (REVERSA MVP): types are guessed from access sizes, check the listing.
 void __report_error(int64_t a1, int64_t a2, int64_t a3, int64_t a4)
 {
     int64_t stack_30;
@@ -509,7 +509,7 @@ void __report_error(int64_t a1, int64_t a2, int64_t a3, int64_t a4)
     abort();
 }
 == mark_section_writable 140001990
-// Dočasný pseudokód (REVERSA MVP): typy sú odhadnuté z veľkosti prístupov, overte v listingu.
+// Provisional pseudocode (REVERSA MVP): types are guessed from access sizes, check the listing.
 int64_t mark_section_writable(int64_t a1)
 {
     int64_t stack_50;
@@ -590,7 +590,7 @@ int64_t mark_section_writable(int64_t a1)
     }
 }
 == _pei386_runtime_relocator 140001b00
-// Dočasný pseudokód (REVERSA MVP): typy sú odhadnuté z veľkosti prístupov, overte v listingu.
+// Provisional pseudocode (REVERSA MVP): types are guessed from access sizes, check the listing.
 int64_t _pei386_runtime_relocator()
 {
     int64_t stack_20;
@@ -834,7 +834,7 @@ label_140001e42:
     goto label_140001e50;
 }
 == __mingw_raise_matherr 140001e60
-// Dočasný pseudokód (REVERSA MVP): typy sú odhadnuté z veľkosti prístupov, overte v listingu.
+// Provisional pseudocode (REVERSA MVP): types are guessed from access sizes, check the listing.
 void __mingw_raise_matherr(int32_t a1, int64_t a2)
 {
     int32_t local_30;
@@ -856,7 +856,7 @@ void __mingw_raise_matherr(int32_t a1, int64_t a2)
     return;
 }
 == __mingw_setusermatherr 140001ea0
-// Dočasný pseudokód (REVERSA MVP): typy sú odhadnuté z veľkosti prístupov, overte v listingu.
+// Provisional pseudocode (REVERSA MVP): types are guessed from access sizes, check the listing.
 void __mingw_setusermatherr(int64_t a1)
 {
     data_14000c0b0 = a1;
@@ -864,7 +864,7 @@ void __mingw_setusermatherr(int64_t a1)
     return;
 }
 == _gnu_exception_handler 140001eb0
-// Dočasný pseudokód (REVERSA MVP): typy sú odhadnuté z veľkosti prístupov, overte v listingu.
+// Provisional pseudocode (REVERSA MVP): types are guessed from access sizes, check the listing.
 int32_t _gnu_exception_handler(int64_t a1)
 {
     int32_t v1;
@@ -883,7 +883,7 @@ int32_t _gnu_exception_handler(int64_t a1)
                 label_140001fa2:
                     return v1;
                 } else {
-                    goto *v1;  // nepriamy skok (napr. switch) – zatiaľ nerozbalený
+                    goto *v1;  // indirect jump (e.g. switch): not expanded yet
                 }
             } else if ((unsigned)v1 <= 0xc000008b) {
                 if (v1 == 0xc0000005) {
@@ -927,7 +927,7 @@ int32_t _gnu_exception_handler(int64_t a1)
                     goto label_140001f80;
                 } else {
                     v2 = data_140009360;
-                    goto **(int32_t *)(v2 + v1 * 4) + v2;  // nepriamy skok (napr. switch) – zatiaľ nerozbalený
+                    goto **(int32_t *)(v2 + v1 * 4) + v2;  // indirect jump (e.g. switch): not expanded yet
                 }
             }
         } else {
@@ -938,7 +938,7 @@ int32_t _gnu_exception_handler(int64_t a1)
     }
 }
 == __mingwthr_run_key_dtors.part.0 140002070
-// Dočasný pseudokód (REVERSA MVP): typy sú odhadnuté z veľkosti prístupov, overte v listingu.
+// Provisional pseudocode (REVERSA MVP): types are guessed from access sizes, check the listing.
 void __mingwthr_run_key_dtors.part.0()
 {
     int64_t v1;
@@ -974,7 +974,7 @@ void __mingwthr_run_key_dtors.part.0()
     return;
 }
 == ___w64_mingwthr_add_key_dtor 1400020f0
-// Dočasný pseudokód (REVERSA MVP): typy sú odhadnuté z veľkosti prístupov, overte v listingu.
+// Provisional pseudocode (REVERSA MVP): types are guessed from access sizes, check the listing.
 int32_t ___w64_mingwthr_add_key_dtor(int32_t a1, int64_t a2)
 {
     int64_t v1;
@@ -1007,7 +1007,7 @@ int32_t ___w64_mingwthr_add_key_dtor(int32_t a1, int64_t a2)
     return v1;
 }
 == ___w64_mingwthr_remove_key_dtor 140002170
-// Dočasný pseudokód (REVERSA MVP): typy sú odhadnuté z veľkosti prístupov, overte v listingu.
+// Provisional pseudocode (REVERSA MVP): types are guessed from access sizes, check the listing.
 int32_t ___w64_mingwthr_remove_key_dtor(int32_t a1)
 {
     int64_t v1;
@@ -1054,7 +1054,7 @@ label_1400021d5:
     goto label_1400021e3;
 }
 == __mingw_TLScallback 140002210
-// Dočasný pseudokód (REVERSA MVP): typy sú odhadnuté z veľkosti prístupov, overte v listingu.
+// Provisional pseudocode (REVERSA MVP): types are guessed from access sizes, check the listing.
 int32_t __mingw_TLScallback(int64_t a1, int32_t a2)
 {
     int64_t v1;
@@ -1101,7 +1101,7 @@ int32_t __mingw_TLScallback(int64_t a1, int32_t a2)
     }
 }
 == _ValidateImageBase 140002310
-// Dočasný pseudokód (REVERSA MVP): typy sú odhadnuté z veľkosti prístupov, overte v listingu.
+// Provisional pseudocode (REVERSA MVP): types are guessed from access sizes, check the listing.
 int32_t _ValidateImageBase(int64_t a1)
 {
     int32_t v1;
@@ -1121,7 +1121,7 @@ int32_t _ValidateImageBase(int64_t a1)
     }
 }
 == _FindPESection 140002340
-// Dočasný pseudokód (REVERSA MVP): typy sú odhadnuté z veľkosti prístupov, overte v listingu.
+// Provisional pseudocode (REVERSA MVP): types are guessed from access sizes, check the listing.
 int64_t _FindPESection(int64_t a1, int64_t a2)
 {
     int64_t v1;
@@ -1159,7 +1159,7 @@ int64_t _FindPESection(int64_t a1, int64_t a2)
     return v3;
 }
 == _FindPESectionByName 140002390
-// Dočasný pseudokód (REVERSA MVP): typy sú odhadnuté z veľkosti prístupov, overte v listingu.
+// Provisional pseudocode (REVERSA MVP): types are guessed from access sizes, check the listing.
 int64_t _FindPESectionByName(int64_t a1)
 {
     int64_t v1;
@@ -1211,7 +1211,7 @@ int64_t _FindPESectionByName(int64_t a1)
     }
 }
 == __mingw_GetSectionForAddress 140002440
-// Dočasný pseudokód (REVERSA MVP): typy sú odhadnuté z veľkosti prístupov, overte v listingu.
+// Provisional pseudocode (REVERSA MVP): types are guessed from access sizes, check the listing.
 int32_t __mingw_GetSectionForAddress(int64_t a1)
 {
     int64_t v1;
@@ -1266,7 +1266,7 @@ int32_t __mingw_GetSectionForAddress(int64_t a1)
     }
 }
 == __mingw_GetSectionCount 1400024c0
-// Dočasný pseudokód (REVERSA MVP): typy sú odhadnuté z veľkosti prístupov, overte v listingu.
+// Provisional pseudocode (REVERSA MVP): types are guessed from access sizes, check the listing.
 int64_t __mingw_GetSectionCount()
 {
     int64_t v1;
@@ -1291,7 +1291,7 @@ int64_t __mingw_GetSectionCount()
     }
 }
 == _FindPESectionExec 140002500
-// Dočasný pseudokód (REVERSA MVP): typy sú odhadnuté z veľkosti prístupov, overte v listingu.
+// Provisional pseudocode (REVERSA MVP): types are guessed from access sizes, check the listing.
 int32_t _FindPESectionExec(int64_t a1)
 {
     int64_t v1;
@@ -1341,7 +1341,7 @@ int32_t _FindPESectionExec(int64_t a1)
     }
 }
 == _GetPEImageBase 140002580
-// Dočasný pseudokód (REVERSA MVP): typy sú odhadnuté z veľkosti prístupov, overte v listingu.
+// Provisional pseudocode (REVERSA MVP): types are guessed from access sizes, check the listing.
 int64_t _GetPEImageBase()
 {
     int64_t v1;
@@ -1363,7 +1363,7 @@ int64_t _GetPEImageBase()
     }
 }
 == _IsNonwritableInCurrentImage 1400025c0
-// Dočasný pseudokód (REVERSA MVP): typy sú odhadnuté z veľkosti prístupov, overte v listingu.
+// Provisional pseudocode (REVERSA MVP): types are guessed from access sizes, check the listing.
 int32_t _IsNonwritableInCurrentImage(int64_t a1)
 {
     int64_t v1;
@@ -1419,7 +1419,7 @@ label_14000263d:
     return 0;
 }
 == __mingw_enum_import_library_names 140002650
-// Dočasný pseudokód (REVERSA MVP): typy sú odhadnuté z veľkosti prístupov, overte v listingu.
+// Provisional pseudocode (REVERSA MVP): types are guessed from access sizes, check the listing.
 int64_t __mingw_enum_import_library_names(int32_t a1)
 {
     int32_t v1;
@@ -1499,7 +1499,7 @@ label_1400026d5:
     return 0;
 }
 == sub_140002710 140002710
-// Dočasný pseudokód (REVERSA MVP): typy sú odhadnuté z veľkosti prístupov, overte v listingu.
+// Provisional pseudocode (REVERSA MVP): types are guessed from access sizes, check the listing.
 void sub_140002710()
 {
     int64_t stack_18;
@@ -1528,7 +1528,7 @@ void sub_140002710()
     return;
 }
 == __mingw_vfprintf 140002750
-// Dočasný pseudokód (REVERSA MVP): typy sú odhadnuté z veľkosti prístupov, overte v listingu.
+// Provisional pseudocode (REVERSA MVP): types are guessed from access sizes, check the listing.
 int32_t __mingw_vfprintf(int64_t a1, int64_t a2, int64_t a3)
 {
     int64_t stack_20;
@@ -1541,7 +1541,7 @@ int32_t __mingw_vfprintf(int64_t a1, int64_t a2, int64_t a3)
     return v1;
 }
 == __pformat_cvt 1400027a0
-// Dočasný pseudokód (REVERSA MVP): typy sú odhadnuté z veľkosti prístupov, overte v listingu.
+// Provisional pseudocode (REVERSA MVP): types are guessed from access sizes, check the listing.
 void __pformat_cvt(int32_t a1, int64_t a2, int32_t a3, int64_t a4)
 {
     int32_t local_1c;
@@ -1602,7 +1602,7 @@ void __pformat_cvt(int32_t a1, int64_t a2, int32_t a3, int64_t a4)
     return;
 }
 == __pformat_putc 140002890
-// Dočasný pseudokód (REVERSA MVP): typy sú odhadnuté z veľkosti prístupov, overte v listingu.
+// Provisional pseudocode (REVERSA MVP): types are guessed from access sizes, check the listing.
 void __pformat_putc(char a1, int64_t a2)
 {
     int32_t v1;
@@ -1635,7 +1635,7 @@ void __pformat_putc(char a1, int64_t a2)
     }
 }
 == __pformat_wputchars 1400028f0
-// Dočasný pseudokód (REVERSA MVP): typy sú odhadnuté z veľkosti prístupov, overte v listingu.
+// Provisional pseudocode (REVERSA MVP): types are guessed from access sizes, check the listing.
 void __pformat_wputchars(int64_t a1, int32_t a2, int64_t a3)
 {
     int64_t stack_50;
@@ -1767,7 +1767,7 @@ void __pformat_wputchars(int64_t a1, int32_t a2, int64_t a3)
     return;
 }
 == __pformat_putchars 140002a90
-// Dočasný pseudokód (REVERSA MVP): typy sú odhadnuté z veľkosti prístupov, overte v listingu.
+// Provisional pseudocode (REVERSA MVP): types are guessed from access sizes, check the listing.
 void __pformat_putchars(int64_t a1, int32_t a2, int64_t a3)
 {
     int32_t v1;
@@ -1878,7 +1878,7 @@ void __pformat_putchars(int64_t a1, int32_t a2, int64_t a3)
     return;
 }
 == __pformat_puts 140002be0
-// Dočasný pseudokód (REVERSA MVP): typy sú odhadnuté z veľkosti prístupov, overte v listingu.
+// Provisional pseudocode (REVERSA MVP): types are guessed from access sizes, check the listing.
 void __pformat_puts(int64_t a1, int64_t a2)
 {
     int64_t v1;
@@ -1898,7 +1898,7 @@ void __pformat_puts(int64_t a1, int64_t a2)
     return;
 }
 == __pformat_emit_inf_or_nan 140002c30
-// Dočasný pseudokód (REVERSA MVP): typy sú odhadnuté z veľkosti prístupov, overte v listingu.
+// Provisional pseudocode (REVERSA MVP): types are guessed from access sizes, check the listing.
 void __pformat_emit_inf_or_nan(int32_t a1, int64_t a2, int64_t a3)
 {
     int64_t local_4;
@@ -1945,7 +1945,7 @@ void __pformat_emit_inf_or_nan(int32_t a1, int64_t a2, int64_t a3)
     return;
 }
 == __pformat_xint.isra.0 140002cd0
-// Dočasný pseudokód (REVERSA MVP): typy sú odhadnuté z veľkosti prístupov, overte v listingu.
+// Provisional pseudocode (REVERSA MVP): types are guessed from access sizes, check the listing.
 int32_t __pformat_xint.isra.0(int32_t a1, int64_t a2, int64_t a3)
 {
     int64_t stack_20;
@@ -2295,7 +2295,7 @@ int32_t __pformat_xint.isra.0(int32_t a1, int64_t a2, int64_t a3)
     return v9;
 }
 == __pformat_int.isra.0 1400031f0
-// Dočasný pseudokód (REVERSA MVP): typy sú odhadnuté z veľkosti prístupov, overte v listingu.
+// Provisional pseudocode (REVERSA MVP): types are guessed from access sizes, check the listing.
 void __pformat_int.isra.0(int64_t a1, int64_t a2)
 {
     int64_t stack_20;
@@ -2530,7 +2530,7 @@ void __pformat_int.isra.0(int64_t a1, int64_t a2)
     return;
 }
 == __pformat_emit_radix_point 1400035a0
-// Dočasný pseudokód (REVERSA MVP): typy sú odhadnuté z veľkosti prístupov, overte v listingu.
+// Provisional pseudocode (REVERSA MVP): types are guessed from access sizes, check the listing.
 void __pformat_emit_radix_point(int64_t a1)
 {
     int64_t stack_20;
@@ -2609,7 +2609,7 @@ void __pformat_emit_radix_point(int64_t a1)
     }
 }
 == __pformat_emit_float 1400036f0
-// Dočasný pseudokód (REVERSA MVP): typy sú odhadnuté z veľkosti prístupov, overte v listingu.
+// Provisional pseudocode (REVERSA MVP): types are guessed from access sizes, check the listing.
 void __pformat_emit_float(int32_t a1, int64_t a2, int32_t a3, int64_t a4)
 {
     int32_t v1;
@@ -2895,7 +2895,7 @@ label_140003a0c:
     goto label_140003793;
 }
 == __pformat_emit_efloat 140003ad0
-// Dočasný pseudokód (REVERSA MVP): typy sú odhadnuté z veľkosti prístupov, overte v listingu.
+// Provisional pseudocode (REVERSA MVP): types are guessed from access sizes, check the listing.
 void __pformat_emit_efloat(int32_t a1, int64_t a2, int32_t a3, int64_t a4)
 {
     int32_t v1;
@@ -2943,7 +2943,7 @@ void __pformat_emit_efloat(int32_t a1, int64_t a2, int32_t a3, int64_t a4)
     return;
 }
 == __pformat_efloat 140003bb0
-// Dočasný pseudokód (REVERSA MVP): typy sú odhadnuté z veľkosti prístupov, overte v listingu.
+// Provisional pseudocode (REVERSA MVP): types are guessed from access sizes, check the listing.
 void __pformat_efloat(int64_t a1, int64_t a2)
 {
     int64_t stack_20;
@@ -2973,7 +2973,7 @@ void __pformat_efloat(int64_t a1, int64_t a2)
     }
 }
 == __pformat_float 140003c50
-// Dočasný pseudokód (REVERSA MVP): typy sú odhadnuté z veľkosti prístupov, overte v listingu.
+// Provisional pseudocode (REVERSA MVP): types are guessed from access sizes, check the listing.
 void __pformat_float(char a1, int64_t a2)
 {
     int64_t stack_20;
@@ -3033,7 +3033,7 @@ void __pformat_float(char a1, int64_t a2)
     return;
 }
 == __pformat_gfloat 140003d30
-// Dočasný pseudokód (REVERSA MVP): typy sú odhadnuté z veľkosti prístupov, overte v listingu.
+// Provisional pseudocode (REVERSA MVP): types are guessed from access sizes, check the listing.
 void __pformat_gfloat(int64_t a1, int64_t a2)
 {
     int64_t stack_20;
@@ -3105,7 +3105,7 @@ void __pformat_gfloat(int64_t a1, int64_t a2)
     return;
 }
 == __pformat_emit_xfloat.isra.0 140003e90
-// Dočasný pseudokód (REVERSA MVP): typy sú odhadnuté z veľkosti prístupov, overte v listingu.
+// Provisional pseudocode (REVERSA MVP): types are guessed from access sizes, check the listing.
 void __pformat_emit_xfloat.isra.0(int64_t a1, int32_t a2, int64_t a3)
 {
     int64_t stack_50;
@@ -3413,7 +3413,7 @@ label_140004104:
     }
 }
 == __mingw_pformat 140004350
-// Dočasný pseudokód (REVERSA MVP): typy sú odhadnuté z veľkosti prístupov, overte v listingu.
+// Provisional pseudocode (REVERSA MVP): types are guessed from access sizes, check the listing.
 int32_t __mingw_pformat(int32_t a1, int64_t a2, int32_t a3, int64_t a4)
 {
     int64_t stack_b0;
@@ -3541,10 +3541,10 @@ int32_t __mingw_pformat(int32_t a1, int64_t a2, int32_t a3, int64_t a4)
 label_1400044cb:
     goto label_1400044d0;
 label_14000445f:
-    goto **(int32_t *)(v3 + v6 * 4) + v3;  // nepriamy skok (napr. switch) – zatiaľ nerozbalený
+    goto **(int32_t *)(v3 + v6 * 4) + v3;  // indirect jump (e.g. switch): not expanded yet
 }
 == __rv_alloc_D2A 140004d60
-// Dočasný pseudokód (REVERSA MVP): typy sú odhadnuté z veľkosti prístupov, overte v listingu.
+// Provisional pseudocode (REVERSA MVP): types are guessed from access sizes, check the listing.
 int32_t __rv_alloc_D2A(int32_t a1)
 {
     int64_t v1;
@@ -3568,7 +3568,7 @@ int32_t __rv_alloc_D2A(int32_t a1)
     return v1 + 4;
 }
 == __nrv_alloc_D2A 140004da0
-// Dočasný pseudokód (REVERSA MVP): typy sú odhadnuté z veľkosti prístupov, overte v listingu.
+// Provisional pseudocode (REVERSA MVP): types are guessed from access sizes, check the listing.
 int64_t __nrv_alloc_D2A(int64_t a1, int64_t a2, int32_t a3)
 {
     int64_t v1;
@@ -3622,7 +3622,7 @@ int64_t __nrv_alloc_D2A(int64_t a1, int64_t a2, int32_t a3)
     return v1;
 }
 == __freedtoa 140004e20
-// Dočasný pseudokód (REVERSA MVP): typy sú odhadnuté z veľkosti prístupov, overte v listingu.
+// Provisional pseudocode (REVERSA MVP): types are guessed from access sizes, check the listing.
 void __freedtoa(int64_t a1)
 {
     __asm("movd xmm0, ecx");
@@ -3633,7 +3633,7 @@ void __freedtoa(int64_t a1)
     return;
 }
 == __quorem_D2A 140004e50
-// Dočasný pseudokód (REVERSA MVP): typy sú odhadnuté z veľkosti prístupov, overte v listingu.
+// Provisional pseudocode (REVERSA MVP): types are guessed from access sizes, check the listing.
 int32_t __quorem_D2A(int64_t a1, int64_t a2)
 {
     int64_t stack_30;
@@ -3760,7 +3760,7 @@ int32_t __quorem_D2A(int64_t a1, int64_t a2)
     return v9;
 }
 == __gdtoa 140004fd0
-// Dočasný pseudokód (REVERSA MVP): typy sú odhadnuté z veľkosti prístupov, overte v listingu.
+// Provisional pseudocode (REVERSA MVP): types are guessed from access sizes, check the listing.
 int32_t __gdtoa(int64_t a1, int32_t a2, int64_t a3, int64_t a4)
 {
     int64_t stack_c0;
@@ -5091,7 +5091,7 @@ label_1400055ab:
     goto label_1400055c8;
 }
 == __rshift_D2A 1400065f0
-// Dočasný pseudokód (REVERSA MVP): typy sú odhadnuté z veľkosti prístupov, overte v listingu.
+// Provisional pseudocode (REVERSA MVP): types are guessed from access sizes, check the listing.
 void __rshift_D2A(int64_t a1, int32_t a2)
 {
     int64_t v1;
@@ -5183,7 +5183,7 @@ void __rshift_D2A(int64_t a1, int32_t a2)
     }
 }
 == __trailz_D2A 140006700
-// Dočasný pseudokód (REVERSA MVP): typy sú odhadnuté z veľkosti prístupov, overte v listingu.
+// Provisional pseudocode (REVERSA MVP): types are guessed from access sizes, check the listing.
 int64_t __trailz_D2A(int64_t a1)
 {
     int64_t v1;
@@ -5220,7 +5220,7 @@ label_14000672c:
     }
 }
 == dtoa_lock 140006740
-// Dočasný pseudokód (REVERSA MVP): typy sú odhadnuté z veľkosti prístupov, overte v listingu.
+// Provisional pseudocode (REVERSA MVP): types are guessed from access sizes, check the listing.
 void dtoa_lock(int32_t a1)
 {
     int32_t v1;
@@ -5282,7 +5282,7 @@ void dtoa_lock(int32_t a1)
     }
 }
 == dtoa_lock_cleanup 140006830
-// Dočasný pseudokód (REVERSA MVP): typy sú odhadnuté z veľkosti prístupov, overte v listingu.
+// Provisional pseudocode (REVERSA MVP): types are guessed from access sizes, check the listing.
 void dtoa_lock_cleanup()
 {
     int64_t v1;
@@ -5291,13 +5291,13 @@ void dtoa_lock_cleanup()
     if (3 == 2) {
         v1 = DeleteCriticalSection;
         (*v1)(data_14000cb00);
-        goto *v1;  // nepriamy skok (napr. switch) – zatiaľ nerozbalený
+        goto *v1;  // indirect jump (e.g. switch): not expanded yet
     } else {
         return;
     }
 }
 == __Balloc_D2A 140006880
-// Dočasný pseudokód (REVERSA MVP): typy sú odhadnuté z veľkosti prístupov, overte v listingu.
+// Provisional pseudocode (REVERSA MVP): types are guessed from access sizes, check the listing.
 int64_t __Balloc_D2A(int32_t a1)
 {
     int64_t stack_30;
@@ -5354,7 +5354,7 @@ int64_t __Balloc_D2A(int32_t a1)
     return v1;
 }
 == __Bfree_D2A 140006980
-// Dočasný pseudokód (REVERSA MVP): typy sú odhadnuté z veľkosti prístupov, overte v listingu.
+// Provisional pseudocode (REVERSA MVP): types are guessed from access sizes, check the listing.
 void __Bfree_D2A(int64_t a1)
 {
     int64_t v1;
@@ -5385,7 +5385,7 @@ void __Bfree_D2A(int64_t a1)
     }
 }
 == __multadd_D2A 1400069f0
-// Dočasný pseudokód (REVERSA MVP): typy sú odhadnuté z veľkosti prístupov, overte v listingu.
+// Provisional pseudocode (REVERSA MVP): types are guessed from access sizes, check the listing.
 int64_t __multadd_D2A(int64_t a1, int64_t a2, int32_t a3)
 {
     int64_t v1;
@@ -5435,7 +5435,7 @@ int64_t __multadd_D2A(int64_t a1, int64_t a2, int32_t a3)
     return v1;
 }
 == __i2b_D2A 140006ab0
-// Dočasný pseudokód (REVERSA MVP): typy sú odhadnuté z veľkosti prístupov, overte v listingu.
+// Provisional pseudocode (REVERSA MVP): types are guessed from access sizes, check the listing.
 int64_t __i2b_D2A(int32_t a1)
 {
     int64_t stack_30;
@@ -5480,7 +5480,7 @@ int64_t __i2b_D2A(int32_t a1)
     return v1;
 }
 == __mult_D2A 140006b70
-// Dočasný pseudokód (REVERSA MVP): typy sú odhadnuté z veľkosti prístupov, overte v listingu.
+// Provisional pseudocode (REVERSA MVP): types are guessed from access sizes, check the listing.
 int64_t __mult_D2A(int64_t a1, int64_t a2)
 {
     int64_t stack_30;
@@ -5591,7 +5591,7 @@ int64_t __mult_D2A(int64_t a1, int64_t a2)
     return v13;
 }
 == __pow5mult_D2A 140006ce0
-// Dočasný pseudokód (REVERSA MVP): typy sú odhadnuté z veľkosti prístupov, overte v listingu.
+// Provisional pseudocode (REVERSA MVP): types are guessed from access sizes, check the listing.
 int32_t __pow5mult_D2A(int64_t a1, int32_t a2)
 {
     int64_t v1;
@@ -5701,7 +5701,7 @@ int32_t __pow5mult_D2A(int64_t a1, int32_t a2)
     return v1;
 }
 == __lshift_D2A 140006e70
-// Dočasný pseudokód (REVERSA MVP): typy sú odhadnuté z veľkosti prístupov, overte v listingu.
+// Provisional pseudocode (REVERSA MVP): types are guessed from access sizes, check the listing.
 int64_t __lshift_D2A(int64_t a1, int32_t a2)
 {
     int32_t v1;
@@ -5794,7 +5794,7 @@ label_140006f94:
     goto label_140006f5f;
 }
 == __cmp_D2A 140006fa0
-// Dočasný pseudokód (REVERSA MVP): typy sú odhadnuté z veľkosti prístupov, overte v listingu.
+// Provisional pseudocode (REVERSA MVP): types are guessed from access sizes, check the listing.
 int64_t __cmp_D2A(int64_t a1, int64_t a2)
 {
     int64_t v1;
@@ -5832,7 +5832,7 @@ label_140006fdd:
     goto label_140006fe4;
 }
 == __diff_D2A 140006ff0
-// Dočasný pseudokód (REVERSA MVP): typy sú odhadnuté z veľkosti prístupov, overte v listingu.
+// Provisional pseudocode (REVERSA MVP): types are guessed from access sizes, check the listing.
 int64_t __diff_D2A(int64_t a1, int64_t a2)
 {
     int32_t v1;
@@ -5960,7 +5960,7 @@ label_140007047:
     }
 }
 == __b2d_D2A 1400071c0
-// Dočasný pseudokód (REVERSA MVP): typy sú odhadnuté z veľkosti prístupov, overte v listingu.
+// Provisional pseudocode (REVERSA MVP): types are guessed from access sizes, check the listing.
 int32_t __b2d_D2A(int64_t a1, int64_t a2)
 {
     int64_t v1;
@@ -6025,7 +6025,7 @@ int32_t __b2d_D2A(int64_t a1, int64_t a2)
     }
 }
 == __d2b_D2A 1400072d0
-// Dočasný pseudokód (REVERSA MVP): typy sú odhadnuté z veľkosti prístupov, overte v listingu.
+// Provisional pseudocode (REVERSA MVP): types are guessed from access sizes, check the listing.
 int32_t __d2b_D2A(int32_t a1, int64_t a2, int64_t a3)
 {
     int32_t v1;
@@ -6094,7 +6094,7 @@ int32_t __d2b_D2A(int32_t a1, int64_t a2, int64_t a3)
     }
 }
 == __strcp_D2A 1400073f0
-// Dočasný pseudokód (REVERSA MVP): typy sú odhadnuté z veľkosti prístupov, overte v listingu.
+// Provisional pseudocode (REVERSA MVP): types are guessed from access sizes, check the listing.
 void __strcp_D2A(int64_t a1, int64_t a2)
 {
     int64_t v1;
@@ -6121,7 +6121,7 @@ void __strcp_D2A(int64_t a1, int64_t a2)
     return;
 }
 == strnlen 140007420
-// Dočasný pseudokód (REVERSA MVP): typy sú odhadnuté z veľkosti prístupov, overte v listingu.
+// Provisional pseudocode (REVERSA MVP): types are guessed from access sizes, check the listing.
 int64_t strnlen(int64_t a1, int64_t a2)
 {
     int64_t v1;
@@ -6143,7 +6143,7 @@ int64_t strnlen(int64_t a1, int64_t a2)
     return v1;
 }
 == wcsnlen 140007450
-// Dočasný pseudokód (REVERSA MVP): typy sú odhadnuté z veľkosti prístupov, overte v listingu.
+// Provisional pseudocode (REVERSA MVP): types are guessed from access sizes, check the listing.
 int64_t wcsnlen(int64_t a1, int64_t a2)
 {
     int64_t v1;
@@ -6172,19 +6172,19 @@ label_140007471:
     goto label_140007474;
 }
 == __p__fmode 140007480
-// Dočasný pseudokód (REVERSA MVP): typy sú odhadnuté z veľkosti prístupov, overte v listingu.
+// Provisional pseudocode (REVERSA MVP): types are guessed from access sizes, check the listing.
 int64_t __p__fmode()
 {
     return *(int64_t *)(data_1400097b0);
 }
 == __p__commode 140007490
-// Dočasný pseudokód (REVERSA MVP): typy sú odhadnuté z veľkosti prístupov, overte v listingu.
+// Provisional pseudocode (REVERSA MVP): types are guessed from access sizes, check the listing.
 int64_t __p__commode()
 {
     return *(int64_t *)(data_1400097a0);
 }
 == _lock_file 1400074a0
-// Dočasný pseudokód (REVERSA MVP): typy sú odhadnuté z veľkosti prístupov, overte v listingu.
+// Provisional pseudocode (REVERSA MVP): types are guessed from access sizes, check the listing.
 void _lock_file(int64_t a1)
 {
     int64_t v1;
@@ -6203,7 +6203,7 @@ void _lock_file(int64_t a1)
     }
 }
 == _unlock_file 140007510
-// Dočasný pseudokód (REVERSA MVP): typy sú odhadnuté z veľkosti prístupov, overte v listingu.
+// Provisional pseudocode (REVERSA MVP): types are guessed from access sizes, check the listing.
 void _unlock_file(int64_t a1)
 {
     int64_t v1;
@@ -6222,26 +6222,26 @@ void _unlock_file(int64_t a1)
     }
 }
 == mingw_get_invalid_parameter_handler 140007580
-// Dočasný pseudokód (REVERSA MVP): typy sú odhadnuté z veľkosti prístupov, overte v listingu.
+// Provisional pseudocode (REVERSA MVP): types are guessed from access sizes, check the listing.
 int64_t mingw_get_invalid_parameter_handler()
 {
     return data_14000cb60;
 }
 == mingw_set_invalid_parameter_handler 140007590
-// Dočasný pseudokód (REVERSA MVP): typy sú odhadnuté z veľkosti prístupov, overte v listingu.
+// Provisional pseudocode (REVERSA MVP): types are guessed from access sizes, check the listing.
 int64_t mingw_set_invalid_parameter_handler(int64_t a1)
 {
     __asm("xchg qword ptr [rip + 0x55c6], rax");
     return a1;
 }
 == __acrt_iob_func 1400075a0
-// Dočasný pseudokód (REVERSA MVP): typy sú odhadnuté z veľkosti prístupov, overte v listingu.
+// Provisional pseudocode (REVERSA MVP): types are guessed from access sizes, check the listing.
 int64_t __acrt_iob_func(int32_t a1)
 {
     return __iob_func() + (a1 + a1 * 2 << 4);
 }
 == __wcrtomb_cp 1400075d0
-// Dočasný pseudokód (REVERSA MVP): typy sú odhadnuté z veľkosti prístupov, overte v listingu.
+// Provisional pseudocode (REVERSA MVP): types are guessed from access sizes, check the listing.
 int32_t __wcrtomb_cp(int64_t a1, int16_t a2, int32_t a3, int32_t a4)
 {
     int32_t local_4;
@@ -6282,7 +6282,7 @@ int32_t __wcrtomb_cp(int64_t a1, int16_t a2, int32_t a3, int32_t a4)
     }
 }
 == wcrtomb 140007660
-// Dočasný pseudokód (REVERSA MVP): typy sú odhadnuté z veľkosti prístupov, overte v listingu.
+// Provisional pseudocode (REVERSA MVP): types are guessed from access sizes, check the listing.
 void wcrtomb(int64_t a1, int32_t a2)
 {
     int64_t stack_30;
@@ -6291,7 +6291,7 @@ void wcrtomb(int64_t a1, int32_t a2)
     return;
 }
 == wcsrtombs 1400076b0
-// Dočasný pseudokód (REVERSA MVP): typy sú odhadnuté z veľkosti prístupov, overte v listingu.
+// Provisional pseudocode (REVERSA MVP): types are guessed from access sizes, check the listing.
 int64_t wcsrtombs(int64_t a1, int64_t a2, int64_t a3)
 {
     int64_t stack_30;
@@ -6366,7 +6366,7 @@ label_140007733:
     goto label_14000773a;
 }
 == __mbrtowc_cp 1400077c0
-// Dočasný pseudokód (REVERSA MVP): typy sú odhadnuté z veľkosti prístupov, overte v listingu.
+// Provisional pseudocode (REVERSA MVP): types are guessed from access sizes, check the listing.
 int32_t __mbrtowc_cp(int64_t a1, int64_t a2, int64_t a3, int64_t a4)
 {
     int64_t stack_20;
@@ -6449,7 +6449,7 @@ int32_t __mbrtowc_cp(int64_t a1, int64_t a2, int64_t a3, int64_t a4)
     }
 }
 == mbrtowc 140007910
-// Dočasný pseudokód (REVERSA MVP): typy sú odhadnuté z veľkosti prístupov, overte v listingu.
+// Provisional pseudocode (REVERSA MVP): types are guessed from access sizes, check the listing.
 void mbrtowc(int64_t a1, int64_t a2, int64_t a3, int64_t a4)
 {
     int32_t stack_20;
@@ -6470,7 +6470,7 @@ void mbrtowc(int64_t a1, int64_t a2, int64_t a3, int64_t a4)
     return;
 }
 == mbsrtowcs 140007980
-// Dočasný pseudokód (REVERSA MVP): typy sú odhadnuté z veľkosti prístupov, overte v listingu.
+// Provisional pseudocode (REVERSA MVP): types are guessed from access sizes, check the listing.
 int64_t mbsrtowcs(int64_t a1, int64_t a2, int64_t a3, int64_t a4)
 {
     int32_t stack_20;
@@ -6553,7 +6553,7 @@ label_140007a1e:
     }
 }
 == mbrlen 140007aa0
-// Dočasný pseudokód (REVERSA MVP): typy sú odhadnuté z veľkosti prístupov, overte v listingu.
+// Provisional pseudocode (REVERSA MVP): types are guessed from access sizes, check the listing.
 void mbrlen(int64_t a1, int64_t a2, int64_t a3)
 {
     int32_t stack_20;
@@ -6572,7 +6572,7 @@ void mbrlen(int64_t a1, int64_t a2, int64_t a3)
     return;
 }
 == register_frame_ctor 140007c80
-// Dočasný pseudokód (REVERSA MVP): typy sú odhadnuté z veľkosti prístupov, overte v listingu.
+// Provisional pseudocode (REVERSA MVP): types are guessed from access sizes, check the listing.
 void register_frame_ctor()
 {
     __gcc_register_frame();

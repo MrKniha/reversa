@@ -61,7 +61,7 @@ def test_newer_schema_is_rejected(tmp_path):
     with con:
         con.execute("UPDATE meta SET value='99' WHERE key='schema_version'")
     con.close()
-    with pytest.raises(ProjectError, match="novšou verziou"):
+    with pytest.raises(ProjectError, match="newer REVERSA"):
         _core.Session.open_project(path)
 
 

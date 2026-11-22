@@ -31,10 +31,10 @@ Disassembler::Disassembler(const std::string& arch, const std::string& endian, s
     else if (arch == "x86-64") { a = CS_ARCH_X86; m = CS_MODE_64; }
     else if (arch == "arm64") { a = CS_ARCH_ARM64; m = CS_MODE_ARM; }
     else if (arch == "arm") { a = CS_ARCH_ARM; m = CS_MODE_ARM; }
-    else throw ReversaError("Architektúra " + arch + " nie je podporovaná disassemblerom.");
+    else throw ReversaError("Architecture " + arch + " is not supported by the disassembler.");
     if (endian == "big") m |= CS_MODE_BIG_ENDIAN;
     csh h;
-    if (cs_open(a, cs_mode(m), &h) != CS_ERR_OK) throw ReversaError("Capstone sa nepodarilo inicializovať.");
+    if (cs_open(a, cs_mode(m), &h) != CS_ERR_OK) throw ReversaError("Could not initialise Capstone.");
     cs_option(h, CS_OPT_DETAIL, CS_OPT_ON);
     handle_ = h;
 }

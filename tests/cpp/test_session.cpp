@@ -168,7 +168,7 @@ TEST("project migrations upgrade the schema step by step") {
     try {
         load_project(path);
     } catch (const ProjectError& e) {
-        newer = std::string(e.what()).find("novšou verziou") != std::string::npos;
+        newer = std::string(e.what()).find("newer REVERSA") != std::string::npos;
     }
     CHECK(newer);
     fs::remove_all(dir);

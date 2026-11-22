@@ -31,7 +31,7 @@ void EventBus::publish(const std::string& topic, std::map<std::string, EventValu
         } catch (const std::exception& e) {  // isolation: one bad listener must not break others
             if (on_error) on_error(topic, e.what());
         } catch (...) {
-            if (on_error) on_error(topic, "neznáma chyba");
+            if (on_error) on_error(topic, "unknown error");
         }
     }
 }

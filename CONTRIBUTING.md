@@ -3,7 +3,7 @@
 Ďakujeme, že chcete pomôcť! Pravidlá sú krátke:
 
 1. **Najprv issue.** Väčšiu zmenu najprv popíšte v issue, nech sa zhodneme na smere.
-2. **Kód po anglicky, dokumentácia po slovensky.** Identifikátory a komentáre v kóde píšeme
+2. **Kód, CLI, chybové hlásenia a reporty po anglicky; dokumentácia po slovensky.** Identifikátory a komentáre v kóde píšeme
    anglicky; README a `docs/` slovensky. Texty v GUI sú slovenské a vždy obalené v `tr(...)`
    (mimo tried `T(...)`, v statických tabuľkách `QT_TR_NOOP(...)`). Preklady sú v
    `src/gui/i18n/<jazyk>.json` (en, de, fr, zh); `python3 scripts/i18n.py check` v CI overí, že
@@ -30,4 +30,4 @@
    a v PR vysvetlite, prečo sa výsledok zmenil.
 
 Štýl: C++20, riadky do 120 znakov, `namespace rv`, chyby ako `ReversaError` so zrozumiteľnou
-slovenskou správou a technickým detailom. Python časti (API, pluginy): PEP 8.
+anglickou správou a technickým detailom. Python časti (API, pluginy): PEP 8.
