@@ -1,0 +1,14 @@
+__pycache__/
+*.pyc
+*.egg-info/
+build/
+dist/
+.coverage
+htmlcov/
+.pytest_cache/
+*.rvproj
+*.rvproj.tmp
+node_modules/
+/report*.md
+/report*.html
+headless-out/

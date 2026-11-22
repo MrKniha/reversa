@@ -1,0 +1,7 @@
+{
+  "name": "crashing-plugin",
+  "version": "0.1.0",
+  "api_version": "1.0",
+  "entry": "plugin.py",
+  "description": "Zámerne padá – demonštruje, že chyba pluginu nezloží REVERSA."
+}

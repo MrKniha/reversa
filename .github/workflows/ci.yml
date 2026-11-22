@@ -1,0 +1,70 @@
+name: CI
+
+on:
+  push:
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  test:
+    name: tests (${{ matrix.os }}, Python ${{ matrix.python }})
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, windows-latest, macos-latest]
+        python: ["3.10", "3.13"]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python }}
+      - name: Install (locked runtime dependencies + dev tools)
+        run: |
+          python -m pip install --upgrade pip
+          pip install --require-hashes -r requirements.lock
+          pip install -e ".[dev]"
+      - name: License check
+        run: python scripts/check_licenses.py
+      - name: Tests with coverage
+        run: |
+          coverage run -m pytest
+          coverage report --fail-under=80
+      - name: Headless check
+        if: runner.os != 'Windows'
+        run: sh scripts/headless_check.sh headless-out
+
+  ui-smoke:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+      - run: pip install --require-hashes -r requirements.lock && pip install -e .
+      - run: npm install --no-save playwright@1.48.2 && npx playwright install --with-deps chromium
+      - run: node tests/ui/smoke.mjs
+
+  build:
+    needs: [test]
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - run: pip install build
+      - run: python -m build
+      - name: Install wheel and run demo
+        run: |
+          pip install dist/*.whl
+          reversa --demo --no-gui
+      - uses: actions/upload-artifact@v4
+        with:
+          name: reversa-dist
+          path: dist/

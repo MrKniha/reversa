@@ -1,0 +1,28 @@
+{
+  "format": "PE",
+  "arch": "x86",
+  "main_found": true,
+  "user_functions_present": [
+    "classify",
+    "greet",
+    "main",
+    "sum_to"
+  ],
+  "imports_present": [
+    "puts",
+    "strlen"
+  ],
+  "strings_present": [
+    "Done.",
+    "sum_to(%d) = %d\n"
+  ],
+  "strcmp_callers": [],
+  "main_calls": [
+    "classify",
+    "greet",
+    "main",
+    "printf",
+    "puts",
+    "sum_to"
+  ]
+}

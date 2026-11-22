@@ -1,0 +1,22 @@
+{
+  "format": "PE",
+  "arch": "x86-64",
+  "main_found": false,
+  "user_functions_present": [],
+  "imports_present": [
+    "puts",
+    "strcmp",
+    "strlen"
+  ],
+  "strings_present": [
+    "Access granted. Flag: CTF{xrefs_are_your_friend}",
+    "Usage: login <user> <password>",
+    "admin",
+    "student"
+  ],
+  "strcmp_callers": [
+    "sub_140001480",
+    "sub_1400014db"
+  ],
+  "main_calls": []
+}

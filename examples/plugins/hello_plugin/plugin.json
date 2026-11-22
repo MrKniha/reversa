@@ -1,0 +1,7 @@
+{
+  "name": "hello-plugin",
+  "version": "1.0.0",
+  "api_version": "1.0",
+  "entry": "plugin.py",
+  "description": "Ukážkový plugin z docs/plugin-tutorial.md: počíta funkcie a reaguje na premenovanie."
+}
