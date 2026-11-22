@@ -1,74 +1,76 @@
-# Quick start za 10 minút
+# Quick start in 10 minutes
 
-Cieľ: nainštalovať REVERSA, otvoriť ukážkovú binárku a nájsť v nej heslo – bez predchádzajúcich znalostí.
+Goal: install REVERSA, open the sample binary and find the password in it, with no prior knowledge.
 
-## 1. Inštalácia (2 minúty)
+## 1. Install (2 minutes)
 
-Stiahnite hotový balík z GitHub Actions (posledný úspešný beh → *Artifacts*):
+Download a ready-made package from GitHub Actions (latest successful run → *Artifacts*):
 
-- **Windows:** `reversa-windows-x64` (zip). Rozbaľte ho a spustite `reversa-windows-x64\bin\reversa-gui.exe`.
-  Pre príkazy nižšie otvorte v priečinku `bin` príkazový riadok a píšte `reversa.exe`.
-- **Linux (Ubuntu 24.04 a novšie):** `reversa-linux-x64-deb`, potom `sudo apt install ./reversa_0.2.0_amd64.deb`.
+- **Windows:** `reversa-windows-x64` (zip). Unpack it and run `reversa-windows-x64\bin\reversa-gui.exe`.
+  For the commands below, open a command prompt in the `bin` folder and type `reversa.exe`.
+- **Linux (Ubuntu 24.04 and newer):** `reversa-linux-x64-deb`, then `sudo apt install ./reversa_0.2.0_amd64.deb`.
 
-Overenie: `reversa --version`. Zostavenie zo zdrojov popisuje [building.md](building.md).
+Check: `reversa --version`. Building from source is described in [building.md](building.md).
 
-## 2. Ukážková analýza (1 minúta)
+## 2. Sample analysis (1 minute)
 
 ```bash
 reversa --demo
 ```
 
-Otvorí sa okno REVERSA a na pozadí sa analyzuje ukážkový program (priebeh vidíte v stavovom riadku,
-tlačidlom *Zrušiť* analýzu zastavíte). Pri prvom spustení uvidíte krátkeho sprievodcu – môžete ho preskočiť. Bez grafického prostredia (server, CI) použite
-`reversa --demo --no-gui`: výsledky sa vypíšu do terminálu.
+The REVERSA window opens and the sample program is analysed in the background (the status bar
+shows the progress, and the *Cancel* button stops the analysis). On the first start you see a
+short guide, which you can skip. Without a graphical environment (server, CI) use
+`reversa --demo --no-gui`: the results are printed to the terminal.
 
-## 3. Tri hlavné panely
+## 3. The three main panels
 
-| Panel | Čo ukazuje |
+| Panel | What it shows |
 |---|---|
-| **Funkcie** (vľavo) | Všetky funkcie programu. ★ = hlavná funkcia `main`. Šedé = importy z knižníc. |
-| **Stred** | Karty *Listing* (inštrukcie), *Pseudokód* (čitateľný kód), *Graf funkcie*, *Graf volaní*, *Reťazce*, *Importy*… |
-| **Detaily** (vpravo) | Čo je na vybranej adrese a **kto ju používa** (cross-referencie). Tlačidlá Premenovať / Komentár / Záložka. |
+| **Functions** (left) | All functions of the program. ★ = the main function `main`. Grey = imports from libraries. |
+| **Centre** | Tabs *Listing* (instructions), *Pseudocode* (readable code), *Function graph*, *Call graph*, *Strings*, *Imports*… |
+| **Details** (right) | What is at the selected address and **who uses it** (cross-references). Buttons Rename / Comment / Bookmark. |
 
-## 4. Nájdite heslo (5 minút)
+## 4. Find the password (5 minutes)
 
-1. V ľavom paneli kliknite na **★ main** a prepnite na kartu **Pseudokód** (alebo kláves `2`).
-   Uvidíte, že `main` volá `check_user` a potom `check_password`.
-2. Kliknite na **check_password**. V pseudokóde je volanie `strcmp(…)` – porovnanie dvoch reťazcov.
-3. Prepnite na **Listing** (`1`). Uvidíte konštanty, ktoré program skladá do premennej – sú to bajty textu
-   `reversa` a `2026` (v pseudokóde ako čísla, v karte *Reťazce* ako `2026`).
-4. Heslo je `reversa2026`. Overenie: `samples/bin/login_x64.elf admin reversa2026`.
-5. Premenujte `check_password` na `overenie_hesla` (kláves `N`). Meno sa okamžite zmení v zozname, v pseudokóde
-   `main` aj v x-refs. `Ctrl+Z` zmenu vráti, `Ctrl+Y` ju zopakuje.
-6. Uložte projekt (`Ctrl+S`). Cestu uvidíte v hláške; neskôr ho otvoríte príkazom `reversa gui cesta.rvproj`.
+1. In the left panel click **★ main** and switch to the **Pseudocode** tab (or press `2`).
+   You see that `main` calls `check_user` and then `check_password`.
+2. Click **check_password**. The pseudocode contains a call to `strcmp(…)`, which compares two strings.
+3. Switch to **Listing** (`1`). You see constants that the program puts together in a variable: they
+   are the bytes of the text `reversa` and `2026` (numbers in the pseudocode, `2026` on the *Strings* tab).
+4. The password is `reversa2026`. Check: `samples/bin/login_x64.elf admin reversa2026`.
+5. Rename `check_password` to `verify_password` (key `N`). The name changes at once in the list, in
+   the pseudocode of `main` and in the x-refs. `Ctrl+Z` undoes the change, `Ctrl+Y` redoes it.
+6. Save the project (`Ctrl+S`). The message shows the path; later you open it with
+   `reversa gui path.rvproj`.
 
-## 5. Vlastný súbor
+## 5. Your own file
 
-Kliknite na **Otvoriť súbor** alebo spustite `reversa gui /cesta/k/programu`. Podporované sú ELF (x86-64, ARM64,
-x86, ARM), PE 32/64-bit a surové dáta (`reversa gui firmware.bin --arch arm64 --base 0x8000000`).
+Click **Open file** or run `reversa gui /path/to/program`. Supported are ELF (x86-64, ARM64, x86,
+ARM), PE 32/64-bit and raw data (`reversa gui firmware.bin --arch arm64 --base 0x8000000`).
 
-## Ovládanie GUI (klávesové skratky)
+## Keyboard shortcuts
 
-| Kláves | Akcia |
+| Key | Action |
 |---|---|
-| `Ctrl+O` / `Ctrl+S` | otvoriť súbor alebo projekt / uložiť projekt |
-| `Ctrl+F` | hľadať funkciu, reťazec alebo adresu |
-| `G` | skočiť na adresu alebo meno |
-| `1` `2` `3` `4` | listing, pseudokód, graf funkcie, graf volaní |
-| `N` | premenovať funkciu, adresu alebo vybranú premennú v pseudokóde |
-| `;` / `B` | komentár / záložka |
-| `Ctrl+Z` / `Ctrl+Y` | späť / znova |
-| `Alt+←` | späť v histórii navigácie |
-| `Ctrl+Shift+T` | svetlý / tmavý motív |
-| `F1` | úvodný sprievodca |
+| `Ctrl+O` / `Ctrl+S` | open a file or project / save the project |
+| `Ctrl+F` | search for a function, string or address |
+| `G` | go to an address or name |
+| `1` `2` `3` `4` | listing, pseudocode, function graph, call graph |
+| `N` | rename a function, an address or the selected variable in the pseudocode |
+| `;` / `B` | comment / bookmark |
+| `Ctrl+Z` / `Ctrl+Y` | undo / redo |
+| `Alt+←` | back in the navigation history |
+| `Ctrl+Shift+T` | light / dark theme |
+| `F1` | getting started guide |
 
-Všetky skratky zmeníte v *Zobraziť → Nastavenia*. Tam nastavíte aj veľkosť
-písma, jazyk a vypnete vysvetlivky pre začiatočníkov. Predvolený jazyk je
-angličtina; po zmene jazyka reštartujte REVERSA. Analýza beží na pozadí
-a tlačidlom *Zrušiť* v stavovom riadku ju zastavíte.
+You can change every shortcut in *View → Settings*. There you also set the font size and the
+language, and turn off the hints for beginners. The default language is English; restart REVERSA
+after changing the language. The analysis runs in the background and the *Cancel* button in the
+status bar stops it.
 
-## Ďalej
+## Next
 
-- [tutorials.md](tutorials.md) – „Nájdite hlavnú funkciu programu“, „Pochopte slučku“, ukážky s riešeniami.
-- [scripting-tutorial.md](scripting-tutorial.md) – automatizácia skriptmi v C++.
-- [glossary.md](glossary.md) – slovník pojmov.
+- [tutorials.md](tutorials.md): "Find the main function", "Understand a loop", examples with solutions.
+- [scripting-tutorial.md](scripting-tutorial.md): automation with C++ scripts.
+- [glossary.md](glossary.md): glossary of terms.

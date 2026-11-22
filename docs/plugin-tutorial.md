@@ -1,19 +1,19 @@
-# Tutoriál: napíšte si plugin v C++
+# Tutorial: write a plugin in C++
 
-Plugin rozširuje REVERSA o vlastnú logiku: reaguje na udalosti (načítanie súboru,
-nájdená funkcia, premenovanie) a môže pridať vlastný pohľad. Plugin je zdieľaná
-knižnica (`.so` na Linuxe, `.dll` na Windows) v C alebo C++. Používa rovnaké
-rozhranie ako skripty (pozri [scripting-tutorial.md](scripting-tutorial.md)).
+A plugin extends REVERSA with your own logic: it reacts to events (file loaded, function found,
+rename) and can add its own view. A plugin is a shared library (`.so` on Linux, `.dll` on Windows)
+written in C or C++. It uses the same interface as scripts (see
+[scripting-tutorial.md](scripting-tutorial.md)).
 
-> **Bezpečnosť:** plugin je natívny kód. Beží v procese REVERSA **bez sandboxu**
-> a má rovnaké práva ako vy. Inštalujte iba pluginy, ktorých kód ste si prečítali
-> alebo ktorým dôverujete.
+> **Security:** a plugin is native code. It runs inside the REVERSA process **without a sandbox**
+> and has the same permissions as you. Only install plugins whose code you have read or that you
+> trust.
 
-## 1. Kód pluginu
+## 1. Plugin code
 
-S pomocníkom [sdk.hpp](../sdk/include/reversa/sdk.hpp) je plugin trieda odvodená
-od `reversa::Plugin`. Všetky háčiky sú nepovinné. Člen `program` je otvorený
-program (rovnaké API ako v skriptoch).
+With the helper [sdk.hpp](../sdk/include/reversa/sdk.hpp), a plugin is a class derived from
+`reversa::Plugin`. All hooks are optional. The member `program` is the opened program (the same
+API as in scripts).
 
 ```cpp
 #include <reversa/sdk.hpp>
@@ -45,24 +45,24 @@ struct HelloPlugin : reversa::Plugin {
 REVERSA_PLUGIN(HelloPlugin, "hello-plugin", "1.0.0", "Counts functions and reacts to renames.")
 ```
 
-Celý súbor: [examples/plugins/hello_plugin.cpp](../examples/plugins/hello_plugin.cpp).
+The whole file: [examples/plugins/hello_plugin.cpp](../examples/plugins/hello_plugin.cpp).
 
-| Háčik | Kedy sa volá |
+| Hook | When it is called |
 |---|---|
-| `on_load()` | po načítaní súboru, pred analýzou |
-| `on_function_analyzed(func)` | raz pre každú nájdenú funkciu |
-| `on_rename(addr, old, new)` | po každom premenovaní (aj pri undo/redo) |
-| `on_unload()` | pri zatváraní súboru alebo ukončení |
+| `on_load()` | after the file is loaded, before the analysis |
+| `on_function_analyzed(func)` | once for every function found |
+| `on_rename(addr, old, new)` | after every rename (also on undo/redo) |
+| `on_unload()` | when the file is closed or REVERSA quits |
 
-`REVERSA_PLUGIN` exportuje funkciu `reversa_plugin()`, ktorá vráti štruktúru
-`rv_plugin` s menom, verziou, popisom a verziou API. Pre každý otvorený súbor
-vznikne nový objekt pluginu.
+`REVERSA_PLUGIN` exports the function `reversa_plugin()`, which returns an `rv_plugin` structure
+with the name, version, description and API version. A new plugin object is created for every
+opened file.
 
-Plugin v čistom C vyplní štruktúru `rv_plugin` sám, pozri
-[sdk/include/reversa/plugin.h](../sdk/include/reversa/plugin.h) a testovací plugin
+A plugin in plain C fills in the `rv_plugin` structure itself; see
+[sdk/include/reversa/plugin.h](../sdk/include/reversa/plugin.h) and the test plugin
 [tests/cpp/plugins/counter.c](../tests/cpp/plugins/counter.c).
 
-## 2. Preklad
+## 2. Build
 
 ```bash
 # Linux
@@ -70,74 +70,72 @@ g++ -std=c++17 -shared -fPIC -o hello_plugin.so hello_plugin.cpp
 ```
 
 ```bat
-:: Windows (Developer Command Prompt pre Visual Studio)
+:: Windows (Developer Command Prompt for Visual Studio)
 cl /std:c++17 /EHsc /LD /I C:\reversa\bin\sdk\include hello_plugin.cpp
 ```
 
-Plugin nepotrebuje linkovať REVERSA. Všetko volá cez tabuľku funkcií, ktorú dostane
-pri načítaní.
+A plugin does not link against REVERSA. It calls everything through the function table it gets
+when it is loaded.
 
-## 3. Inštalácia a spustenie
+## 3. Install and run
 
-Skopírujte knižnicu do `~/.reversa/plugins/` (Windows:
-`%USERPROFILE%\.reversa\plugins\`). Môže byť aj v podpriečinku, napríklad
-`plugins/hello/hello_plugin.so`. Ďalšie priečinky pridáte premennou prostredia
-`REVERSA_PLUGIN_PATH` (oddeľovač `:` na Linuxe, `;` na Windows) alebo prepínačom
-`--plugins`:
+Copy the library to `~/.reversa/plugins/` (Windows: `%USERPROFILE%\.reversa\plugins\`). It can
+also be in a subfolder, for example `plugins/hello/hello_plugin.so`. Add more folders with the
+environment variable `REVERSA_PLUGIN_PATH` (separator `:` on Linux, `;` on Windows) or with the
+`--plugins` option:
 
 ```bash
 reversa analyze samples/bin/hello_x64.elf --plugins build/bin/examples/plugins
 reversa gui samples/bin/hello_x64.elf --plugins build/bin/examples/plugins
 ```
 
-Výstup v termináli:
+Output in the terminal:
 
 ```
 [hello-plugin] loaded file: .../samples/bin/hello_x64.elf
 ```
 
-V GUI nájdete pluginy v menu **Pokročilé → Pluginy** (meno, verzia, stav, háčiky,
-počet volaní). Pohľad „Hello plugin“ je na karte **Pohľady**. Ak pluginy nechcete,
-použite `--no-plugins`.
+In the GUI the plugins are listed in **Advanced → Plugins** (name, version, status, hooks, number
+of calls). The "Hello plugin" view is on the **Views** tab. If you do not want plugins, use
+`--no-plugins`.
 
-## 4. Čo keď plugin zlyhá
+## 4. When a plugin fails
 
-V [examples/plugins/crashing_plugin.cpp](../examples/plugins/crashing_plugin.cpp)
-je plugin, ktorý zámerne vyhodí výnimku v `on_function_analyzed`. REVERSA:
+[examples/plugins/crashing_plugin.cpp](../examples/plugins/crashing_plugin.cpp) throws an
+exception in `on_function_analyzed` on purpose. REVERSA:
 
-1. dostane od háčika chybu (makro `REVERSA_PLUGIN` výnimku zachytí) a plugin
-   **vypne** (stav *failed*),
-2. zapíše chybu do diagnostiky aj s textom výnimky,
-3. pokračuje v analýze. Ostatné pluginy bežia ďalej.
+1. gets an error from the hook (the `REVERSA_PLUGIN` macro catches the exception) and **disables**
+   the plugin (status *failed*),
+2. writes the error, including the exception text, to the diagnostics,
+3. continues the analysis. The other plugins keep running.
 
 ```
 ! error: Plugin 'crashing-plugin' failed in on_function_analyzed and was disabled. REVERSA continues.
 ```
 
-Rovnako sa správa knižnica, ktorá sa nedá načítať, nemá funkciu
-`reversa_plugin()` alebo je preložená pre inú verziu API (stav *incompatible*).
-Toto správanie overujú testy [tests/cpp/test_plugins.cpp](../tests/cpp/test_plugins.cpp)
-a `tests/gui/test_gui.cpp` (háčiky bežia aj na pracovnom vlákne analýzy v GUI).
+A library that cannot be loaded, has no `reversa_plugin()` function or is built for another API
+version (status *incompatible*) is handled the same way. The tests
+[tests/cpp/test_plugins.cpp](../tests/cpp/test_plugins.cpp) and `tests/gui/test_gui.cpp` check
+this behaviour (hooks also run on the analysis worker thread in the GUI).
 
-> Natívny plugin môže zhodiť celú aplikáciu, napríklad zlým ukazovateľom. REVERSA
-> zachytí chyby, ktoré plugin ohlási, ale nie pád pamäte. Aj preto inštalujte len
-> pluginy, ktorým dôverujete.
+> A native plugin can bring down the whole application, for example with a bad pointer. REVERSA
+> catches errors that a plugin reports, but not memory crashes. That is another reason to install
+> only plugins you trust.
 
-## 5. Väčší príklad: kryptografické konštanty
+## 5. A bigger example: crypto constants
 
-[examples/plugins/crypto_constants.cpp](../examples/plugins/crypto_constants.cpp)
-hľadá v súbore známe konštanty (AES S-box, SHA-256, MD5, CRC32) cez
-`program.search_bytes(...)`. Ku každému nálezu pridá záložku a vytvorí pohľad
-„Crypto constants“. Podobne fungujú pluginy FindCrypt pre IDA a Ghidra.
+[examples/plugins/crypto_constants.cpp](../examples/plugins/crypto_constants.cpp) looks for
+well-known constants (AES S-box, SHA-256, MD5, CRC32) with `program.search_bytes(...)`. It adds a
+bookmark for every hit and creates the view "Crypto constants". FindCrypt plugins for IDA and
+Ghidra work in a similar way.
 
-## Tipy
+## Tips
 
-- Háčik `on_function_analyzed` sa volá veľakrát. Robte v ňom len rýchle veci.
-- Háčiky môžu bežať na pracovnom vlákne analýzy. REVERSA volania na jeden program
-  serializuje, takže zámky v plugine netreba.
-- Na anotácie použite API (`rename`, `set_comment`, `set_bookmark`), aby fungovalo
-  undo a uloženie do projektu.
-- Plugin by nemal sieťovo komunikovať ani spúšťať analyzovaný súbor.
-  REVERSA je nástroj na statickú analýzu bez telemetrie.
-- Pluginy v Pythone (`plugin.json` + `plugin.py`) z verzie 0.1 už REVERSA
-  nenačítava.
+- The `on_function_analyzed` hook is called many times. Only do quick work in it.
+- Hooks may run on the analysis worker thread. REVERSA serialises calls to one program, so the
+  plugin needs no locks.
+- Use the API for annotations (`rename`, `set_comment`, `set_bookmark`), so undo and saving to the
+  project work.
+- A plugin should not use the network or run the analysed file. REVERSA is a static analysis tool
+  without telemetry.
+- REVERSA no longer loads Python plugins (`plugin.json` + `plugin.py`) from version 0.1.

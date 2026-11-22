@@ -61,25 +61,21 @@ QKeySequence UiSettings::key(const CommandDef& c) const {
 namespace {
 struct Step { const char* title; const char* text; };
 const Step STEPS[] = {
-    {QT_TR_NOOP("Vitajte v REVERSA"),
-     QT_TR_NOOP("REVERSA vám pomôže pochopiť, čo robí program, aj keď nemáte jeho zdrojový kód. Ukážeme vám to v 5 krokoch.")},
-    {QT_TR_NOOP("1. Otvorte súbor"),
-     QT_TR_NOOP("Tlačidlom „Otvoriť súbor“ vyberte program (ELF z Linuxu, PE/.exe z Windows alebo surové dáta). Ak nemáte čo "
-     "otvoriť, použite skúšobnú binárku – je to malá CTF úloha s heslom. Analýza beží na pozadí a dá sa zrušiť.")},
-    {QT_TR_NOOP("2. Ľavý panel: funkcie"),
-     QT_TR_NOOP("Program sa skladá z funkcií. Hlavná funkcia (main) je označená hviezdičkou. Kliknutím funkciu otvoríte, "
-     "filtrom nad zoznamom ju rýchlo nájdete.")},
-    {QT_TR_NOOP("3. Stred: listing, pseudokód a grafy"),
-     QT_TR_NOOP("Listing ukazuje inštrukcie procesora, Pseudokód ich prepis do čitateľného kódu podobného C a grafy ukazujú "
-     "štruktúru funkcie a volania. Prepínate ich kartami alebo klávesmi 1 až 4. Modré mená sú klikateľné.")},
-    {QT_TR_NOOP("4. Pravý panel: detaily a x-refs"),
-     QT_TR_NOOP("Tu vidíte, kto funkciu alebo reťazec používa (cross-referencie). Funkciu môžete premenovať (N), pridať "
-     "komentár (;) alebo záložku (B). Všetko sa dá vrátiť (Ctrl+Z) a uložiť do projektu (Ctrl+S).")},
+    {QT_TR_NOOP("Welcome to REVERSA"),
+     QT_TR_NOOP("REVERSA helps you understand what a program does, even without its source code. Here is how, in 5 steps.")},
+    {QT_TR_NOOP("1. Open a file"),
+     QT_TR_NOOP("Use the “Open file” button to choose a program (ELF from Linux, PE/.exe from Windows, or raw data). If you have nothing to open, use the sample binary: a small CTF task with a password. Analysis runs in the background and can be cancelled.")},
+    {QT_TR_NOOP("2. Left panel: functions"),
+     QT_TR_NOOP("A program is made of functions. The main function is marked with a star. Click a function to open it; use the filter above the list to find one quickly.")},
+    {QT_TR_NOOP("3. Centre: listing, pseudocode and graphs"),
+     QT_TR_NOOP("The listing shows the processor instructions, the pseudocode rewrites them as readable C-like code, and the graphs show the structure of a function and its calls. Switch with the tabs or keys 1 to 4. Blue names are clickable.")},
+    {QT_TR_NOOP("4. Right panel: details and x-refs"),
+     QT_TR_NOOP("Here you see who uses a function or string (cross-references). You can rename a function (N), add a comment (;) or a bookmark (B). Everything can be undone (Ctrl+Z) and saved to a project (Ctrl+S).")},
 };
 }  // namespace
 
 OnboardingDialog::OnboardingDialog(QWidget* parent) : QDialog(parent) {
-    setWindowTitle(tr("Úvodný sprievodca"));
+    setWindowTitle(tr("Getting started guide"));
     setMinimumWidth(480);
     auto* lay = new QVBoxLayout(this);
     stack_ = new QStackedWidget(this);
@@ -97,9 +93,9 @@ OnboardingDialog::OnboardingDialog(QWidget* parent) : QDialog(parent) {
     lay->addWidget(stack_);
     auto* row = new QHBoxLayout;
     counter_ = new QLabel;
-    auto* skip = new QPushButton(tr("Preskočiť"));
-    back_ = new QPushButton(tr("Späť"));
-    next_ = new QPushButton(tr("Ďalej"));
+    auto* skip = new QPushButton(tr("Skip"));
+    back_ = new QPushButton(tr("Back"));
+    next_ = new QPushButton(tr("Next"));
     next_->setDefault(true);
     row->addWidget(counter_);
     row->addStretch();
@@ -126,19 +122,19 @@ void OnboardingDialog::show_page(int i) {
     stack_->setCurrentIndex(i);
     counter_->setText(QStringLiteral("%1 / %2").arg(i + 1).arg(pages()));
     back_->setEnabled(i > 0);
-    next_->setText(i + 1 == pages() ? tr("Začať") : tr("Ďalej"));
+    next_->setText(i + 1 == pages() ? tr("Start") : tr("Next"));
 }
 
 // ------------------------------------------------------------ settings dialog
 SettingsDialog::SettingsDialog(const UiSettings& current, const std::vector<CommandDef>& commands, QWidget* parent)
     : QDialog(parent), commands_(commands), base_(current) {
-    setWindowTitle(tr("Nastavenia"));
+    setWindowTitle(tr("Settings"));
     resize(560, 620);
     auto* lay = new QVBoxLayout(this);
     auto* form = new QFormLayout;
     theme_ = new QComboBox;
-    theme_->addItem(tr("Svetlý"), "light");
-    theme_->addItem(tr("Tmavý"), "dark");
+    theme_->addItem(tr("Light"), "light");
+    theme_->addItem(tr("Dark"), "dark");
     theme_->setCurrentIndex(current.theme == "dark" ? 1 : 0);
     language_ = new QComboBox;
     language_->setObjectName("language");
@@ -149,19 +145,19 @@ SettingsDialog::SettingsDialog(const UiSettings& current, const std::vector<Comm
     font_ = new QSpinBox;
     font_->setRange(7, 24);
     font_->setValue(current.font_size);
-    hints_ = new QCheckBox(tr("Zobrazovať vysvetlivky nad panelmi (pre začiatočníkov)"));
+    hints_ = new QCheckBox(tr("Show explanations above the panels (for beginners)"));
     hints_->setChecked(current.hints);
-    onboarding_ = new QCheckBox(tr("Znova ukázať úvodného sprievodcu"));
-    form->addRow(tr("Jazyk:"), language_);
-    form->addRow(tr("Motív:"), theme_);
-    form->addRow(tr("Veľkosť písma kódu:"), font_);
+    onboarding_ = new QCheckBox(tr("Show the getting started guide again"));
+    form->addRow(tr("Language:"), language_);
+    form->addRow(tr("Theme:"), theme_);
+    form->addRow(tr("Code font size:"), font_);
     form->addRow(hints_);
     form->addRow(onboarding_);
     lay->addLayout(form);
 
-    lay->addWidget(new QLabel(tr("Klávesové skratky (kliknite do poľa a stlačte novú kombináciu):")));
+    lay->addWidget(new QLabel(tr("Keyboard shortcuts (click a field and press the new combination):")));
     auto* table = new QTableWidget(int(commands.size()), 2);
-    table->setHorizontalHeaderLabels({tr("Príkaz"), tr("Skratka")});
+    table->setHorizontalHeaderLabels({tr("Command"), tr("Shortcut")});
     table->horizontalHeader()->setSectionResizeMode(0, QHeaderView::Stretch);
     table->horizontalHeader()->setSectionResizeMode(1, QHeaderView::Stretch);
     table->verticalHeader()->hide();
@@ -177,7 +173,7 @@ SettingsDialog::SettingsDialog(const UiSettings& current, const std::vector<Comm
     lay->addWidget(table, 1);
 
     auto* buttons = new QDialogButtonBox(QDialogButtonBox::Ok | QDialogButtonBox::Cancel | QDialogButtonBox::RestoreDefaults);
-    buttons->button(QDialogButtonBox::RestoreDefaults)->setText(tr("Obnoviť predvolené"));
+    buttons->button(QDialogButtonBox::RestoreDefaults)->setText(tr("Restore defaults"));
     connect(buttons, &QDialogButtonBox::accepted, this, &QDialog::accept);
     connect(buttons, &QDialogButtonBox::rejected, this, &QDialog::reject);
     connect(buttons->button(QDialogButtonBox::RestoreDefaults), &QPushButton::clicked, this, [this] {
@@ -223,7 +219,7 @@ void show_table(QWidget* parent, const QString& title, const QString& intro, con
         lay->addWidget(l);
     }
     auto* filter = new QLineEdit;
-    filter->setPlaceholderText(QObject::tr("Filtrovať…"));
+    filter->setPlaceholderText(QObject::tr("Filter…"));
     lay->addWidget(filter);
     auto* t = new QTableWidget(int(rows.size()), int(headers.size()));
     t->setHorizontalHeaderLabels(headers);
@@ -245,7 +241,7 @@ void show_table(QWidget* parent, const QString& title, const QString& intro, con
         }
     });
     auto* buttons = new QDialogButtonBox(QDialogButtonBox::Close);
-    auto* copy = buttons->addButton(QObject::tr("Skopírovať všetko"), QDialogButtonBox::ActionRole);
+    auto* copy = buttons->addButton(QObject::tr("Copy all"), QDialogButtonBox::ActionRole);
     QObject::connect(copy, &QPushButton::clicked, &d, [rows, headers] {
         QStringList lines{headers.join('\t')};
         for (auto& r : rows) lines << r.join('\t');

@@ -1,10 +1,10 @@
-# Kódex správania
+# Code of conduct
 
-Tento projekt preberá [Contributor Covenant 2.1](https://www.contributor-covenant.org/version/2/1/code_of_conduct/).
+This project adopts the [Contributor Covenant 2.1](https://www.contributor-covenant.org/version/2/1/code_of_conduct/).
 
-V skratke: správajte sa k ostatným s rešpektom, bez obťažovania, urážok a diskriminácie.
-Konštruktívna kritika kódu je vítaná, útoky na ľudí nie. Začiatočníci sú v tomto projekte
-cieľovou skupinou – na „hlúpe otázky“ odpovedáme trpezlivo.
+In short: treat others with respect, without harassment, insults or discrimination.
+Constructive criticism of code is welcome, attacks on people are not. Beginners are a target
+audience of this project, so we answer "stupid questions" patiently.
 
-Porušenia hláste správcom projektu súkromne (pozri SECURITY.md pre kontakt). Správcovia môžu
-nevhodné príspevky odstrániť a opakovane porušujúcich účastníkov vylúčiť.
+Report violations to the maintainers privately (see SECURITY.md for the contact). Maintainers may
+remove inappropriate contributions and exclude participants who repeatedly break these rules.

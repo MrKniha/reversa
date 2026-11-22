@@ -1,50 +1,51 @@
-REVERSA – licencie tretích strán
-================================
+REVERSA – third-party licenses
+==============================
 
-REVERSA (MIT) je napísaná v C++. Pri zostavení a behu používa len tieto komponenty
-tretích strán. Úplnosť zoznamu overuje nástroj tools/check_licenses.cpp v CI (každá
-závislosť z CMakeLists.txt a vcpkg.json musí byť uvedená tu a mať povolenú licenciu).
+REVERSA (MIT) is written in C++. To build and run, it uses only the third-party
+components below. CI checks that this list is complete with tools/check_licenses.cpp
+(every dependency from CMakeLists.txt and vcpkg.json must be listed here and have an
+allowed license).
 
-Súčasť programu
----------------
+Part of the program
+-------------------
 
 1. Capstone
-   Verzia: 5.0.9 (CMake FetchContent, pevný git tag)
-   Licencia: BSD-3-Clause
+   Version: 5.0.9 (CMake FetchContent, pinned git tag)
+   License: BSD-3-Clause
    Copyright (c) 2013, COSEINC; Nguyen Anh Quynh and contributors
-   Zdroj: https://github.com/capstone-engine/capstone
-   Použitie: disassembler, staticky zlinkovaný bez úprav.
-   Povinnosť: zachovať copyright a text licencie pri redistribúcii.
+   Source: https://github.com/capstone-engine/capstone
+   Use: disassembler, linked statically without changes.
+   Obligation: keep the copyright and license text when redistributing.
 
 2. SQLite
-   Licencia: public domain
-   Zdroj: https://sqlite.org (Linux: systémový balík libsqlite3, Windows: vcpkg, verzia
-   zamknutá cez builtin-baseline vo vcpkg.json)
-   Použitie: formát projektu .rvproj.
+   License: public domain
+   Source: https://sqlite.org (Linux: system package libsqlite3, Windows: vcpkg, version
+   locked by builtin-baseline in vcpkg.json)
+   Use: the .rvproj project format.
 
 3. Qt 6 (QtCore, QtGui, QtWidgets)
-   Licencia: LGPL-3.0-only
-   Zdroj: https://www.qt.io, https://code.qt.io
-   Použitie: grafické rozhranie. Qt je linkované dynamicky a distribuované ako
-   samostatné, vymeniteľné knižnice (Windows: Qt6*.dll vedľa reversa.exe, Linux:
-   systémové balíky). Používateľ môže Qt nahradiť vlastnou verziou, čím sú splnené
-   podmienky LGPL. Zdrojový kód Qt je dostupný na code.qt.io. Kód Qt nie je upravený.
+   License: LGPL-3.0-only
+   Source: https://www.qt.io, https://code.qt.io
+   Use: graphical interface. Qt is linked dynamically and shipped as separate,
+   replaceable libraries (Windows: Qt6*.dll next to reversa.exe, Linux: system
+   packages). Users can replace Qt with their own build, which meets the LGPL
+   conditions. The Qt source code is available at code.qt.io. Qt is not modified.
 
-Vývojové nástroje
+Development tools
 -----------------
-Testy a kontroly repozitára (tools/*.cpp, tests/cpp) používajú len štandardnú knižnicu C++
-a komponenty vyššie. Žiadne ďalšie nástroje tretích strán sa nesťahujú.
+Tests and repository checks (tools/*.cpp, tests/cpp) use only the C++ standard library
+and the components above. No other third-party tools are downloaded.
 
-Inšpirácia (bez prebratia kódu)
--------------------------------
-Dizajnové vzory a algoritmy sme študovali v projektoch Ghidra (Apache-2.0),
-radare2 (LGPL-3.0), rizin/Cutter (LGPL-3.0/GPL-3.0), angr (BSD-2-Clause),
-RetDec (MIT), LIEF (Apache-2.0), Detect It Easy (MIT), binwalk (MIT).
-Z týchto projektov nie je skopírovaný žiadny zdrojový kód – pozri docs/research.md.
+Inspiration (no code copied)
+----------------------------
+We studied design patterns and algorithms in Ghidra (Apache-2.0), radare2 (LGPL-3.0),
+rizin/Cutter (LGPL-3.0/GPL-3.0), angr (BSD-2-Clause), RetDec (MIT), LIEF (Apache-2.0),
+Detect It Easy (MIT) and binwalk (MIT). No source code was copied from these
+projects; see docs/research.md.
 
-Testovacie vzorky
------------------
-samples/bin/* sú skompilované z vlastných zdrojákov samples/src/*.c (MIT)
-skriptom samples/build.sh. Obsahujú štartovací kód runtime knižníc (glibc,
-MinGW-w64 CRT), ktorý je pod licenciami s výnimkou pre runtime
-(LGPL-2.1 + výnimka / GCC Runtime Library Exception / ZPL / public domain).
+Test samples
+------------
+samples/bin/* are compiled from our own sources samples/src/*.c (MIT) by
+samples/build.sh. They contain startup code of runtime libraries (glibc,
+MinGW-w64 CRT), which is under licenses with a runtime exception
+(LGPL-2.1 + exception / GCC Runtime Library Exception / ZPL / public domain).
