@@ -65,7 +65,7 @@ Za 10 minút nájdete v ukážke heslo: [docs/quickstart.md](docs/quickstart.md)
 
 ## Dokumentácia
 
-| | |
+| Dokument | Obsah |
 |---|---|
 | [Rýchly štart](docs/quickstart.md) | Prvá analýza, panely GUI, klávesové skratky |
 | [Tutoriály](docs/tutorials.md) | Nájdite `main`, pochopte slučku, iné architektúry |
