@@ -45,8 +45,8 @@ použite termín z tohto slovníka (a ak chýba, doplňte ho sem).
 | **Anotácia** | annotation | Spoločný názov pre premenovania, komentáre a záložky. |
 | **Analýza** | auto-analysis | Automatické hľadanie funkcií, reťazcov a x-refs po otvorení súboru (beží na pozadí). |
 | **Diagnostika** | diagnostics | Upozornenia z načítania (napr. poškodená časť súboru). |
-| **Plugin** | plugin | Rozšírenie v Pythone, ktoré reaguje na udalosti (načítanie, analýza funkcie, premenovanie). |
-| **Skript** | script | Python program, ktorý používa API `reversa`. |
+| **Plugin** | plugin | Knižnica v C/C++ (.so/.dll), ktorá reaguje na udalosti (načítanie, analýza funkcie, premenovanie). |
+| **Skript** | script | Knižnica v C/C++, ktorú spustí `reversa script` a ktorá používa API REVERSA. |
 | **Pohľad** | view | Vlastný textový výstup zo skriptu alebo pluginu, zobrazený v GUI na karte Pohľady. |
 | **Report** | report | Textové zhrnutie analýzy (Markdown alebo HTML). |
 | **Headless** | headless | Beh bez grafického rozhrania (CLI, CI). |

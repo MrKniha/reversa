@@ -50,5 +50,5 @@ x86, ARM), PE 32/64-bit a surové dáta (`reversa gui firmware.bin --arch arm64 
 ## Ďalej
 
 - [tutorials.md](tutorials.md) – „Nájdite hlavnú funkciu programu“, „Pochopte slučku“, ukážky s riešeniami.
-- [scripting-tutorial.md](scripting-tutorial.md) – automatizácia v Pythone.
+- [scripting-tutorial.md](scripting-tutorial.md) – automatizácia skriptmi v C++.
 - [glossary.md](glossary.md) – slovník pojmov.

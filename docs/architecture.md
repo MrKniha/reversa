@@ -8,7 +8,7 @@ a čo plánujeme ďalej. Pojmy vysvetľuje [slovník](glossary.md).
 ```
 ┌──────────────────────────────────────────────────────────────────────┐
 │ Rozhrania:  Qt GUI (src/gui)   CLI (src/cli)   reporty (src/report)   │
-│             Python API + pluginy (src/python, python/reversa)          │
+│             pluginy a skripty v C/C++ (src/plugins, sdk/include)       │
 ├──────────────────────────────────────────────────────────────────────┤
 │ Služby:     Session (src/session) – otvorenie, analýza, anotácie,      │
 │             undo/redo, cache pseudokódu, uloženie projektu             │
@@ -41,8 +41,8 @@ skriptu sa okamžite prejaví v GUI (cez EventBus).
 | `src/session` | `Session`: mená, `resolve`, editácie cez `UndoStack`, udalosti, pohľady pluginov, uloženie. |
 | `src/report` | Reporty Markdown, HTML a JSON súhrn. |
 | `src/cli` | Príkazový riadok (`analyze`, `info`, `search`, `script`, `gui`, `--demo`). |
-| `src/python` | pybind11 väzby (`_reversa`), vstavaný interpret pre skripty a pluginy. |
-| `python/reversa` | Python balík: `Program`, `FunctionView`, `XrefView`, `PluginManager`. |
+| `src/plugins` | Načítanie natívnych pluginov a skriptov (`dlopen` / `LoadLibraryW`), tabuľka funkcií `rv_host`, izolácia chybných pluginov. |
+| `sdk/include/reversa` | Verejné SDK: `plugin.h` (stabilné C ABI, `RV_API_VERSION`) a `sdk.hpp` (C++ pomocník: `Program`, `Plugin`, makrá `REVERSA_PLUGIN`, `REVERSA_SCRIPT`). |
 | `src/gui` | Qt Widgets: hlavné okno, pohľady (listing, pseudokód, detaily, hex), graf (`GraphView`), dialógy (sprievodca, nastavenia). |
 
 ## Dátové toky
@@ -68,8 +68,7 @@ Projekt obsahuje SHA-256 binárky. Pri otvorení sa overí, či binárka sedí.
 ## Prečo C++ a Qt
 
 Verzia 0.1 bola v Pythone s webovým GUI v prehliadači. Od verzie 0.2 je celý
-nástroj v C++20 s natívnym rozhraním Qt 6. Python zostal len tam, kde je
-najužitočnejší: na skripty a pluginy.
+nástroj v C++20 s natívnym rozhraním Qt 6, vrátane skriptov a pluginov.
 
 - **Výkon a pamäť.** Analýza, x-refs a dekompilátor bežia natívne, bez
   interpretera. Veľké binárky (desaťtisíce funkcií) sú realistické, model
@@ -77,16 +76,19 @@ najužitočnejší: na skripty a pluginy.
   navyše).
 - **Jeden program bez závislostí.** Windows balík je zip s `reversa-gui.exe`;
   Linux balík je `.deb` so systémovými knižnicami. Netreba inštalovať Python
-  ani prehliadač (Windows balík obsahuje vlastný Python runtime). Zostava
-  s `-DREVERSA_PYTHON=OFF` Python vôbec nepotrebuje, len skripty a pluginy sú vypnuté.
+  ani prehliadač.
 - **Natívne GUI.** Qt Widgets je overené v nástrojoch ako Cutter, má
   dokovateľné panely, klávesové skratky, tmavý motív a funguje rovnako na
   Windows aj Linuxe. Odpadá lokálny HTTP server a s ním celá jeho útočná plocha.
-- **Python API zostáva.** pybind11 sprístupní tie isté C++ objekty
-  (`Session`, `Analysis`, …) Pythonu. Skripty a pluginy z 0.1 fungujú ďalej
-  (rovnaké `reversa.open`, `Program`, háčiky pluginov).
+- **Pluginy a skripty v C/C++ cez stabilné C ABI.** Plugin aj skript je zdieľaná
+  knižnica, ktorá s REVERSA komunikuje len cez tabuľku funkcií `rv_host`
+  (`sdk/include/reversa/plugin.h`). Nepotrebuje linkovať REVERSA, funguje
+  s ľubovoľným kompilátorom C alebo C++ a staré pluginy fungujú aj v novších
+  verziách: funkcie sa pridávajú len na koniec tabuľky a nekompatibilná zmena
+  zvýši `RV_API_VERSION`. Pluginy a skripty v Pythone z verzie 0.1 už nie sú
+  podporované (rozhodnutie 2026-11-22: celý nástroj v C++).
 - **Licencie.** Qt je pod LGPL-3.0 a linkujeme ho dynamicky (vymeniteľné
-  knižnice), čo je s MIT licenciou REVERSA v poriadku. pybind11 a Capstone sú
+  knižnice), čo je s MIT licenciou REVERSA v poriadku. Capstone je
   BSD-3-Clause, SQLite public domain.
 
 Cena: zostavenie je zložitejšie (CMake, kompilátor, Qt). Preto CI zostavuje
@@ -117,21 +119,22 @@ a bez transakcií.
 inštrukcie do spoločného IR. Optimalizácie a štruktúrovanie sú potom spoločné.
 Novú architektúru pridáte napísaním jedného liftera.
 
-**Závislosti so zámkom.** Capstone a pybind11 sťahuje CMake v pevných git
-tagoch, SQLite na Windows ide cez vcpkg s pevným `builtin-baseline`, testovacie
-Python nástroje majú hashe v `tests/requirements-dev.lock` a GitHub Actions sú
-pripnuté na commity. `scripts/check_licenses.py` v CI overí licenciu každej
-závislosti.
+**Závislosti so zámkom.** Capstone sťahuje CMake v pevnom git tagu, SQLite na
+Windows ide cez vcpkg s pevným `builtin-baseline` a GitHub Actions sú pripnuté
+na commity. Testy a nástroje repozitára (`tools/*.cpp`) nepotrebujú nič navyše.
+`tools/check_licenses.cpp` v CI overí licenciu každej závislosti.
 
 **MIT licencia.** Najjednoduchšia pre používateľov aj firmy, kompatibilná so
 všetkými našimi závislosťami. GPL nástroje (Unicorn, Keystone) preto nemôžu byť
 povinnou súčasťou, len voliteľnými pluginmi.
 
-**Izolácia pluginov bez sandboxu.** Každý háčik je obalený `try/except`.
-Spadnutý plugin sa vypne a REVERSA beží ďalej. Háčiky počas analýzy bežia na
-pracovnom vlákne (GIL sa získava pri každom volaní). Skutočný sandbox
-(samostatný proces) je v roadmape. Dovtedy dokumentácia jasne varuje, že
-pluginy sú dôveryhodný kód.
+**Izolácia pluginov bez sandboxu.** Háčik, ktorý vráti chybu (makro
+`REVERSA_PLUGIN` na ňu prevedie aj výnimku), plugin vypne a REVERSA beží ďalej.
+Knižnicu, ktorá sa nedá načítať alebo má inú verziu API, REVERSA preskočí
+a ohlási. Pád pamäte v natívnom plugine však ukončí celú aplikáciu. Háčiky
+počas analýzy bežia na pracovnom vlákne, volania na jeden program sú
+serializované. Skutočný sandbox (samostatný proces) je v roadmape. Dovtedy
+dokumentácia jasne varuje, že pluginy sú dôveryhodný kód.
 
 ## Čo sme sa naučili z existujúcich projektov
 
@@ -171,7 +174,7 @@ pluginy sú dôveryhodný kód.
 | P0 | CFG a graf volaní | hotové |
 | P0 | Pseudokód (dočasný) | hotové |
 | P0 | Premenovanie, komentáre, záložky, undo/redo, projekt | hotové |
-| P0 | Python API, pluginy s izoláciou | hotové |
+| P0 | API pre skripty, pluginy s izoláciou (C/C++) | hotové |
 | P0 | Headless CLI, reporty | hotové |
 | P1 | Slovenské a anglické rozhranie | slovenské úplné; anglický preklad chýba (texty sú pripravené cez `tr()`) |
 | P1 | Onboarding, nápoveda, slovník | hotové |

@@ -7,48 +7,47 @@ on:
 permissions:
   contents: read
 
-env:
-  PYTHONIOENCODING: utf-8  # Windows runners default to cp1252, which lacks Slovak letters
-
 # Third-party actions are pinned to commit SHAs (supply-chain safety); the comment names the tag.
 jobs:
   licenses:
     runs-on: ubuntu-24.04
     steps:
       - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+      - name: Build the repository checks (standard C++ only)
+        run: |
+          c++ -std=c++20 -O1 -o check_licenses tools/check_licenses.cpp
+          c++ -std=c++20 -O1 -o i18n_check tools/i18n_check.cpp
       - name: License check
-        run: python3 scripts/check_licenses.py
+        run: ./check_licenses .
       - name: Translation check (every GUI text in en, de, fr, zh)
-        run: python3 scripts/i18n.py check
+        run: ./i18n_check .
 
   linux:
     name: Linux (build, tests, .deb)
     runs-on: ubuntu-24.04
     steps:
       - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
-      - name: Packages (system Qt 6, SQLite, Python, so the .deb depends on distribution packages)
+      - name: Packages (system Qt 6 and SQLite, so the .deb depends on distribution packages)
         run: |
           sudo apt-get update
-          sudo apt-get install -y ninja-build libsqlite3-dev qt6-base-dev libgl-dev python3-dev python3-venv
+          sudo apt-get install -y ninja-build libsqlite3-dev qt6-base-dev libgl-dev
       - name: Configure
-        run: cmake -S . -B build -G Ninja -DCMAKE_BUILD_TYPE=Release -DPython_EXECUTABLE=/usr/bin/python3
+        run: cmake -S . -B build -G Ninja -DCMAKE_BUILD_TYPE=Release
       - name: Build
         run: cmake --build build --parallel
       - name: C++ and GUI tests
         run: ctest --test-dir build --output-on-failure
-      - name: Python API tests
-        run: |
-          python3 -m venv .venv
-          .venv/bin/pip install --require-hashes -r tests/requirements-dev.lock
-          REVERSA_BUILD_DIR=build .venv/bin/python -m pytest -q tests/python
       - name: Headless check
-        run: python3 scripts/headless_check.py build/bin/reversa headless-out
+        run: build/bin/headless_check build/bin/reversa . headless-out
       - name: Package (.deb) and test the installed package
         run: |
           cd build && cpack -G DEB && cd ..
           sudo apt-get install -y ./build/reversa_*.deb
           reversa --version
-          reversa script /usr/share/reversa/examples/scripts/strcmp_callers.py samples/bin/login_x64.exe | grep check_password
+          reversa script /usr/lib/reversa/examples/scripts/strcmp_callers.so samples/bin/login_x64.exe | grep check_password
+          # a third-party plugin built only against the installed SDK headers
+          mkdir -p plugin-test && c++ -std=c++17 -shared -fPIC -o plugin-test/hello_plugin.so /usr/share/reversa/examples/plugins/hello_plugin.cpp
+          reversa analyze samples/bin/login_x64.elf --plugins plugin-test | grep "hello-plugin"
           reversa --demo --no-gui
           reversa gui 2>&1 | grep "no display is available"
       - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
@@ -61,9 +60,6 @@ jobs:
     runs-on: windows-2022
     steps:
       - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
-      - uses: actions/setup-python@a26af69be951a213d495a4c3e4e4022e16d87065 # v5.6.0
-        with:
-          python-version: "3.12"
       - uses: jurplel/install-qt-action@d325aaf2a8baeeda41ad0b5d39f84a6af9bcf005 # v4.3.0
         with:
           version: "6.8.3"
@@ -75,24 +71,31 @@ jobs:
           cmake -S . -B build -G "Visual Studio 17 2022" -A x64
           -DCMAKE_TOOLCHAIN_FILE=C:/vcpkg/scripts/buildsystems/vcpkg.cmake
           -DVCPKG_TARGET_TRIPLET=x64-windows-static-md
-          -DPython_EXECUTABLE="$(python -c 'import sys; print(sys.executable)')"
       - name: Build
         run: cmake --build build --config Release --parallel
       - name: C++ and GUI tests
         run: ctest --test-dir build -C Release --output-on-failure
-      - name: Python API tests
-        shell: bash
-        run: |
-          python -m pip install --require-hashes -r tests/requirements-dev.lock
-          REVERSA_BUILD_DIR=build python -m pytest -q tests/python
       - name: Headless check
-        shell: bash
-        run: python scripts/headless_check.py build/bin/reversa.exe headless-out
-      - name: Portable package (Qt via windeployqt, bundled Python runtime)
-        shell: bash
+        run: build/bin/headless_check.exe build/bin/reversa.exe . headless-out
+      - name: Portable package (CPack zip, Qt via windeployqt)
         run: |
-          cmake --install build --config Release --prefix dist/reversa
-          python scripts/package_windows.py dist/reversa reversa-windows-x64.zip
+          cd build
+          cpack -G ZIP -C Release
+          Move-Item reversa-windows-x64.zip ..
+      - name: Test the portable package with a clean PATH (only the zip may provide Qt)
+        shell: pwsh
+        run: |
+          Expand-Archive reversa-windows-x64.zip -DestinationPath zip-test
+          $bin = "zip-test/reversa-windows-x64/bin"
+          $env:PATH = "$env:SystemRoot\System32;$env:SystemRoot"
+          $env:QT_QPA_PLATFORM = "offscreen"
+          & "$bin/reversa.exe" --version
+          if ($LASTEXITCODE -ne 0) { exit 1 }
+          $out = & "$bin/reversa.exe" script "$bin/examples/scripts/strcmp_callers.dll" samples/bin/login_x64.exe
+          $out
+          if (-not ($out -match "check_password")) { exit 1 }
+          & "$bin/reversa.exe" --demo --no-gui
+          if ($LASTEXITCODE -ne 0) { exit 1 }
       - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
         with:
           name: reversa-windows-x64

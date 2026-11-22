@@ -4,10 +4,13 @@
 
 #include "core/errors.hpp"
 #include "core/json.hpp"
+#include "core/sha256.hpp"
 #include "core/text.hpp"
 #include "project/store.hpp"
 #include "session/session.hpp"
 #include "test.hpp"
+
+#include <sqlite3.h>
 
 using namespace rv;
 namespace fs = std::filesystem;
@@ -171,5 +174,80 @@ TEST("project migrations upgrade the schema step by step") {
         newer = std::string(e.what()).find("newer REVERSA") != std::string::npos;
     }
     CHECK(newer);
+    fs::remove_all(dir);
+}
+
+// ---------------------------------------------------------------- project files are plain SQLite
+static void sql(const std::string& path, const std::string& script) {
+    sqlite3* db = nullptr;
+    CHECK(sqlite3_open(path.c_str(), &db) == SQLITE_OK);
+    CHECK(sqlite3_exec(db, script.c_str(), nullptr, nullptr, nullptr) == SQLITE_OK);
+    sqlite3_close(db);
+}
+
+static std::string sql_value(const std::string& path, const std::string& query) {
+    sqlite3* db = nullptr;
+    sqlite3_stmt* st = nullptr;
+    std::string out;
+    sqlite3_open(path.c_str(), &db);
+    if (sqlite3_prepare_v2(db, query.c_str(), -1, &st, nullptr) == SQLITE_OK)
+        while (sqlite3_step(st) == SQLITE_ROW) out += std::string(reinterpret_cast<const char*>(sqlite3_column_text(st, 0))) + ",";
+    sqlite3_finalize(st);
+    sqlite3_close(db);
+    return out;
+}
+
+TEST("project is plain SQLite with documented tables") {
+    auto dir = temp_dir();
+    std::string path = Session::open(rvtest::sample("hello_x64.elf"))->save(path_to_utf8(dir / "h.rvproj"));
+    std::string tables = sql_value(path, "SELECT name FROM sqlite_master WHERE type='table' ORDER BY name");
+    for (auto t : {"meta,", "binary,", "names,", "comments,", "bookmarks,", "var_names,"}) CHECK(contains(tables, t));
+    CHECK_EQ(sql_value(path, "SELECT value FROM meta WHERE key='schema_version'"), std::to_string(SCHEMA_VERSION) + ",");
+    fs::remove_all(dir);
+}
+
+TEST("project save errors and default project paths") {
+    auto dir = temp_dir();
+    bool threw = false;
+    try { Session::open(rvtest::sample("hello_x64.elf"))->save(path_to_utf8(dir / "no" / "such" / "x.rvproj")); }
+    catch (const ProjectError&) { threw = true; }
+    CHECK(threw);
+    threw = false;
+    try { load_project(path_to_utf8(dir / "nope.rvproj")); } catch (const ProjectError&) { threw = true; }
+    CHECK(threw);
+    CHECK(!is_project(path_to_utf8(dir / "missing.rvproj")));
+    CHECK_EQ(default_project_path(path_to_utf8(dir / "a.out")), path_to_utf8(dir / "a.out.rvproj"));
+    CHECK(contains(default_project_path("<demo>/login_x64.elf"), "reversa-projects"));
+    fs::remove_all(dir);
+}
+
+TEST("projects written by REVERSA 0.1 (Python) still open") {
+    auto dir = temp_dir();
+    std::string path = path_to_utf8(dir / "old.rvproj");
+    std::ifstream f(path_from_utf8(rvtest::sample("hello_x64.elf")), std::ios::binary);
+    std::vector<uint8_t> data((std::istreambuf_iterator<char>(f)), {});
+    sql(path, R"(
+CREATE TABLE meta (key TEXT PRIMARY KEY, value TEXT NOT NULL);
+CREATE TABLE binary (id INTEGER PRIMARY KEY CHECK (id = 1), name TEXT, path TEXT, sha256 TEXT, data BLOB, load_options TEXT);
+CREATE TABLE names (addr INTEGER PRIMARY KEY, name TEXT NOT NULL);
+CREATE TABLE comments (addr INTEGER PRIMARY KEY, text TEXT NOT NULL);
+CREATE TABLE bookmarks (addr INTEGER PRIMARY KEY, label TEXT NOT NULL);
+CREATE TABLE var_names (func INTEGER, key TEXT, name TEXT NOT NULL, PRIMARY KEY (func, key));
+INSERT INTO meta VALUES ('schema_version', '1'), ('app', 'REVERSA'), ('settings', '{}');
+INSERT INTO names VALUES (4198806, 'my_func');)");
+    sqlite3* db = nullptr;
+    sqlite3_open(path.c_str(), &db);
+    sqlite3_stmt* st = nullptr;
+    sqlite3_prepare_v2(db, "INSERT INTO binary VALUES (1, 'hello_x64.elf', '/old/hello_x64.elf', ?, ?, ?)", -1, &st, nullptr);
+    std::string sha = sha256_hex(data), opts = R"({"arch": null, "base": null, "raw": false})";
+    sqlite3_bind_text(st, 1, sha.c_str(), -1, SQLITE_TRANSIENT);
+    sqlite3_bind_blob(st, 2, data.data(), int(data.size()), SQLITE_TRANSIENT);
+    sqlite3_bind_text(st, 3, opts.c_str(), -1, SQLITE_TRANSIENT);
+    CHECK(sqlite3_step(st) == SQLITE_DONE);
+    sqlite3_finalize(st);
+    sqlite3_close(db);
+    auto s = Session::open(path);
+    CHECK_EQ(s->name_of(0x401196), std::string("my_func"));
+    CHECK_EQ(s->binary.path, std::string("/old/hello_x64.elf"));
     fs::remove_all(dir);
 }

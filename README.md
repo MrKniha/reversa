@@ -4,7 +4,7 @@
 
 **Open-source nástroj na reverzné inžinierstvo pre začiatočníkov aj profesionálov.**
 Disassembler, pseudokód (dekompilátor), krížové odkazy (x-refs), grafy funkcií
-a volaní, Python API, pluginy a natívne grafické rozhranie (Qt).
+a volaní, pluginy a skripty v C/C++ a natívne grafické rozhranie (Qt).
 
 - Formáty: ELF, PE (32/64-bit), surové dáta (firmvér)
 - Architektúry: x86, x86-64, AArch64 (ARM64), ARM 32-bit (len disassembly)
@@ -12,8 +12,8 @@ a volaní, Python API, pluginy a natívne grafické rozhranie (Qt).
 - Platformy: **Windows a Linux** (64-bit)
 - Jazyky GUI: angličtina (predvolená), slovenčina, nemčina, francúzština, čínština (zjednodušená).
   Príkazový riadok, chybové hlásenia a reporty sú po anglicky.
-- Napísané v **C++20** s grafickým rozhraním **Qt 6**; Python slúži len na skripty
-  a pluginy. Prečo: [docs/architecture.md](docs/architecture.md#prečo-c-a-qt).
+- Celé napísané v **C++20** s grafickým rozhraním **Qt 6**. Pluginy a skripty sú
+  knižnice v C alebo C++ so stabilným C rozhraním. Prečo: [docs/architecture.md](docs/architecture.md#prečo-c-a-qt).
 - Licencia: MIT
 
 > Verzia 0.2.0. Pseudokód je **dočasný**: typy sú odhadnuté. Dôležité
@@ -37,7 +37,7 @@ reversa program.exe                                       # to isté, kratšie
 reversa analyze program.elf --report report.md            # headless report (aj .html, --json)
 reversa analyze program.elf --pseudocode main             # pseudokód jednej funkcie
 reversa search program.elf --insn "call.*strcmp"          # hľadanie v inštrukciách
-reversa script examples/scripts/strcmp_callers.py program.elf
+reversa script strcmp_callers.so program.elf            # skript v C++ (docs/scripting-tutorial.md)
 reversa gui firmware.bin --arch arm64 --base 0x8000000    # surové dáta
 ```
 
@@ -85,7 +85,7 @@ Na stránke GitHub Actions repozitára (posledný úspešný beh CI → *Artifac
 
 - **Windows:** `reversa-windows-x64` je zip. Rozbaľte ho kamkoľvek a spustite
   `reversa\bin\reversa-gui.exe` (GUI) alebo `reversa.exe` (príkazový riadok).
-  Obsahuje Qt aj Python pre skripty a pluginy, nič ďalšie netreba inštalovať.
+  Obsahuje Qt, hlavičky SDK pre pluginy a preložené príklady, nič ďalšie netreba inštalovať.
   Windows SmartScreen môže varovať, lebo súbor nie je digitálne podpísaný.
 - **Linux (Ubuntu 24.04, Debian 13 a novšie):** `reversa-linux-x64-deb` obsahuje
   balík `.deb`:
@@ -98,24 +98,22 @@ Na stránke GitHub Actions repozitára (posledný úspešný beh CI → *Artifac
 ### Zostavenie zo zdrojov
 
 Potrebujete C++20 kompilátor (GCC 11+, Clang 14+ alebo Visual Studio 2022),
-CMake 3.21+, Qt 6.2+, SQLite 3 a Python 3.10+ (voliteľný, pre skripty
-a pluginy). Capstone a pybind11 stiahne CMake automaticky v pevných verziách.
+CMake 3.21+, Qt 6.2+ a SQLite 3. Capstone stiahne CMake automaticky v pevnej verzii.
 
 **Linux (Debian/Ubuntu):**
 
 ```bash
-sudo apt install build-essential cmake ninja-build git qt6-base-dev libgl-dev libsqlite3-dev python3-dev
+sudo apt install build-essential cmake ninja-build git qt6-base-dev libgl-dev libsqlite3-dev
 git clone https://github.com/MrKniha/reversa.git && cd reversa
 cmake -S . -B build -G Ninja -DCMAKE_BUILD_TYPE=Release
 cmake --build build
 ./build/bin/reversa --demo
 ```
 
-Fedora: `sudo dnf install gcc-c++ cmake ninja-build qt6-qtbase-devel sqlite-devel python3-devel`.
+Fedora: `sudo dnf install gcc-c++ cmake ninja-build qt6-qtbase-devel sqlite-devel`.
 
 **Windows:** nainštalujte Visual Studio 2022 (Desktop development with C++),
-Qt 6 (Qt Online Installer, komponent MSVC 2022 64-bit), Python 3.12 z
-python.org a vcpkg (`git clone https://github.com/microsoft/vcpkg` a
+Qt 6 (Qt Online Installer, komponent MSVC 2022 64-bit) a vcpkg (`git clone https://github.com/microsoft/vcpkg` a
 `bootstrap-vcpkg.bat`). V „x64 Native Tools Command Prompt":
 
 ```bat
@@ -126,29 +124,29 @@ cmake --build build --config Release
 build\bin\reversa.exe --demo
 ```
 
-Voľby CMake: `-DREVERSA_GUI=OFF` (len príkazový riadok, bez Qt),
-`-DREVERSA_PYTHON=OFF` (bez skriptov a pluginov), `-DREVERSA_TESTS=OFF`.
+Voľby CMake: `-DREVERSA_GUI=OFF` (len príkazový riadok, bez Qt), `-DREVERSA_TESTS=OFF`.
 
 ### Testy
 
 ```bash
-ctest --test-dir build --output-on-failure            # C++ testy a GUI test (Qt offscreen)
-python3 -m venv .venv && .venv/bin/pip install --require-hashes -r tests/requirements-dev.lock
-REVERSA_BUILD_DIR=build .venv/bin/python -m pytest tests/python   # Python API, CLI, golden súbory
-python3 scripts/headless_check.py build/bin/reversa   # end-to-end kontrola všetkých vzoriek
-python3 scripts/check_licenses.py                     # licencie závislostí
-python3 scripts/i18n.py check                         # úplnosť prekladov GUI
+ctest --test-dir build --output-on-failure           # C++ testy (API, pluginy, CLI, golden súbory) a GUI test
+build/bin/headless_check build/bin/reversa .         # end-to-end kontrola všetkých vzoriek
+build/bin/check_licenses .                           # licencie závislostí
+build/bin/i18n_check .                               # úplnosť prekladov GUI
 ```
 
 Na vývoj pozri [CONTRIBUTING.md](CONTRIBUTING.md).
 
-### Python API mimo aplikácie
+### Pluginy a skripty v C++
 
-Modul sa zostaví spolu s programom do `build/bin/python`:
+Príklady v `examples/` sa preložia spolu s programom do `build/bin/examples`:
 
 ```bash
-PYTHONPATH=build/bin/python python3 -c "import reversa; p = reversa.open('samples/bin/login_x64.elf'); print([f.name for f in p.callers_of('strcmp')])"
+./build/bin/reversa script build/bin/examples/scripts/strcmp_callers.so samples/bin/login_x64.elf
+./build/bin/reversa analyze samples/bin/login_x64.elf --plugins build/bin/examples/plugins
 ```
+
+Návody: [docs/scripting-tutorial.md](docs/scripting-tutorial.md), [docs/plugin-tutorial.md](docs/plugin-tutorial.md).
 
 ## Bezpečná analýza malvéru
 
@@ -198,8 +196,8 @@ nástroj použijete, zodpovedáte vy. Analyzujte iba softvér, na ktorý máte p
 |---|---|
 | [docs/quickstart.md](docs/quickstart.md) | Rýchly štart za 10 minút |
 | [docs/tutorials.md](docs/tutorials.md) | Tutoriály: prvá analýza, nájdite `main`, pochopte slučku, iné architektúry |
-| [docs/scripting-tutorial.md](docs/scripting-tutorial.md) | Python API a skripty |
-| [docs/plugin-tutorial.md](docs/plugin-tutorial.md) | Ako napísať plugin |
+| [docs/scripting-tutorial.md](docs/scripting-tutorial.md) | Skripty v C++ a ich API |
+| [docs/plugin-tutorial.md](docs/plugin-tutorial.md) | Ako napísať plugin v C/C++ |
 | [docs/glossary.md](docs/glossary.md) | Slovník pojmov |
 | [docs/architecture.md](docs/architecture.md) | Architektúra, rozhodnutia, roadmapa |
 | [docs/research.md](docs/research.md) | Výskum, porovnania, záznam REA |
@@ -209,7 +207,7 @@ nástroj použijete, zodpovedáte vy. Analyzujte iba softvér, na ktorý máte p
 
 REVERSA je pod licenciou **MIT**, pozri [LICENSE](LICENSE). Licencie
 komponentov tretích strán sú v [LICENSE-THIRD-PARTY](LICENSE-THIRD-PARTY).
-Skript `scripts/check_licenses.py` ich kontroluje v CI.
+Nástroj `tools/check_licenses.cpp` ich kontroluje v CI.
 
 ## Poďakovanie
 

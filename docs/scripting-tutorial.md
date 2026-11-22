@@ -1,29 +1,48 @@
-# Tutoriál: skriptovanie v Pythone
+# Tutoriál: skripty v C++
 
-REVERSA je Python knižnica. Všetko, čo vidíte v GUI (funkcie, x-refs, pseudokód,
-premenovania), máte k dispozícii aj zo skriptu. API je stabilné vo verzii `1.0`
-(rovnaké API dostávajú pluginy).
+Skript je malá zdieľaná knižnica (`.so` na Linuxe, `.dll` na Windows), ktorú
+spustí príkaz `reversa script`. Všetko, čo vidíte v GUI (funkcie, x-refs,
+pseudokód, premenovania), máte k dispozícii aj zo skriptu. Skripty aj pluginy
+používajú rovnaké stabilné rozhranie v jazyku C, verzia `RV_API_VERSION 1`
+([sdk/include/reversa/plugin.h](../sdk/include/reversa/plugin.h)).
+Pre C++ je k nemu tenký pomocník bez ďalších závislostí
+([sdk/include/reversa/sdk.hpp](../sdk/include/reversa/sdk.hpp)).
 
-## Ako skript spustiť
+## Prvý skript: kto volá strcmp
 
-```bash
-# 1) ako bežný Python skript (REVERSA musí byť nainštalovaná)
-python moj_skript.py samples/bin/login_x64.elf
+```cpp
+#include <reversa/sdk.hpp>
 
-# 2) cez REVERSA (rovnaký Python, v ktorom je REVERSA nainštalovaná);
-#    argumenty za skriptom dostane skript v sys.argv
-reversa script moj_skript.py samples/bin/login_x64.elf
+#include <cstdio>
+
+int run(const rv_host* host, const std::vector<std::string>& args) {
+    auto prog = reversa::Program::open(host, args.size() > 1 ? args[1] : "samples/bin/login_x64.elf");
+    for (auto& f : prog.callers_of("strcmp")) std::printf("%-24s %s\n", f.name.c_str(), reversa::hex(f.addr).c_str());
+    return 0;
+}
+REVERSA_SCRIPT(run)
 ```
 
-## Prvý skript: kto volá strcmp (akceptačné kritérium: ≤ 10 riadkov)
+Súbor je v [examples/scripts/strcmp_callers.cpp](../examples/scripts/strcmp_callers.cpp).
+`args[0]` je cesta ku skriptu, ďalšie prvky sú argumenty za skriptom. Návratová
+hodnota `run` je návratový kód príkazu `reversa script`. Výnimka (napríklad
+neznáme meno funkcie) sa vypíše ako chyba a skript skončí s kódom 1.
 
-```python
-import sys
-import reversa
+## Preklad a spustenie
 
-prog = reversa.open(sys.argv[1])
-for func in prog.callers_of("strcmp"):
-    print(f"{func.name:<24} 0x{func.addr:x}")
+Hlavičky SDK sú v balíku REVERSA: Linux `/usr/include/reversa`, Windows
+`bin\sdk\include\reversa` v rozbalenom zip-e. Netreba linkovať žiadnu knižnicu.
+
+```bash
+# Linux (g++ alebo clang++)
+g++ -std=c++17 -shared -fPIC -o strcmp_callers.so strcmp_callers.cpp
+reversa script ./strcmp_callers.so samples/bin/login_x64.elf
+```
+
+```bat
+:: Windows (Developer Command Prompt pre Visual Studio)
+cl /std:c++17 /EHsc /LD /I C:\reversa\bin\sdk\include strcmp_callers.cpp
+reversa script strcmp_callers.dll samples\bin\login_x64.exe
 ```
 
 Výstup pre `samples/bin/login_x64.elf`:
@@ -33,73 +52,82 @@ check_password           0x401196
 check_user               0x401217
 ```
 
-Súbor je v [examples/scripts/strcmp_callers.py](../examples/scripts/strcmp_callers.py).
-Funguje aj na Windows PE (`login_x64.exe`, import `strcmp` z msvcrt.dll), na ARM64
-a na binárkach bez symbolov.
+Skript funguje aj na Windows PE (`login_x64.exe`, import `strcmp` z msvcrt.dll),
+na ARM64 a na binárkach bez symbolov. Preložené príklady sú v balíku: Linux
+`/usr/lib/reversa/examples/scripts/`, Windows `bin\examples\scripts\`.
+Pri vývoji REVERSA ich CMake preloží do `build/bin/examples/scripts/`.
 
-## Prehľad API
+## Prehľad API (C++)
 
-`reversa.open(cesta)` vráti objekt `Program` (súbor je už analyzovaný).
-Kdekoľvek API čaká adresu, môžete zadať číslo, text `"0x401196"` alebo meno
-(`"main"`, `"strcmp"`, `"sub_401196"`).
+`reversa::Program::open(host, cesta)` otvorí binárku alebo projekt `.rvproj`
+a analyzuje ho. Program sa zatvorí, keď objekt zanikne. Kdekoľvek API čaká meno,
+môžete zadať aj text `"0x401196"`, `"main"`, `"strcmp"` alebo `"sub_401196"`.
 
 | Volanie | Čo vráti / urobí |
 |---|---|
-| `prog.path`, `prog.arch`, `prog.format`, `prog.entry` | základné informácie |
-| `prog.main` | funkcia `main` (alebo `None`) |
-| `prog.functions(include_imports=False)` | zoznam funkcií (`FunctionView`) |
-| `prog.function(ref)` | jedna funkcia |
-| `prog.callers_of(ref)` | funkcie, ktoré volajú `ref` (aj cez PLT/IAT) |
-| `prog.xrefs_to(ref)`, `prog.xrefs_from(ref)` | krížové odkazy (`frm`, `to`, `kind`) |
-| `prog.imports()`, `prog.exports()`, `prog.sections()` | tabuľky súboru |
-| `prog.strings(min_len=4)` | nájdené reťazce |
-| `prog.search_strings(text, regex=False)` | dvojice `(adresa, text)` |
-| `prog.search_bytes("48 8b ?? 05")` | adresy, kde sa vzor nachádza (`??` = ľubovoľný bajt) |
-| `prog.read(addr, size)`, `prog.read_string(addr)` | čítanie pamäte súboru |
-| `prog.disassemble(addr, count)` | inštrukcie (`addr`, `mnemonic`, `op_str`) |
-| `prog.decompile(ref)` | pseudokód ako text |
-| `prog.rename(ref, meno)`, `prog.rename_variable(func, kľúč, meno)` | premenovanie (s undo) |
-| `prog.comment(ref, text)`, `prog.bookmark(ref, popis)` | anotácie (s undo) |
-| `prog.undo()`, `prog.redo()` | vrátenie a zopakovanie zmien |
-| `prog.add_view(názov, funkcia)` | vlastný textový pohľad (GUI karta *Pohľady*, report) |
-| `prog.save(cesta.rvproj)` | uloženie projektu |
-
-`FunctionView` má `name`, `addr`, `size`, `kind`, `is_import`, `callers`,
-`callees`, `xrefs`, `instructions()`, `pseudocode()` a `rename(meno)`.
+| `path()`, `format()`, `arch()`, `entry()` | základné informácie |
+| `main()` | funkcia `main` (`std::optional<Function>`) |
+| `functions(include_imports = false)` | zoznam funkcií |
+| `function(ref)` | jedna funkcia (`addr`, `name`, `size`, `insn_count`, `block_count`, `is_import`) |
+| `resolve(ref)`, `addr(ref)`, `name_of(addr)` | mená a adresy (`addr` pri neznámom mene vyhodí `reversa::Error`) |
+| `callers_of(ref)`, `callees_of(addr)` | kto funkciu volá a koho volá ona (aj cez PLT/IAT) |
+| `xrefs_to(addr)` | krížové odkazy (`from`, `to`, `kind`) |
+| `strings()` | nájdené reťazce (`addr`, `text`) |
+| `search_bytes("48 8b ?? 05")` | adresy, kde sa vzor nachádza (`??` = ľubovoľný bajt) |
+| `read(addr, size)` | bajty zo súboru |
+| `pseudocode(addr)` | pseudokód ako text |
+| `rename(addr, meno)`, `set_comment(addr, text)`, `set_bookmark(addr, popis)` | anotácie (s undo); prázdny text ich zmaže |
+| `comment(addr)`, `bookmark(addr)` | prečítanie anotácií |
+| `add_view(názov, funkcia)` | vlastný textový pohľad (GUI karta *Pohľady*, report) |
+| `save(cesta.rvproj)` | uloženie projektu (bez cesty vedľa binárky) |
+| `log(text)` | výpis na štandardný výstup |
 
 ## Príklad: tabuľka funkcií do CSV
 
-```python
-import csv, sys
-import reversa
+[examples/scripts/function_table.cpp](../examples/scripts/function_table.cpp)
+vypíše meno, adresu, veľkosť, počet volajúcich a volané funkcie:
 
-prog = reversa.open(sys.argv[1])
-out = csv.writer(sys.stdout)
-out.writerow(["name", "address", "size", "callers", "callees"])
-for f in prog.functions():
-    out.writerow([f.name, hex(f.addr), f.size, len(f.callers), " ".join(c.name for c in f.callees)])
+```bash
+reversa script function_table.so samples/bin/hello_x64.elf > functions.csv
 ```
 
-Celý príklad: [examples/scripts/function_table.py](../examples/scripts/function_table.py).
+## Príklad: automatické anotácie a uložený projekt
 
-## Príklad: automatické anotácie a vlastný pohľad
-
-[examples/scripts/annotate_and_view.py](../examples/scripts/annotate_and_view.py)
-komentuje miesta, ktoré používajú reťazce s „password“, premenuje volajúcich
+[examples/scripts/annotate_and_view.cpp](../examples/scripts/annotate_and_view.cpp)
+okomentuje miesta, ktoré používajú reťazce s „password“, premenuje volajúcich
 `strcmp` a uloží projekt. Výsledok otvoríte v GUI:
 
 ```bash
-python examples/scripts/annotate_and_view.py samples/bin/login_x64_stripped.elf out.rvproj
+reversa script annotate_and_view.so samples/bin/login_x64_stripped.elf out.rvproj
 reversa gui out.rvproj
+```
+
+## Skript v čistom C
+
+`sdk.hpp` je len pohodlie. Skript môže použiť priamo tabuľku funkcií `rv_host`:
+
+```c
+#include <stdio.h>
+#include <reversa/plugin.h>
+
+RV_EXPORT int reversa_script(const rv_host* host, int argc, const char* const* argv) {
+    rv_program* p = host->open(argc > 1 ? argv[1] : "samples/bin/login_x64.elf");
+    if (!p) { fprintf(stderr, "%s\n", host->last_error()); return 1; }
+    printf("%s / %s, %zu functions\n", host->format(p), host->arch(p), host->function_count(p));
+    host->close(p);
+    return 0;
+}
 ```
 
 ## Tipy
 
-- Premenovanie zo skriptu sa okamžite prejaví v pseudokóde (`prog.decompile`)
-  aj v x-refs. Po uložení ho uvidíte v GUI.
-- Neznáme meno alebo adresa vyvolá `reversa.core.errors.ReversaError` so
-  zrozumiteľnou správou.
+- Premenovanie zo skriptu sa okamžite prejaví v pseudokóde aj v x-refs. Po
+  uložení projektu ho uvidíte v GUI.
+- Text, ktorý vráti funkcia `rv_host`, platí len do ďalšieho volania na tom istom
+  vlákne. `sdk.hpp` ho kopíruje do `std::string` za vás.
 - Pseudokód je **dočasný** (MVP): typy sú odhadnuté. Dôležité závery si overte
   v listingu.
-- Skripty bežia ako bežný Python bez sandboxu. Spúšťajte len skripty, ktorým
+- Skript beží v procese REVERSA bez sandboxu. Spúšťajte len skripty, ktorým
   dôverujete.
+- Python skripty (`.py`) z verzie 0.1 už REVERSA nespúšťa. Prepíšte ich podľa
+  tohto návodu.

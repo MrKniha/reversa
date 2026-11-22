@@ -6,7 +6,6 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_POSITION_INDEPENDENT_CODE ON)
 
 option(REVERSA_GUI "Build the Qt GUI" ON)
-option(REVERSA_PYTHON "Build the Python scripting module and embedded interpreter" ON)
 option(REVERSA_TESTS "Build the C++ tests" ON)
 
 if(MSVC)
@@ -39,46 +38,18 @@ endforeach()
 
 file(GLOB CORE_SOURCES CONFIGURE_DEPENDS
   src/core/*.cpp src/formats/*.cpp src/disasm/*.cpp src/analysis/*.cpp src/decompiler/*.cpp
-  src/project/*.cpp src/session/*.cpp src/report/*.cpp)
+  src/project/*.cpp src/session/*.cpp src/report/*.cpp src/plugins/*.cpp)
 add_library(reversa_core STATIC ${CORE_SOURCES})
-target_include_directories(reversa_core PUBLIC src)
-target_link_libraries(reversa_core PUBLIC capstone SQLite::SQLite3)
+target_include_directories(reversa_core PUBLIC src sdk/include)
+target_link_libraries(reversa_core PUBLIC capstone SQLite::SQLite3 ${CMAKE_DL_LIBS})
 target_compile_definitions(reversa_core PUBLIC REVERSA_VERSION="${PROJECT_VERSION}")
-
-if(REVERSA_PYTHON)
-  find_package(Python 3.10 COMPONENTS Interpreter Development REQUIRED)
-  FetchContent_Declare(pybind11 GIT_REPOSITORY https://github.com/pybind/pybind11.git GIT_TAG v2.13.6 GIT_SHALLOW TRUE)
-  FetchContent_MakeAvailable(pybind11)
-  # Bindings shared by the `reversa` Python extension and the embedded interpreter of the app.
-  add_library(reversa_bindings STATIC src/python/bindings.cpp)
-  target_link_libraries(reversa_bindings PUBLIC reversa_core pybind11::pybind11)
-  pybind11_add_module(_reversa src/python/module.cpp)
-  target_link_libraries(_reversa PRIVATE reversa_bindings)
-  # Importable package in the build tree: <build>/bin/python/reversa/{*.py,_reversa.*}
-  set(RV_PY_OUT ${CMAKE_BINARY_DIR}/bin/python/reversa)
-  set_target_properties(_reversa PROPERTIES LIBRARY_OUTPUT_DIRECTORY ${RV_PY_OUT} LIBRARY_OUTPUT_DIRECTORY_RELEASE ${RV_PY_OUT}
-                        LIBRARY_OUTPUT_DIRECTORY_DEBUG ${RV_PY_OUT} RUNTIME_OUTPUT_DIRECTORY ${RV_PY_OUT})
-  file(GLOB RV_PY_SOURCES CONFIGURE_DEPENDS ${CMAKE_SOURCE_DIR}/python/reversa/*.py)
-  add_custom_target(reversa_python ALL
-    COMMAND ${CMAKE_COMMAND} -E make_directory ${RV_PY_OUT}
-    COMMAND ${CMAKE_COMMAND} -E copy_if_different ${RV_PY_SOURCES} ${RV_PY_OUT}
-    DEPENDS ${RV_PY_SOURCES} COMMENT "Copying the reversa Python package")
-  add_dependencies(_reversa reversa_python)
-endif()
 
 include(cmake/embed.cmake)
 rv_embed(rv_demo_elf ${CMAKE_SOURCE_DIR}/assets/demo/login_x64.elf ${CMAKE_BINARY_DIR}/generated/demo_elf.cpp)
 
-# Application layer shared by the executables and the GUI tests: CLI commands, demo, embedded
-# Python, Qt GUI.
+# Application layer shared by the executables and the GUI tests: CLI commands, demo, Qt GUI.
 add_library(reversa_app STATIC src/cli/main.cpp ${CMAKE_BINARY_DIR}/generated/demo_elf.cpp)
 target_link_libraries(reversa_app PUBLIC reversa_core)
-if(REVERSA_PYTHON)
-  target_sources(reversa_app PRIVATE src/python/embed.cpp)
-  target_link_libraries(reversa_app PUBLIC reversa_bindings pybind11::embed)
-  target_compile_definitions(reversa_app PUBLIC REVERSA_WITH_PYTHON=1)
-  add_dependencies(reversa_app reversa_python)
-endif()
 if(REVERSA_GUI)
   find_package(Qt6 6.2 REQUIRED COMPONENTS Widgets)
   file(GLOB GUI_SOURCES CONFIGURE_DEPENDS src/gui/*.cpp src/gui/*.hpp)
@@ -105,6 +76,26 @@ if(WIN32 AND REVERSA_GUI)
   target_link_libraries(reversa-gui PRIVATE reversa_app)
 endif()
 
+# ---------------------------------------------------------------- examples: plugins and scripts (shared libraries)
+# Built against the SDK headers only, exactly like third-party plugins; output: <build>/bin/examples/<kind>/<name>.so|.dll
+function(rv_module name src out)
+  add_library(${name} MODULE ${src})
+  target_include_directories(${name} PRIVATE ${CMAKE_SOURCE_DIR}/sdk/include)
+  set_target_properties(${name} PROPERTIES PREFIX "" C_VISIBILITY_PRESET hidden CXX_VISIBILITY_PRESET hidden
+                        CXX_STANDARD 17 LIBRARY_OUTPUT_DIRECTORY ${out})
+  foreach(cfg Debug Release RelWithDebInfo MinSizeRel)
+    string(TOUPPER ${cfg} CFG)
+    set_target_properties(${name} PROPERTIES LIBRARY_OUTPUT_DIRECTORY_${CFG} ${out})
+  endforeach()
+endfunction()
+foreach(ex plugins/hello_plugin plugins/crypto_constants plugins/crashing_plugin
+           scripts/strcmp_callers scripts/function_table scripts/annotate_and_view)
+  get_filename_component(kind ${ex} DIRECTORY)
+  get_filename_component(name ${ex} NAME)
+  rv_module(${name} examples/${ex}.cpp ${CMAKE_BINARY_DIR}/bin/examples/${kind})
+  list(APPEND RV_EXAMPLES_${kind} ${name})
+endforeach()
+
 # ---------------------------------------------------------------- install / packages
 # Windows: everything next to the executables (portable zip). Linux: FHS layout for the .deb.
 install(TARGETS reversa RUNTIME DESTINATION bin)
@@ -114,31 +105,46 @@ endif()
 if(WIN32)
   set(RV_SHARE bin)
   set(RV_DOC bin/doc)
+  set(RV_SDK_INCLUDE bin/sdk/include)
+  set(RV_LIB_EXAMPLES bin/examples)
   include(InstallRequiredSystemLibraries)  # MSVC runtime DLLs
 else()
   set(RV_SHARE share/reversa)
   set(RV_DOC share/doc/reversa)
+  set(RV_SDK_INCLUDE include)
+  set(RV_LIB_EXAMPLES lib/reversa/examples)
   install(FILES assets/reversa.desktop DESTINATION share/applications)
   install(FILES assets/reversa.svg DESTINATION share/icons/hicolor/scalable/apps)
   install(FILES assets/reversa-256.png DESTINATION share/icons/hicolor/256x256/apps RENAME reversa.png)
 endif()
-if(REVERSA_PYTHON)
-  install(FILES ${RV_PY_SOURCES} DESTINATION ${RV_SHARE}/python/reversa)
-  install(TARGETS _reversa LIBRARY DESTINATION ${RV_SHARE}/python/reversa RUNTIME DESTINATION ${RV_SHARE}/python/reversa)
-endif()
-install(DIRECTORY examples/ DESTINATION ${RV_SHARE}/examples PATTERN "__pycache__" EXCLUDE)
+install(DIRECTORY examples/ DESTINATION ${RV_SHARE}/examples)           # example sources
+install(DIRECTORY sdk/include/reversa DESTINATION ${RV_SDK_INCLUDE})    # headers for plugins and scripts
+install(TARGETS ${RV_EXAMPLES_plugins} LIBRARY DESTINATION ${RV_LIB_EXAMPLES}/plugins)  # built examples
+install(TARGETS ${RV_EXAMPLES_scripts} LIBRARY DESTINATION ${RV_LIB_EXAMPLES}/scripts)
 install(FILES README.md LICENSE LICENSE-THIRD-PARTY DESTINATION ${RV_DOC})
 install(DIRECTORY docs/ DESTINATION ${RV_DOC}/docs)
 
 set(CPACK_PACKAGE_NAME reversa)
 set(CPACK_PACKAGE_VENDOR "REVERSA contributors")
-set(CPACK_PACKAGE_DESCRIPTION_SUMMARY "Open-source reverse engineering tool: disassembler, pseudocode, x-refs, graphs, Python API")
+set(CPACK_PACKAGE_DESCRIPTION_SUMMARY "Open-source reverse engineering tool: disassembler, pseudocode, x-refs, graphs, C/C++ plugins")
 set(CPACK_PACKAGE_CONTACT "REVERSA contributors <https://github.com/MrKniha/reversa>")
 set(CPACK_RESOURCE_FILE_LICENSE ${CMAKE_SOURCE_DIR}/LICENSE)
 set(CPACK_DEBIAN_PACKAGE_SECTION devel)
-set(CPACK_DEBIAN_PACKAGE_SHLIBDEPS ON)  # Qt, SQLite and libpython versions from the build machine
+set(CPACK_DEBIAN_PACKAGE_SHLIBDEPS ON)  # Qt and SQLite versions from the build machine
 set(CPACK_DEBIAN_FILE_NAME DEB-DEFAULT)
 set(CPACK_DEBIAN_PACKAGE_HOMEPAGE "https://github.com/MrKniha/reversa")
+if(WIN32)
+  # Portable zip: `cpack -G ZIP` -> reversa-windows-x64.zip with a reversa-windows-x64/ folder inside.
+  set(CPACK_GENERATOR ZIP)
+  set(CPACK_PACKAGE_FILE_NAME reversa-windows-x64)
+  set(CPACK_INCLUDE_TOPLEVEL_DIRECTORY ON)
+  if(TARGET reversa-gui)
+    # Qt DLLs, plugins and Qt's own translations next to the executables (dynamic linking, LGPL).
+    find_program(WINDEPLOYQT windeployqt HINTS "${QT6_INSTALL_PREFIX}/bin" REQUIRED)
+    install(CODE "execute_process(COMMAND \"${WINDEPLOYQT}\" --release --no-system-d3d-compiler --no-opengl-sw
+                  \"\${CMAKE_INSTALL_PREFIX}/bin/reversa-gui.exe\" COMMAND_ERROR_IS_FATAL ANY)")
+  endif()
+endif()
 include(CPack)
 
 if(REVERSA_TESTS)
@@ -146,14 +152,27 @@ if(REVERSA_TESTS)
   file(GLOB TEST_SOURCES CONFIGURE_DEPENDS tests/cpp/*.cpp)
   add_executable(reversa_tests ${TEST_SOURCES})
   target_link_libraries(reversa_tests PRIVATE reversa_core)
-  target_compile_definitions(reversa_tests PRIVATE REVERSA_SOURCE_DIR="${CMAKE_SOURCE_DIR}")
+  target_compile_definitions(reversa_tests PRIVATE REVERSA_SOURCE_DIR="${CMAKE_SOURCE_DIR}"
+                             REVERSA_EXAMPLES_DIR="${CMAKE_BINARY_DIR}/bin/examples" REVERSA_EXE="$<TARGET_FILE:reversa>")
+  # test-only C modules (bad plugins, a C plugin, a script with an exit code): <build>/bin/test-modules/<kind>
+  foreach(m plugins/counter plugins/old_api plugins/null_entry plugins/no_entry plugins/failing_load scripts/exit_code)
+    get_filename_component(kind ${m} DIRECTORY)
+    get_filename_component(name ${m} NAME)
+    rv_module(test_${name} tests/cpp/plugins/${name}.c ${CMAKE_BINARY_DIR}/bin/test-modules/${kind})
+    set_target_properties(test_${name} PROPERTIES OUTPUT_NAME ${name})
+    list(APPEND RV_TEST_MODULES test_${name})
+  endforeach()
+  target_compile_definitions(reversa_tests PRIVATE REVERSA_TEST_MODULES_DIR="${CMAKE_BINARY_DIR}/bin/test-modules")
+  add_dependencies(reversa_tests reversa ${RV_EXAMPLES_plugins} ${RV_EXAMPLES_scripts} ${RV_TEST_MODULES})
   add_test(NAME reversa_tests COMMAND reversa_tests)
   if(REVERSA_GUI)
     find_package(Qt6 REQUIRED COMPONENTS Test)
     add_executable(reversa_gui_tests tests/gui/test_gui.cpp)
     set_target_properties(reversa_gui_tests PROPERTIES AUTOMOC ON)
     target_link_libraries(reversa_gui_tests PRIVATE reversa_app Qt6::Test)
-    target_compile_definitions(reversa_gui_tests PRIVATE REVERSA_SOURCE_DIR="${CMAKE_SOURCE_DIR}")
+    target_compile_definitions(reversa_gui_tests PRIVATE REVERSA_SOURCE_DIR="${CMAKE_SOURCE_DIR}"
+                               REVERSA_EXAMPLES_DIR="${CMAKE_BINARY_DIR}/bin/examples")
+    add_dependencies(reversa_gui_tests ${RV_EXAMPLES_plugins})
     add_test(NAME reversa_gui_tests COMMAND reversa_gui_tests)
     set_tests_properties(reversa_gui_tests PROPERTIES ENVIRONMENT "QT_QPA_PLATFORM=offscreen")
   endif()
@@ -162,4 +181,8 @@ endif()
 if(REVERSA_TESTS)
   add_executable(rvdump tools/rvdump.cpp)
   target_link_libraries(rvdump PRIVATE reversa_core)
+  # repository checks used by CI (standard C++ only, they also build without CMake: c++ -std=c++20 tools/X.cpp)
+  foreach(tool check_licenses i18n_check headless_check)
+    add_executable(${tool} tools/${tool}.cpp)
+  endforeach()
 endif()

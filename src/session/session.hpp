@@ -1,7 +1,7 @@
 // Session = one opened binary plus everything the user did with it.
 //
-// This is the service layer between the headless core and every front end (Python API, CLI, Qt
-// GUI, plugins). All edits go through here so they are undoable, published on the event bus and
+// This is the service layer between the headless core and every front end (CLI, Qt GUI,
+// plugins and scripts). All edits go through here so they are undoable, published on the event bus and
 // saved with the project.
 #pragma once
 
@@ -24,7 +24,7 @@
 
 namespace rv {
 
-// Implemented by the embedded Python plugin manager. Hook failures are handled by the host.
+// Implemented by the native plugin loader (src/plugins). Hook failures are handled by the host.
 class PluginHost {
 public:
     virtual ~PluginHost() = default;
@@ -38,6 +38,7 @@ public:
 class Session {
 public:
     explicit Session(Binary binary, LoadOptions options = {});
+    ~Session();  // calls the plugins' on_unload hook
     static std::unique_ptr<Session> open(const std::string& path, const LoadOptions& options = {});  // binary or .rvproj
     static std::unique_ptr<Session> open_project(const std::string& path);
 
