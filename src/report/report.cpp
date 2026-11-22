@@ -56,7 +56,11 @@ std::string fixed(double v, int digits) {
 }
 
 std::string basename_of(const std::string& path) {
-    auto p = path.find_last_of('/');
+#ifdef _WIN32
+    auto p = path.find_last_of("/\\");
+#else
+    auto p = path.find_last_of('/');  // '\\' is a valid file name character on Linux
+#endif
     return p == std::string::npos ? path : path.substr(p + 1);
 }
 
