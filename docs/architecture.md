@@ -1,204 +1,191 @@
-# Architektúra REVERSA
+# REVERSA architecture
 
-Tento dokument popisuje, ako je REVERSA postavená, prečo sme sa tak rozhodli
-a čo plánujeme ďalej. Pojmy vysvetľuje [slovník](glossary.md).
+This document describes how REVERSA is built, why we chose to build it this way and what we plan
+next. Terms are explained in the [glossary](glossary.md).
 
-## Prehľad vrstiev
+## Layers
 
 ```
 ┌──────────────────────────────────────────────────────────────────────┐
-│ Rozhrania:  Qt GUI (src/gui)   CLI (src/cli)   reporty (src/report)   │
-│             pluginy a skripty v C/C++ (src/plugins, sdk/include)       │
+│ Interfaces: Qt GUI (src/gui)   CLI (src/cli)   reports (src/report)   │
+│             C/C++ plugins and scripts (src/plugins, sdk/include)      │
 ├──────────────────────────────────────────────────────────────────────┤
-│ Služby:     Session (src/session) – otvorenie, analýza, anotácie,      │
-│             undo/redo, cache pseudokódu, uloženie projektu             │
-│             EventBus a UndoStack (src/session/events)                  │
+│ Services:   Session (src/session): open, analyse, annotations,        │
+│             undo/redo, pseudocode cache, project saving               │
+│             EventBus and UndoStack (src/session/events)               │
 ├──────────────────────────────────────────────────────────────────────┤
-│ Analýza:    src/analysis – funkcie, bloky, x-refs, reťazce, grafy,     │
-│             hľadanie      src/decompiler – IR, lifting, passy,         │
-│             štruktúrovanie, renderer                                   │
+│ Analysis:   src/analysis: functions, blocks, x-refs, strings, graphs, │
+│             search        src/decompiler: IR, lifting, passes,        │
+│             structuring, renderer                                     │
 ├──────────────────────────────────────────────────────────────────────┤
-│ Jadro:      src/formats – ELF, PE, surové dáta (vlastné parsery)       │
-│             src/disasm – Capstone   src/core – Binary, JSON, text      │
-│             src/project – SQLite projekt (.rvproj) s migráciami        │
+│ Core:       src/formats: ELF, PE, raw data (own parsers)              │
+│             src/disasm: Capstone   src/core: Binary, JSON, text       │
+│             src/project: SQLite project (.rvproj) with migrations     │
 └──────────────────────────────────────────────────────────────────────┘
 ```
 
-Každá vrstva používa len vrstvy pod sebou. GUI, CLI aj pluginy volajú tú istú
-`rv::Session`, preto je správanie všade rovnaké. Napríklad premenovanie zo
-skriptu sa okamžite prejaví v GUI (cez EventBus).
+Each layer uses only the layers below it. The GUI, the CLI and plugins all call the same
+`rv::Session`, so the behaviour is the same everywhere. For example, a rename from a script shows
+up in the GUI at once (through the EventBus).
 
-## Moduly
+## Modules
 
-| Modul | Zodpovednosť |
+| Module | Responsibility |
 |---|---|
-| `src/core` | `Binary`, `Section`, `Symbol`, `Import`, `Export`, `Relocation`, `Diagnostic`; `Reader` s kontrolou hraníc; chyby (`ReversaError` → `LoadError`, `ProjectError`, `AnnotationError`, `Cancelled`); vlastný `Json`; SHA-256; UTF-8 pomôcky. |
-| `src/formats` | Parsery ELF, PE a surových dát, rozpoznanie formátu, odhad architektúry. Poškodená časť = diagnostika, zvyšok sa načíta. |
-| `src/disasm` | Prevod Capstone inštrukcií na `Insn` (tok riadenia, cieľ, odkazy na pamäť). Sledovanie `adrp`+`add` pre ARM64. |
-| `src/analysis` | Rekurzívny zostup od vstupných bodov, symbolov, exportov a `.pdata`. Noreturn funkcie, thunky PLT/IAT, hľadanie `main`, x-refs, reťazce ASCII a UTF-16, CFG, dominátory, slučky, graf volaní, hľadanie. |
-| `src/decompiler` | `ir` (výrazy a príkazy), `lift` (x86, x86-64, AArch64), `passes` (propagácia, DCE), `structure` (if/else, while, do-while, goto), `render` (segmenty s typom a odkazom). |
-| `src/project` | Anotácie a SQLite úložisko so schémou v1 a migráciami. Formát je kompatibilný s projektmi z verzie 0.1 (Python). |
-| `src/session` | `Session`: mená, `resolve`, editácie cez `UndoStack`, udalosti, pohľady pluginov, uloženie. |
-| `src/report` | Reporty Markdown, HTML a JSON súhrn. |
-| `src/cli` | Príkazový riadok (`analyze`, `info`, `search`, `script`, `gui`, `--demo`). |
-| `src/plugins` | Načítanie natívnych pluginov a skriptov (`dlopen` / `LoadLibraryW`), tabuľka funkcií `rv_host`, izolácia chybných pluginov. |
-| `sdk/include/reversa` | Verejné SDK: `plugin.h` (stabilné C ABI, `RV_API_VERSION`) a `sdk.hpp` (C++ pomocník: `Program`, `Plugin`, makrá `REVERSA_PLUGIN`, `REVERSA_SCRIPT`). |
-| `src/gui` | Qt Widgets: hlavné okno, pohľady (listing, pseudokód, detaily, hex), graf (`GraphView`), dialógy (sprievodca, nastavenia). |
+| `src/core` | `Binary`, `Section`, `Symbol`, `Import`, `Export`, `Relocation`, `Diagnostic`; `Reader` with bounds checks; errors (`ReversaError` → `LoadError`, `ProjectError`, `AnnotationError`, `Cancelled`); own `Json`; SHA-256; UTF-8 helpers. |
+| `src/formats` | ELF, PE and raw data parsers, format detection, architecture guess. A damaged part becomes a diagnostic, the rest is loaded. |
+| `src/disasm` | Turns Capstone instructions into `Insn` (control flow, target, memory references). Tracks `adrp`+`add` on ARM64. |
+| `src/analysis` | Recursive descent from entry points, symbols, exports and `.pdata`. Noreturn functions, PLT/IAT thunks, finding `main`, x-refs, ASCII and UTF-16 strings, CFG, dominators, loops, call graph, search. |
+| `src/decompiler` | `ir` (expressions and statements), `lift` (x86, x86-64, AArch64), `passes` (propagation, DCE), `structure` (if/else, while, do-while, goto), `render` (segments with a kind and a reference). |
+| `src/project` | Annotations and SQLite storage with schema v1 and migrations. The format is compatible with projects from version 0.1 (Python). |
+| `src/session` | `Session`: names, `resolve`, edits through the `UndoStack`, events, plugin views, saving. |
+| `src/report` | Markdown and HTML reports and a JSON summary. |
+| `src/cli` | Command line (`analyze`, `info`, `search`, `script`, `gui`, `--demo`). |
+| `src/plugins` | Loads native plugins and scripts (`dlopen` / `LoadLibraryW`), the `rv_host` function table, isolation of failing plugins. |
+| `sdk/include/reversa` | Public SDK: `plugin.h` (stable C ABI, `RV_API_VERSION`) and `sdk.hpp` (C++ helper: `Program`, `Plugin`, macros `REVERSA_PLUGIN`, `REVERSA_SCRIPT`). |
+| `src/gui` | Qt Widgets: main window, views (listing, pseudocode, details, hex), graph (`GraphView`), dialogs (guide, settings). English is the source language; translations are in `src/gui/i18n/*.json`. |
 
-## Dátové toky
+## Data flows
 
-**Otvorenie súboru:**
-`súbor → detect_format → ELF/PE/RAW parser → Binary (+ diagnostiky)
-→ pluginy on_load → analyze() na pracovnom vlákne (priebeh, zrušenie)
-→ Analysis → pluginy on_function_analyzed → EventBus „analysis_done" → GUI / CLI`.
+**Opening a file:**
+`file → detect_format → ELF/PE/RAW parser → Binary (+ diagnostics)
+→ plugins on_load → analyze() on a worker thread (progress, cancel)
+→ Analysis → plugins on_function_analyzed → EventBus "analysis_done" → GUI / CLI`.
 
-**Pseudokód:**
-`funkcia → build_cfg → lifter (Insn → IR) → passy → štruktúrovanie
-→ renderer (segmenty) → Session cache → GUI (klikateľné mená a premenné) / text`.
-Cache sa zneplatní pri premenovaní, takže nové meno sa zobrazí všade.
+**Pseudocode:**
+`function → build_cfg → lifter (Insn → IR) → passes → structuring
+→ renderer (segments) → Session cache → GUI (clickable names and variables) / text`.
+A rename invalidates the cache, so the new name shows up everywhere.
 
-**Premenovanie:**
-`GUI/API → Session::rename → validácia → Command na UndoStack
-→ Annotations → EventBus „renamed" → pluginy on_rename → GUI obnoví pohľady`.
+**Rename:**
+`GUI/API → Session::rename → validation → Command on the UndoStack
+→ Annotations → EventBus "renamed" → plugins on_rename → GUI refreshes its views`.
 
-**Uloženie projektu:**
-`Session::save → save_project → dočasný súbor → atómové premenovanie`.
-Projekt obsahuje SHA-256 binárky. Pri otvorení sa overí, či binárka sedí.
+**Saving a project:**
+`Session::save → save_project → temporary file → atomic rename`.
+The project contains the SHA-256 of the binary. When it is opened, REVERSA checks that the binary
+matches.
 
-## Prečo C++ a Qt
+## Why C++ and Qt
 
-Verzia 0.1 bola v Pythone s webovým GUI v prehliadači. Od verzie 0.2 je celý
-nástroj v C++20 s natívnym rozhraním Qt 6, vrátane skriptov a pluginov.
+Version 0.1 was written in Python with a web GUI in the browser. Since version 0.2 the whole tool
+is C++20 with a native Qt 6 interface, including scripts and plugins.
 
-- **Výkon a pamäť.** Analýza, x-refs a dekompilátor bežia natívne, bez
-  interpretera. Veľké binárky (desaťtisíce funkcií) sú realistické, model
-  dát je kompaktný (`std::map`, `unordered_map`, žiadne objekty na inštrukciu
-  navyše).
-- **Jeden program bez závislostí.** Windows balík je zip s `reversa-gui.exe`;
-  Linux balík je `.deb` so systémovými knižnicami. Netreba inštalovať Python
-  ani prehliadač.
-- **Natívne GUI.** Qt Widgets je overené v nástrojoch ako Cutter, má
-  dokovateľné panely, klávesové skratky, tmavý motív a funguje rovnako na
-  Windows aj Linuxe. Odpadá lokálny HTTP server a s ním celá jeho útočná plocha.
-- **Pluginy a skripty v C/C++ cez stabilné C ABI.** Plugin aj skript je zdieľaná
-  knižnica, ktorá s REVERSA komunikuje len cez tabuľku funkcií `rv_host`
-  (`sdk/include/reversa/plugin.h`). Nepotrebuje linkovať REVERSA, funguje
-  s ľubovoľným kompilátorom C alebo C++ a staré pluginy fungujú aj v novších
-  verziách: funkcie sa pridávajú len na koniec tabuľky a nekompatibilná zmena
-  zvýši `RV_API_VERSION`. Pluginy a skripty v Pythone z verzie 0.1 už nie sú
-  podporované (rozhodnutie 2026-11-22: celý nástroj v C++).
-- **Licencie.** Qt je pod LGPL-3.0 a linkujeme ho dynamicky (vymeniteľné
-  knižnice), čo je s MIT licenciou REVERSA v poriadku. Capstone je
-  BSD-3-Clause, SQLite public domain.
+- **Speed and memory.** Analysis, x-refs and the decompiler run natively, without an interpreter.
+  Large binaries (tens of thousands of functions) are realistic, and the data model is compact
+  (`std::map`, `unordered_map`, no extra objects per instruction).
+- **One program without dependencies.** The Windows package is a zip with `reversa-gui.exe`; the
+  Linux package is a `.deb` with system libraries. You do not need Python or a browser.
+- **Native GUI.** Qt Widgets is proven in tools like Cutter, has dockable panels, keyboard
+  shortcuts and a dark theme, and works the same on Windows and Linux. There is no local HTTP
+  server and so none of its attack surface.
+- **C/C++ plugins and scripts over a stable C ABI.** A plugin or a script is a shared library that
+  talks to REVERSA only through the `rv_host` function table (`sdk/include/reversa/plugin.h`). It
+  does not link against REVERSA, works with any C or C++ compiler, and old plugins keep working in
+  newer versions: functions are only appended to the table, and an incompatible change raises
+  `RV_API_VERSION`. Python plugins and scripts from version 0.1 are no longer supported (decision
+  of 2026-11-22: the whole tool in C++).
+- **Licenses.** Qt is LGPL-3.0 and we link it dynamically (replaceable libraries), which is fine
+  with REVERSA's MIT license. Capstone is BSD-3-Clause, SQLite is public domain.
 
-Cena: zostavenie je zložitejšie (CMake, kompilátor, Qt). Preto CI zostavuje
-hotové balíky pre Windows aj Linux a README popisuje zostavenie krok za krokom.
+The price: building is harder (CMake, a compiler, Qt). That is why CI builds ready-made packages
+for Windows and Linux and [building.md](building.md) describes the build step by step.
 
-## Ďalšie rozhodnutia
+## Other decisions
 
-**Capstone.** Jeden disassembler pre x86, x86-64, ARM, AArch64 a ďalšie
-architektúry, licencia BSD-3. Zydis a iced sú pre x86 presnejšie, ale ostatné
-architektúry by vyžadovali ďalšiu knižnicu. Linkujeme ho staticky, len so
-štyrmi architektúrami, ktoré používame.
+**Capstone.** One disassembler for x86, x86-64, ARM, AArch64 and other architectures, BSD-3
+license. Zydis and iced are more accurate for x86, but other architectures would need another
+library. We link it statically, with only the four architectures we use.
 
-**Vlastné parsery ELF a PE.** Pri analýze malvéru sú poškodené a zámerne
-pokazené hlavičky bežné. Vlastný parser s kontrolou hraníc pri každom čítaní
-vie načítať to, čo sa dá, a zvyšok ohlási ako diagnostiku. Fuzz testy
-(`tests/cpp/test_analysis.cpp`) to overujú.
+**Own ELF and PE parsers.** In malware analysis, damaged and deliberately broken headers are
+common. An own parser that checks bounds on every read can load what is possible and report the
+rest as diagnostics. Fuzz tests (`tests/cpp/test_analysis.cpp`) check this.
 
-**Vlastné rozloženie grafov.** Grafy funkcií majú zvyčajne desiatky blokov.
-Zjednodušený vrstvený algoritmus (podľa dagre a Sugiyamu) v `QGraphicsView`
-na to stačí. Pre veľké grafy (stovky blokov) bude treba lepší algoritmus
-(roadmapa).
+**Own graph layout.** Function graphs usually have tens of blocks. A simplified layered algorithm
+(after dagre and Sugiyama) in `QGraphicsView` is enough for that. Large graphs (hundreds of blocks)
+will need a better algorithm (roadmap).
 
-**SQLite pre projekty.** Jeden súbor, atómové transakcie, verzia schémy
-a migrácie. JSON by bol jednoduchší, ale pri veľkých projektoch pomalší
-a bez transakcií.
+**SQLite for projects.** One file, atomic transactions, a schema version and migrations. JSON would
+be simpler, but slower for large projects and without transactions.
 
-**Medzijazyk (IR) v dekompilátore.** Lifter pre každú architektúru prevedie
-inštrukcie do spoločného IR. Optimalizácie a štruktúrovanie sú potom spoločné.
-Novú architektúru pridáte napísaním jedného liftera.
+**Intermediate representation (IR) in the decompiler.** A lifter per architecture turns
+instructions into a common IR. Optimisations and structuring are then shared. You add a new
+architecture by writing one lifter.
 
-**Závislosti so zámkom.** Capstone sťahuje CMake v pevnom git tagu, SQLite na
-Windows ide cez vcpkg s pevným `builtin-baseline` a GitHub Actions sú pripnuté
-na commity. Testy a nástroje repozitára (`tools/*.cpp`) nepotrebujú nič navyše.
-`tools/check_licenses.cpp` v CI overí licenciu každej závislosti.
+**Locked dependencies.** CMake downloads Capstone at a pinned git tag, SQLite on Windows comes from
+vcpkg with a pinned `builtin-baseline`, and GitHub Actions are pinned to commits. Tests and
+repository tools (`tools/*.cpp`) need nothing extra. `tools/check_licenses.cpp` checks the license
+of every dependency in CI.
 
-**MIT licencia.** Najjednoduchšia pre používateľov aj firmy, kompatibilná so
-všetkými našimi závislosťami. GPL nástroje (Unicorn, Keystone) preto nemôžu byť
-povinnou súčasťou, len voliteľnými pluginmi.
+**MIT license.** The simplest for users and companies, compatible with all our dependencies. GPL
+tools (Unicorn, Keystone) therefore cannot be a required part, only optional plugins.
 
-**Izolácia pluginov bez sandboxu.** Háčik, ktorý vráti chybu (makro
-`REVERSA_PLUGIN` na ňu prevedie aj výnimku), plugin vypne a REVERSA beží ďalej.
-Knižnicu, ktorá sa nedá načítať alebo má inú verziu API, REVERSA preskočí
-a ohlási. Pád pamäte v natívnom plugine však ukončí celú aplikáciu. Háčiky
-počas analýzy bežia na pracovnom vlákne, volania na jeden program sú
-serializované. Skutočný sandbox (samostatný proces) je v roadmape. Dovtedy
-dokumentácia jasne varuje, že pluginy sú dôveryhodný kód.
+**Plugin isolation without a sandbox.** A hook that returns an error (the `REVERSA_PLUGIN` macro
+also turns an exception into one) disables the plugin and REVERSA keeps running. A library that
+cannot be loaded or has a different API version is skipped and reported. A memory crash in a
+native plugin, however, ends the whole application. During the analysis, hooks run on the worker
+thread, and calls to one program are serialised. A real sandbox (a separate process) is on the
+roadmap. Until then the documentation warns clearly that plugins are trusted code.
 
-## Čo sme sa naučili z existujúcich projektov
+## What we learned from existing projects
 
-- **Ghidra**: oddeliť IR od architektúry (P-code). Ukazovať pseudokód a listing
-  vedľa seba a synchronizovať ich.
-- **Cutter a IDA**: jedna „aktuálna adresa" riadi všetky pohľady. Rozloženie
-  funkcie vľavo, obsah v strede, detaily vpravo.
-- **radare2 a Rizin**: krátke klávesové skratky. Projekt ako samostatný súbor
-  s verziou formátu.
-- **angr**: rekurzívny zostup a zoznam noreturn funkcií sú dôležitejšie než
-  heuristiky prológov. Python API ako plnohodnotné rozhranie.
-- **Detect It Easy**: detekcia kompilátora a packera je pre začiatočníka
-  cenná informácia hneď po otvorení súboru.
-- **RetDec**: výstup dekompilátora treba jasne označiť ako odhad.
-- **binwalk**: firmvér je často len surové dáta, treba ručne zadať architektúru
-  a bázovú adresu.
-- **LIEF, pyelftools, pefile**: jednotný model binárky pre všetky formáty.
-  Zároveň sme videli, že knižnice, ktoré pri chybe vyhodia výnimku, nie sú
-  vhodné pre poškodené súbory.
+- **Ghidra**: separate the IR from the architecture (P-code). Show pseudocode and listing side by
+  side and keep them in sync.
+- **Cutter and IDA**: one "current address" drives all views. Layout: functions on the left,
+  content in the centre, details on the right.
+- **radare2 and Rizin**: short keyboard shortcuts. A project as a separate file with a format
+  version.
+- **angr**: recursive descent and a list of noreturn functions matter more than prologue
+  heuristics. A complete API as a first-class interface.
+- **Detect It Easy**: detecting the compiler and packer is valuable for a beginner right after
+  opening a file.
+- **RetDec**: decompiler output must be clearly marked as an estimate.
+- **binwalk**: firmware is often just raw data; the architecture and base address must be given by
+  hand.
+- **LIEF, pyelftools, pefile**: one binary model for all formats. We also saw that libraries that
+  throw an exception on an error are not suitable for damaged files.
 
-## Bezpečnostný model
+## Security model
 
-- Iba statická analýza. Analyzovaný súbor sa nikdy nespúšťa.
-- Žiadna sieť, žiadna telemetria. GUI je natívne, nič nepočúva na porte.
-- Všetky čítania zo súboru idú cez kontrolu hraníc; fuzz testy v CI.
-- Pluginy a skripty nie sú sandboxované (pozri vyššie). Načítajú sa len
-  z používateľského priečinka pluginov a z priečinkov zadaných voľbou
-  `--plugins`; voľba `--no-plugins` ich vypne.
+- Static analysis only. The analysed file is never run.
+- No network, no telemetry. The GUI is native and listens on no port.
+- Every read from the file goes through bounds checks; fuzz tests run in CI.
+- Plugins and scripts are not sandboxed (see above). They are loaded only from the user's plugin
+  folder, `REVERSA_PLUGIN_PATH` and folders given with `--plugins`; `--no-plugins` turns them off.
 
-## Plán priorít (MVP, sekcia 4.2)
+## Priorities (MVP, section 4.2)
 
-| Priorita | Funkcia | Stav v 0.2.0 |
+| Priority | Feature | State in 0.2.0 |
 |---|---|---|
-| P0 | Načítanie ELF/PE, odolnosť voči poškodeniu | hotové |
-| P0 | Disassembly x86, x86-64, ARM64 (ARM 32-bit základ) | hotové |
-| P0 | Funkcie, reťazce, importy, exporty, x-refs | hotové |
-| P0 | CFG a graf volaní | hotové |
-| P0 | Pseudokód (dočasný) | hotové |
-| P0 | Premenovanie, komentáre, záložky, undo/redo, projekt | hotové |
-| P0 | API pre skripty, pluginy s izoláciou (C/C++) | hotové |
-| P0 | Headless CLI, reporty | hotové |
-| P1 | Slovenské a anglické rozhranie | slovenské úplné; anglický preklad chýba (texty sú pripravené cez `tr()`) |
-| P1 | Onboarding, nápoveda, slovník | hotové |
+| P0 | Loading ELF/PE, robust against damage | done |
+| P0 | Disassembly x86, x86-64, ARM64 (ARM 32-bit basics) | done |
+| P0 | Functions, strings, imports, exports, x-refs | done |
+| P0 | CFG and call graph | done |
+| P0 | Pseudocode (provisional) | done |
+| P0 | Rename, comments, bookmarks, undo/redo, project | done |
+| P0 | API for scripts, plugins with isolation (C/C++) | done |
+| P0 | Headless CLI, reports | done |
+| P1 | English and Slovak interface | done (also German, French, Chinese) |
+| P1 | Onboarding, help, glossary | done |
 
-## Roadmapa (sekcia 4.3, mimo MVP)
+## Roadmap (section 4.3, outside the MVP)
 
-1. Mach-O a APK/DEX (teraz sa načítajú len ako surové dáta).
-2. Jump tabuľky (`switch`), typy a štruktúry, signatúry knižníc (FLIRT-like).
-3. Lepší dekompilátor: SSA, typová inferencia, floating point (teraz `__asm`).
-4. Sandbox pre pluginy (samostatný proces).
-5. Diffing dvoch verzií binárky.
-6. Emulácia (voliteľný plugin s Unicorn, GPL-2.0).
-7. **Patch mód**: úpravy vlastných binárok na opravu chýb a výučbu. Nikdy
-   nebude obsahovať funkcie na obchádzanie DRM, licencií, anti-cheatu
-   alebo ochrany proti kopírovaniu.
-8. Debugger (lokálny, v sandboxe), kolaborácia na projekte.
+1. Mach-O and APK/DEX (now they load only as raw data).
+2. Jump tables (`switch`), types and structures, library signatures (FLIRT-like).
+3. A better decompiler: SSA, type inference, floating point (now `__asm`).
+4. A sandbox for plugins (separate process).
+5. Diffing two versions of a binary.
+6. Emulation (optional plugin with Unicorn, GPL-2.0).
+7. **Patch mode**: changing your own binaries to fix bugs and for teaching. It will never contain
+   features to bypass DRM, licenses, anti-cheat or copy protection.
+8. A debugger (local, sandboxed), collaboration on a project.
 
-## Známe obmedzenia
+## Known limitations
 
-- `main` sa nenájde v stripped PE z mingw (chýba vzor ako `__libc_start_main`).
-- Jump tabuľky sa neriešia, nepriame skoky končia blok.
-- Floating point a SIMD inštrukcie sú v pseudokóde ako `__asm(...)`.
-- Pluginy nie sú sandboxované.
-- Mach-O, APK a iné formáty sa načítajú ako surové dáta.
-- GUI je zatiaľ len po slovensky (anglický preklad cez Qt Linguist je v pláne).
-- Listing v GUI zobrazuje jednu funkciu naraz; dáta mimo funkcií ukazuje hex
-  výpis na karte Sekcie a hex.
+- `main` is not found in a stripped PE from MinGW (there is no pattern like `__libc_start_main`).
+- Jump tables are not resolved; indirect jumps end a block.
+- Floating point and SIMD instructions appear in the pseudocode as `__asm(...)`.
+- Plugins are not sandboxed.
+- Mach-O, APK and other formats load as raw data.
+- The GUI listing shows one function at a time; data outside functions is shown by the hex dump on
+  the Sections and hex tab.

@@ -1,7 +1,7 @@
 // GUI translations check (standalone, standard C++ only; build: c++ -std=c++20 tools/i18n_check.cpp).
 //
 // Translatable strings in src/gui are the literals passed to tr(...), T(...) and QT_TR_NOOP(...).
-// The source language is Slovak; translations live in src/gui/i18n/<lang>.json as {"source": "translation"}.
+// The source language is English; translations live in src/gui/i18n/<lang>.json as {"source": "translation"}.
 //
 //   i18n_check [REPO_ROOT]           CI: missing/stale keys, empty values, different %N placeholders -> exit 1
 //   i18n_check REPO_ROOT missing     prints the missing keys per language as JSON (for translators)
@@ -20,7 +20,7 @@ namespace fs = std::filesystem;
 
 namespace {
 
-const std::vector<std::string> LANGS = {"en", "de", "fr", "zh"};
+const std::vector<std::string> LANGS = {"sk", "de", "fr", "zh"};
 
 std::string read(const fs::path& p) {
     std::ifstream f(p, std::ios::binary);
