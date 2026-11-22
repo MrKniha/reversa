@@ -67,7 +67,7 @@ Ubuntu 24.04 (GCC, systémové Qt 6.4) a Windows Server 2022 (MSVC 2022, Qt 6.8.
 |---|---|---|
 | Analyzovaný súbor sa nespúšťa | prešlo | V kóde nie je spúšťanie procesov nad analyzovaným súborom (`src/` neobsahuje `system`, `popen`, `CreateProcess`). |
 | Žiadna telemetria, žiadna sieť | prešlo | `src/` nepoužíva sieť; GUI je natívne, nepočúva na porte (webový server z 0.1 je odstránený). |
-| Žiadne funkcie na obchádzanie DRM, licencií, anti-cheatu | prešlo | README, kapitola Etika. Takáto funkcia neexistuje. |
+| Žiadne funkcie na obchádzanie DRM, licencií, anti-cheatu | prešlo | [docs/safety.md](safety.md#etika). Takáto funkcia neexistuje. |
 | Závislosti so zámkom a kontrolou licencií | prešlo | Pevný git tag (Capstone), vcpkg baseline, Actions pripnuté na commity, job `licenses`. Testy a nástroje nepotrebujú žiadne ďalšie balíky. |
 | Pluginy a skripty sú sandboxované | **neprešlo** (vedomé obmedzenie) | Izolácia chýb áno, sandbox nie. Zdokumentované v README, plugin-tutorial.md, SECURITY.md. Roadmapa. |
 
