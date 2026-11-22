@@ -1,3 +1,4 @@
+#include <algorithm>
 // Decompiler: IR helpers, structure on known functions, golden pseudocode for every sample.
 #include <filesystem>
 #include <fstream>
@@ -103,8 +104,17 @@ TEST("golden pseudocode for every sample") {
             if (fn.kind != "normal") continue;
             got += "== " + s->name_of(ad) + " " + hex_digits(ad) + "\n" + s->pseudocode(ad) + "\n";
         }
-        if (got != want.str()) std::printf("  golden mismatch: %s (regenerate with rvdump --pseudo)\n", file.c_str());
-        CHECK(got == want.str());
+        std::string exp = want.str();
+        exp.erase(std::remove(exp.begin(), exp.end(), '\r'), exp.end());  // tolerate CRLF checkouts
+        if (got != exp) {
+            size_t i = 0;
+            while (i < got.size() && i < exp.size() && got[i] == exp[i]) i++;
+            size_t line = size_t(std::count(got.begin(), got.begin() + long(i), '\n')) + 1;
+            std::printf("  golden mismatch: %s line %zu (regenerate with rvdump --pseudo)\n    got:  %s\n    want: %s\n",
+                        file.c_str(), line, got.substr(i - std::min<size_t>(i, 30), 80).c_str(),
+                        exp.substr(i - std::min<size_t>(i, 30), 80).c_str());
+        }
+        CHECK(got == exp);
         checked++;
     }
     CHECK(checked >= 10);
