@@ -26,6 +26,9 @@ Vývojové (nie sú súčasťou distribúcie)
 - pytest – MIT
 - coverage – Apache-2.0
 - Playwright (iba UI smoke test v CI) – Apache-2.0
+- PyInstaller (iba zostavenie samostatného programu v CI) – GPL-2.0 s bootloader výnimkou;
+  výsledný program môže byť šírený pod vlastnou licenciou. Program obsahuje
+  interpret CPython (PSF-2.0) a Capstone (BSD-3-Clause).
 
 Inšpirácia (bez prebratia kódu)
 -------------------------------

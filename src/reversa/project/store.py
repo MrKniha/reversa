@@ -12,6 +12,7 @@ import json
 import os
 import sqlite3
 import time
+from pathlib import Path
 
 from reversa.core.errors import ProjectError
 from reversa.project.annotations import Annotations
@@ -42,7 +43,7 @@ def _has_meta(path: str) -> bool:
         with open(path, "rb") as fh:
             if fh.read(16) != MAGIC:
                 return False
-        con = sqlite3.connect(f"file:{path}?mode=ro", uri=True)
+        con = sqlite3.connect(Path(path).resolve().as_uri() + "?mode=ro", uri=True)  # as_uri: Windows drive letters, %-escaping
         try:
             con.execute("SELECT value FROM meta WHERE key='schema_version'").fetchone()
             return True

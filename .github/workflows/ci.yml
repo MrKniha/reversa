@@ -14,7 +14,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        os: [ubuntu-latest, windows-latest, macos-latest]
+        os: [ubuntu-latest, windows-latest]
         python: ["3.10", "3.13"]
     steps:
       - uses: actions/checkout@v4
@@ -33,8 +33,7 @@ jobs:
           coverage run -m pytest
           coverage report --fail-under=80
       - name: Headless check
-        if: runner.os != 'Windows'
-        run: sh scripts/headless_check.sh headless-out
+        run: python scripts/headless_check.py headless-out
 
   ui-smoke:
     runs-on: ubuntu-latest
@@ -50,21 +49,44 @@ jobs:
       - run: npm install --no-save playwright@1.48.2 && npx playwright install --with-deps chromium
       - run: node tests/ui/smoke.mjs
 
-  build:
+  package:
+    name: package (${{ matrix.os }})
     needs: [test]
-    runs-on: ubuntu-latest
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        include:
+          - os: ubuntu-latest
+            exe: dist/reversa
+            artifact: reversa-linux-x64
+          - os: windows-latest
+            exe: dist/reversa.exe
+            artifact: reversa-windows-x64
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
         with:
           python-version: "3.12"
-      - run: pip install build
-      - run: python -m build
-      - name: Install wheel and run demo
+      - name: Wheel
         run: |
-          pip install dist/*.whl
-          reversa --demo --no-gui
+          pip install build
+          python -m build
+      - name: Standalone executable (no Python needed on the target machine)
+        shell: bash
+        run: |
+          pip install --require-hashes -r requirements.lock
+          pip install . pyinstaller==6.22.3
+          pyinstaller --onefile --name reversa --collect-all reversa --collect-all capstone src/reversa/__main__.py
+      - name: Smoke test the executable
+        shell: bash
+        run: |
+          ${{ matrix.exe }} --version
+          ${{ matrix.exe }} --demo --no-gui
+          ${{ matrix.exe }} analyze samples/bin/login_x64.exe --report report.md --no-plugins
       - uses: actions/upload-artifact@v4
         with:
-          name: reversa-dist
-          path: dist/
+          name: ${{ matrix.artifact }}
+          path: |
+            dist/*.whl
+            dist/*.tar.gz
+            ${{ matrix.exe }}

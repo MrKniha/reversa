@@ -7,7 +7,7 @@ Cieľ: nainštalovať REVERSA, otvoriť ukážkovú binárku a nájsť v nej hes
 Potrebujete Python 3.10 alebo novší.
 
 ```bash
-git clone <URL repozitára> reversa && cd reversa
+git clone https://github.com/MrKniha/reversa.git && cd reversa
 python3 -m venv .venv && . .venv/bin/activate     # Windows: .venv\Scripts\activate
 pip install .
 reversa --version

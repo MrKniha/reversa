@@ -49,40 +49,52 @@ Celý postup s riešením: [docs/quickstart.md](docs/quickstart.md) a
 
 ## Inštalácia
 
-Potrebujete **Python 3.10 alebo novší** a moderný prehliadač (Firefox, Chrome,
-Edge, Safari). Jediná závislosť je Capstone, ktorý pip nainštaluje automaticky.
+REVERSA je určená pre **Windows a Linux** (64-bit). Na macOS by mala fungovať
+inštalácia cez pip, ale oficiálne ju nepodporujeme ani netestujeme.
 
-### Linux
+### Najjednoduchšie: hotový program (bez Pythonu)
+
+Na stránke GitHub Actions repozitára (posledný úspešný beh CI → *Artifacts*)
+stiahnite `reversa-windows-x64` alebo `reversa-linux-x64`. Obsahuje jeden
+spustiteľný súbor:
+
+```powershell
+reversa.exe --demo          # Windows (PowerShell alebo cmd)
+```
+```bash
+chmod +x reversa && ./reversa --demo     # Linux
+```
+
+Windows SmartScreen môže pri prvom spustení varovať, lebo súbor nie je
+digitálne podpísaný. Ak chcete istotu, nainštalujte REVERSA zo zdrojov (nižšie).
+
+### Linux zo zdrojov
+
+Potrebujete **Python 3.10 alebo novší** a prehliadač. Jediná závislosť je
+Capstone, ktorý pip nainštaluje automaticky.
 
 ```bash
 sudo apt install python3 python3-venv git      # Debian/Ubuntu (Fedora: dnf install python3 git)
-git clone <URL repozitára> reversa && cd reversa
+git clone https://github.com/MrKniha/reversa.git && cd reversa
 python3 -m venv .venv && . .venv/bin/activate
-pip install .
+pip install --require-hashes -r requirements.lock && pip install .
 reversa --demo
 ```
 
-### Windows
+### Windows zo zdrojov
 
-1. Nainštalujte Python z https://www.python.org/downloads/ (zaškrtnite
-   „Add python.exe to PATH").
+1. Nainštalujte Python 3.10+ z https://www.python.org/downloads/ (zaškrtnite
+   „Add python.exe to PATH") a Git z https://git-scm.com/download/win.
 2. V PowerShell:
    ```powershell
-   git clone <URL repozitára> reversa; cd reversa
+   git clone https://github.com/MrKniha/reversa.git; cd reversa
    py -m venv .venv; .venv\Scripts\Activate.ps1
-   pip install .
+   pip install --require-hashes -r requirements.lock; pip install .
    reversa --demo
    ```
-
-### macOS
-
-```bash
-brew install python git          # alebo Python z python.org
-git clone <URL repozitára> reversa && cd reversa
-python3 -m venv .venv && . .venv/bin/activate
-pip install .
-reversa --demo
-```
+   Ak PowerShell odmietne spustiť `Activate.ps1`, použite
+   `Set-ExecutionPolicy -Scope CurrentUser RemoteSigned` alebo cmd:
+   `.venv\Scripts\activate.bat`.
 
 Inštalácia z wheel balíka: `pip install reversa-0.1.0-py3-none-any.whl`.
 Na vývoj: `pip install -e ".[dev]"` (pozri [CONTRIBUTING.md](CONTRIBUTING.md)).
