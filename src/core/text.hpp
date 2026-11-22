@@ -23,6 +23,7 @@ std::vector<std::string> split(std::string_view s, char sep);
 std::string trim(std::string_view s);
 std::string format_hex(uint64_t v);
 std::string hex_digits(uint64_t v);  // like Python f"{v:x}" (no 0x prefix)
+size_t utf8_length(const std::string& s);  // code points
 std::string utf8_prefix(const std::string& s, size_t chars);  // first N code points (Python s[:N])
 std::string json_escape(std::string_view s);
 std::string html_escape(std::string_view s);

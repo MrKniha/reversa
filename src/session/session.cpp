@@ -5,6 +5,7 @@
 #include <cstring>
 #include <filesystem>
 #include <fstream>
+#include <algorithm>
 #include <regex>
 
 #include "core/errors.hpp"
@@ -372,6 +373,53 @@ std::string Session::save(const std::string& path_in) {
     }
     events.publish("saved", {{"path", *project_path}});
     return *project_path;
+}
+
+// ------------------------------------------------------------ search
+Session::Hits Session::search_strings(const std::string& query, bool regex, size_t min_len) {
+    Hits items;
+    for (auto& st : require_analysis().strings)
+        if (utf8_length(st.text) >= min_len) items.emplace_back(st.addr, st.text);
+    return search_text(items, query, regex);
+}
+
+Session::Hits Session::search_instructions(const std::string& query, bool regex) {
+    Analysis& a = require_analysis();
+    std::vector<Addr> addrs;
+    for (auto& [ad, ins] : a.insns) addrs.push_back(ad);
+    std::sort(addrs.begin(), addrs.end());
+    Hits items;
+    for (Addr ad : addrs) items.emplace_back(ad, a.insns[ad]->text());
+    return search_text(items, query, regex);
+}
+
+Session::Hits Session::search_pseudocode(const std::string& query, bool regex) {
+    Analysis& a = require_analysis();
+    Hits out;
+    std::regex rx;
+    if (regex) {
+        try {
+            rx = std::regex(query, std::regex::ECMAScript | std::regex::icase);
+        } catch (const std::regex_error& e) {
+            throw ReversaError(std::string("Neplatný regulárny výraz: ") + e.what());
+        }
+    }
+    std::string ql = lower(query);
+    for (auto& [ad, f] : a.functions) {
+        if (f.kind != "normal") continue;
+        for (auto& line : split(pseudocode(ad), '\n'))
+            if (regex ? std::regex_search(line, rx) : contains(lower(line), ql)) out.emplace_back(ad, trim(line));
+    }
+    return out;
+}
+
+void Session::add_view(const std::string& name, std::function<std::string()> render) {
+    for (auto& v : views)
+        if (v.first == name) {
+            v.second = std::move(render);
+            return;
+        }
+    views.emplace_back(name, std::move(render));
 }
 
 std::vector<Diagnostic> Session::diagnostics() const {

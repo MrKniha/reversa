@@ -80,6 +80,17 @@ public:
     std::vector<Line> decompile(Addr func);
     std::string pseudocode(Addr func) { return to_text(decompile(func)); }
 
+    // search (results: address + matching text)
+    using Hits = std::vector<std::pair<Addr, std::string>>;
+    Hits search_strings(const std::string& query, bool regex = false, size_t min_len = 4);
+    Hits search_instructions(const std::string& query, bool regex = true);
+    Hits search_pseudocode(const std::string& query, bool regex = true);
+    std::vector<Addr> search_bytes(const std::string& pattern) const { return rv::search_bytes(binary, pattern); }
+
+    // custom text/Markdown views registered by plugins (shown in the GUI and in reports)
+    std::vector<std::pair<std::string, std::function<std::string()>>> views;
+    void add_view(const std::string& name, std::function<std::string()> render);
+
     // persistence
     std::string save(const std::string& path = "");
     std::vector<Diagnostic> diagnostics() const;

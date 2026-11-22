@@ -2,6 +2,7 @@
 
 #include <cmath>
 #include <cstdio>
+#include <cstdlib>
 #include <stdexcept>
 
 #include "core/text.hpp"
@@ -226,8 +227,12 @@ void Json::dump_to(std::string& out, int indent, int level) const {
             double d = std::get<double>(v_);
             if (!std::isfinite(d)) { out += "null"; break; }
             char b[32];
-            std::snprintf(b, sizeof b, "%.17g", d);
+            for (int prec = 1; prec <= 17; prec++) {  // shortest text that reads back exactly (like Python repr)
+                std::snprintf(b, sizeof b, "%.*g", prec, d);
+                if (std::strtod(b, nullptr) == d) break;
+            }
             out += b;
+            if (std::string(b).find_first_of(".eEn") == std::string::npos) out += ".0";
             break;
         }
         case 4: out += json_quote(std::get<std::string>(v_)); break;
