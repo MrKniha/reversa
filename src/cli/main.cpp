@@ -5,7 +5,7 @@
 //   reversa analyze FILE [--report out.md|out.html] [--json] [--project out.rvproj] [--pseudocode FUNC]
 //   reversa info FILE              quick header information
 //   reversa search FILE (--string|--hex|--insn|--code) QUERY
-//   reversa script SCRIPT.py [ARGS...]
+//   reversa script SCRIPT.so|.dll [ARGS...]
 #include <chrono>
 #include <cstdio>
 #include <cstring>
@@ -32,9 +32,7 @@
 #define RV_ISATTY(f) isatty(fileno(f))
 #endif
 
-#ifdef REVERSA_WITH_PYTHON
-#include "python/embed.hpp"
-#endif
+#include "plugins/native.hpp"
 #ifdef REVERSA_WITH_GUI
 #include "gui/gui.hpp"
 #endif
@@ -65,7 +63,7 @@ commands:
   info FILE           basic information about a file
   search FILE         search a file: --string TEXT [--regex] | --hex '48 8b ?? 05' |
                       --insn REGEX | --code REGEX (regex over pseudocode)
-  script SCRIPT [ARGS...]   run a Python script with the reversa module available
+  script LIBRARY [ARGS...]  run a C/C++ script (shared library, see docs/scripting-tutorial.md)
 
 common options:
   --arch {x86,x86-64,arm,arm64}   set the architecture by hand (for raw data)
@@ -171,14 +169,8 @@ void progress(double frac, const std::string& msg) {
 }
 
 void attach_plugins(Session& s, const Args& a) {
-#ifdef REVERSA_WITH_PYTHON
     if (a.no_plugins) return;
-    s.plugins = py::make_plugin_host(s, a.plugin_dirs);
-#else
-    (void)s;
-    if (!a.plugin_dirs.empty())
-        std::fprintf(stderr, "Warning: this REVERSA build has no Python, plugins are not loaded.\n");
-#endif
+    s.plugins = plugins::load(s, a.plugin_dirs);
 }
 
 void write_file(const std::string& path, const std::string& text) {
@@ -278,13 +270,7 @@ int cmd_demo_terminal() {
 }
 
 int cmd_script(const Args& a) {
-#ifdef REVERSA_WITH_PYTHON
-    return py::run_script(a.file, a.script_args);
-#else
-    (void)a;
-    throw ReversaError("This REVERSA build has no Python, scripts are not available.",
-                       "build with -DREVERSA_PYTHON=ON");
-#endif
+    return plugins::run_script(a.file, a.script_args);
 }
 
 int cmd_gui(const Args& a) {
@@ -316,11 +302,7 @@ std::unique_ptr<Session> open_demo() {
 static int run(const std::vector<std::string>& argv);
 
 int main(const std::vector<std::string>& argv) {
-    int code = run(argv);
-#ifdef REVERSA_WITH_PYTHON
-    py::flush();  // output printed by plugins
-#endif
-    return code;
+    return run(argv);
 }
 
 static int run(const std::vector<std::string>& argv) {

@@ -65,7 +65,7 @@
  "&Zobraziť": "&Ansicht",
  "Pomo&c": "&Hilfe",
  "O programe REVERSA": "Über REVERSA",
- "<b>REVERSA %1</b><br>Open-source nástroj na reverzné inžinierstvo (MIT).<br>Statická analýza – analyzovaný program sa nikdy nespúšťa.<br>Knižnice: Qt (LGPL-3.0), Capstone, pybind11 (BSD-3-Clause), SQLite (public domain).": "<b>REVERSA %1</b><br>Open-Source-Werkzeug für Reverse Engineering (MIT).<br>Statische Analyse – das untersuchte Programm wird nie ausgeführt.<br>Bibliotheken: Qt (LGPL-3.0), Capstone, pybind11 (BSD-3-Clause), SQLite (Public Domain).",
+ "<b>REVERSA %1</b><br>Open-source nástroj na reverzné inžinierstvo (MIT).<br>Statická analýza – analyzovaný program sa nikdy nespúšťa.<br>Knižnice: Qt (LGPL-3.0), Capstone (BSD-3-Clause), SQLite (public domain).": "<b>REVERSA %1</b><br>Open-Source-Werkzeug für Reverse Engineering (MIT).<br>Statische Analyse – das untersuchte Programm wird nie ausgeführt.<br>Bibliotheken: Qt (LGPL-3.0), Capstone (BSD-3-Clause), SQLite (Public Domain).",
  "Hlavný panel": "Hauptleiste",
  "Hľadať funkciu, reťazec alebo adresu (Ctrl+F)…": "Funktion, Zeichenkette oder Adresse suchen (Strg+F)…",
  "Pokročilé": "Erweitert",
@@ -190,9 +190,6 @@
  "Symbol": "Symbol",
  "Addend": "Addend",
  "Pluginy sú vypnuté (--no-plugins).": "Plugins sind deaktiviert (--no-plugins).",
- "Python nie je dostupný, pluginy sú vypnuté: %1": "Python ist nicht verfügbar, Plugins sind deaktiviert: %1",
- "Pluginy sa načítavajú z priečinkov plugins/ v používateľskom priečinku REVERSA a z volieb --plugins. Python %1.": "Plugins werden aus den Ordnern plugins/ im REVERSA-Benutzerordner und aus den Optionen --plugins geladen. Python %1.",
- "Táto zostava REVERSA je bez Pythonu – skripty a pluginy nie sú dostupné.": "Dieser REVERSA-Build enthält kein Python – Skripte und Plugins sind nicht verfügbar.",
  "Verzia": "Version",
  "Stav": "Status",
  "Háčiky": "Hooks",
@@ -219,5 +216,6 @@
  "Volá": "Ruft auf",
  "Kto to používa (x-refs)": "Wer das verwendet (X-Refs)",
  "Nikto – na túto adresu v kóde ani v dátach nič neukazuje.": "Niemand – nichts im Code oder in den Daten zeigt auf diese Adresse.",
- "Čo to používa": "Was das verwendet"
+ "Čo to používa": "Was das verwendet",
+ "Pluginy sú knižnice .so/.dll v C alebo C++. Načítavajú sa z priečinka %1, z premennej REVERSA_PLUGIN_PATH a z volieb --plugins. Bežia priamo v REVERSA – inštalujte len pluginy, ktorým dôverujete.": "Plugins sind .so/.dll-Bibliotheken in C oder C++. Sie werden aus dem Ordner %1, aus der Variable REVERSA_PLUGIN_PATH und über --plugins-Optionen geladen. Sie laufen direkt in REVERSA – installieren Sie nur Plugins, denen Sie vertrauen."
 }
