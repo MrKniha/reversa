@@ -35,6 +35,8 @@ bool is_project(const std::string& path);
 void save_project(const std::string& path, const Bytes& data, const std::string& binary_path, const LoadOptions& options,
                   const Annotations& ann, const Json& settings);  // atomic; throws ProjectError
 ProjectData load_project(const std::string& path);                // throws ProjectError
+// Same, with an explicit migration table (version -> SQL) and target schema; used by tests.
+ProjectData load_project(const std::string& path, const std::map<int, std::string>& migrations, int schema_version);
 
 Json load_options_json(const LoadOptions& o);
 LoadOptions load_options_from_json(const Json& j);

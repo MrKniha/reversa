@@ -34,6 +34,7 @@ def register(api):
     def on_load(program):
         original(program)
         for name, addr in plugin.hits:
-            program.session.annotations.bookmarks.setdefault(addr, f"krypto: {name}")
+            if addr not in program.bookmarks():
+                program.bookmark(addr, f"krypto: {name}")
     plugin.on_load = on_load
     return plugin

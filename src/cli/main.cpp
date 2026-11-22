@@ -305,7 +305,17 @@ std::unique_ptr<Session> open_demo() {
     return std::make_unique<Session>(load_bytes(data, "<demo>/login_x64.elf"));
 }
 
+static int run(const std::vector<std::string>& argv);
+
 int main(const std::vector<std::string>& argv) {
+    int code = run(argv);
+#ifdef REVERSA_WITH_PYTHON
+    py::flush();  // output printed by plugins
+#endif
+    return code;
+}
+
+static int run(const std::vector<std::string>& argv) {
     Args a;
     try {
         a = parse(argv);

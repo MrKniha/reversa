@@ -256,9 +256,14 @@ std::string Session::rename(Addr addr, const std::string& new_name_in) {
     return name_of(addr);
 }
 
-void Session::rename_var(const std::string& func, const std::string& key, const std::string& new_name_in) {
+void Session::rename_var(const std::string& func, const std::string& key, const std::string& new_name) {
     auto faddr = resolve(func);
     if (!faddr) throw AnnotationError("Funkciu '" + func + "' som nenašiel.");
+    rename_var(*faddr, key, new_name);
+}
+
+void Session::rename_var(Addr func_addr, const std::string& key, const std::string& new_name_in) {
+    std::optional<Addr> faddr = func_addr;
     std::string new_name = strip(new_name_in);
     if (!new_name.empty() && !valid_name(new_name))
         throw AnnotationError("Neplatné meno premennej (písmená, číslice, _; nesmie začínať číslicou).");
@@ -278,15 +283,19 @@ void Session::rename_var(const std::string& func, const std::string& key, const 
     edit("Premenovanie premennej " + key, apply(new_name.empty() ? std::nullopt : std::optional<std::string>(new_name)), apply(old));
 }
 
-void Session::set_map(std::map<Addr, std::string>& mapping, const std::string& topic, const std::string& label,
-                      const std::string& ref, const std::string& value_in) {
+Addr Session::resolve_or_throw(const std::string& ref, const std::string& what) {
     auto addr = resolve(ref);
-    if (!addr) throw AnnotationError("Adresu '" + ref + "' som nenašiel.");
+    if (!addr) throw AnnotationError(what + " '" + ref + "' som nenašiel.");
+    return *addr;
+}
+
+void Session::set_map(std::map<Addr, std::string>& mapping, const std::string& topic, const std::string& label, Addr a,
+                      const std::string& value_in) {
+    std::lock_guard<std::recursive_mutex> g(lock);
     std::optional<std::string> old;
-    if (mapping.count(*addr)) old = mapping[*addr];
+    if (mapping.count(a)) old = mapping[a];
     std::string v = strip(value_in);
     std::optional<std::string> value = v.empty() ? std::nullopt : std::optional<std::string>(v);
-    Addr a = *addr;
     auto apply = [this, &mapping, topic, a](std::optional<std::string> val) {
         return [this, &mapping, topic, a, val]() {
             if (val)
@@ -299,13 +308,10 @@ void Session::set_map(std::map<Addr, std::string>& mapping, const std::string& t
     edit(label + " 0x" + hx(a), apply(value), apply(old));
 }
 
-void Session::set_comment(const std::string& ref, const std::string& text) {
-    set_map(annotations.comments, "comment", "Komentár", ref, text);
-}
-
-void Session::set_bookmark(const std::string& ref, const std::string& label) {
-    set_map(annotations.bookmarks, "bookmark", "Záložka", ref, label);
-}
+void Session::set_comment(const std::string& ref, const std::string& text) { set_comment(resolve_or_throw(ref, "Adresu"), text); }
+void Session::set_comment(Addr addr, const std::string& text) { set_map(annotations.comments, "comment", "Komentár", addr, text); }
+void Session::set_bookmark(const std::string& ref, const std::string& label) { set_bookmark(resolve_or_throw(ref, "Adresu"), label); }
+void Session::set_bookmark(Addr addr, const std::string& label) { set_map(annotations.bookmarks, "bookmark", "Záložka", addr, label); }
 
 std::optional<std::string> Session::undo() {
     std::lock_guard<std::recursive_mutex> g(lock);

@@ -70,8 +70,11 @@ public:
     std::string rename(const std::string& ref, const std::string& new_name);
     std::string rename(Addr addr, const std::string& new_name);
     void rename_var(const std::string& func, const std::string& key, const std::string& new_name);
+    void rename_var(Addr func, const std::string& key, const std::string& new_name);
     void set_comment(const std::string& ref, const std::string& text);
+    void set_comment(Addr addr, const std::string& text);
     void set_bookmark(const std::string& ref, const std::string& label);
+    void set_bookmark(Addr addr, const std::string& label);
     std::optional<std::string> undo();
     std::optional<std::string> redo();
 
@@ -102,8 +105,9 @@ private:
     const std::map<std::string, Addr>& names_index();
     std::optional<Addr> resolve_addr(Addr v) const;
     void edit(const std::string& description, std::function<void()> redo, std::function<void()> undo);
-    void set_map(std::map<Addr, std::string>& mapping, const std::string& topic, const std::string& label,
-                 const std::string& ref, const std::string& value);
+    void set_map(std::map<Addr, std::string>& mapping, const std::string& topic, const std::string& label, Addr addr,
+                 const std::string& value);
+    Addr resolve_or_throw(const std::string& ref, const std::string& what);
 };
 
 std::string default_project_path(const std::string& binary_path);
