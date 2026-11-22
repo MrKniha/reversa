@@ -6,11 +6,11 @@ Cieľ: nainštalovať REVERSA, otvoriť ukážkovú binárku a nájsť v nej hes
 
 Stiahnite hotový balík z GitHub Actions (posledný úspešný beh → *Artifacts*):
 
-- **Windows:** `reversa-windows-x64` (zip). Rozbaľte ho a spustite `reversa\bin\reversa-gui.exe`.
-  Pre príkazy nižšie otvorte v priečinku `reversa\bin` príkazový riadok a píšte `reversa.exe`.
+- **Windows:** `reversa-windows-x64` (zip). Rozbaľte ho a spustite `reversa-windows-x64\bin\reversa-gui.exe`.
+  Pre príkazy nižšie otvorte v priečinku `bin` príkazový riadok a píšte `reversa.exe`.
 - **Linux (Ubuntu 24.04 a novšie):** `reversa-linux-x64-deb`, potom `sudo apt install ./reversa_0.2.0_amd64.deb`.
 
-Overenie: `reversa --version`. Zostavenie zo zdrojov popisuje [README](../README.md#zostavenie-zo-zdrojov).
+Overenie: `reversa --version`. Zostavenie zo zdrojov popisuje [building.md](building.md).
 
 ## 2. Ukážková analýza (1 minúta)
 
@@ -46,6 +46,26 @@ tlačidlom *Zrušiť* analýzu zastavíte). Pri prvom spustení uvidíte krátke
 
 Kliknite na **Otvoriť súbor** alebo spustite `reversa gui /cesta/k/programu`. Podporované sú ELF (x86-64, ARM64,
 x86, ARM), PE 32/64-bit a surové dáta (`reversa gui firmware.bin --arch arm64 --base 0x8000000`).
+
+## Ovládanie GUI (klávesové skratky)
+
+| Kláves | Akcia |
+|---|---|
+| `Ctrl+O` / `Ctrl+S` | otvoriť súbor alebo projekt / uložiť projekt |
+| `Ctrl+F` | hľadať funkciu, reťazec alebo adresu |
+| `G` | skočiť na adresu alebo meno |
+| `1` `2` `3` `4` | listing, pseudokód, graf funkcie, graf volaní |
+| `N` | premenovať funkciu, adresu alebo vybranú premennú v pseudokóde |
+| `;` / `B` | komentár / záložka |
+| `Ctrl+Z` / `Ctrl+Y` | späť / znova |
+| `Alt+←` | späť v histórii navigácie |
+| `Ctrl+Shift+T` | svetlý / tmavý motív |
+| `F1` | úvodný sprievodca |
+
+Všetky skratky zmeníte v *Zobraziť → Nastavenia*. Tam nastavíte aj veľkosť
+písma, jazyk a vypnete vysvetlivky pre začiatočníkov. Predvolený jazyk je
+angličtina; po zmene jazyka reštartujte REVERSA. Analýza beží na pozadí
+a tlačidlom *Zrušiť* v stavovom riadku ju zastavíte.
 
 ## Ďalej
 
