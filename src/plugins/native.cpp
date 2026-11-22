@@ -13,6 +13,7 @@
 #include "core/text.hpp"
 
 #ifdef _WIN32
+#define NOMINMAX
 #include <windows.h>
 #else
 #include <dlfcn.h>
