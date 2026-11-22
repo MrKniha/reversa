@@ -9,7 +9,6 @@ permissions:
 
 env:
   PYTHONIOENCODING: utf-8  # Windows runners default to cp1252, which lacks Slovak letters
-  QT_QPA_PLATFORM: offscreen  # GUI tests run without a display
 
 # Third-party actions are pinned to commit SHAs (supply-chain safety); the comment names the tag.
 jobs:
@@ -49,6 +48,7 @@ jobs:
           reversa --version
           reversa script /usr/share/reversa/examples/scripts/strcmp_callers.py samples/bin/login_x64.exe | grep check_password
           reversa --demo --no-gui
+          reversa gui 2>&1 | grep "nie je dostupný žiadny displej"
       - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
         with:
           name: reversa-linux-x64-deb
