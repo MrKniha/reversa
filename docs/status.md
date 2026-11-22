@@ -20,7 +20,7 @@ Actions na Ubuntu 24.04 (GCC, systémové Qt 6.4, Python 3.12) a Windows Server
 | Headless | `python3 scripts/headless_check.py build/bin/reversa` | `headless check OK: 10 samples` (reporty .md/.html, projekty, demo, skript) |
 | Linux balík | `cpack -G DEB`, `apt install ./reversa_0.2.0_amd64.deb` | CI: inštalácia, `reversa --version`, skript z `/usr/share/reversa/examples`, `--demo --no-gui` |
 | Windows balík | `scripts/package_windows.py` (windeployqt + Python runtime) | CI: zip, test z čistého `PATH` (len balík poskytuje Qt a Python): `--version`, skript, `--demo --no-gui` |
-| CI na GitHube | `.github/workflows/ci.yml` (licencie, Linux, Windows) | pozri [Záznam CI](#záznam-ci) |
+| CI na GitHube | `.github/workflows/ci.yml` (licencie, Linux, Windows) | prešlo, pozri [Záznam CI](#záznam-ci) |
 
 ## Akceptačné kritériá (8.2)
 
@@ -35,7 +35,7 @@ Actions na Ubuntu 24.04 (GCC, systémové Qt 6.4, Python 3.12) a Windows Server
 | 7 | Tutoriál „prvá analýza za 10 minút" (walkthrough) | prešlo (dokument), s reálnym nováčikom **nebolo možné overiť** | README, `docs/quickstart.md`, `docs/tutorials.md`. Kroky zodpovedajú GUI testu. |
 | 8 | `reversa analyze subor.exe --report report.md` headless v CI | prešlo | `test_analyze_report_markdown`, `scripts/headless_check.py` (aj `.exe` vzorky) v CI na Linuxe aj Windows. |
 | 9 | Licenčná kontrola v CI, LICENSE-THIRD-PARTY kompletný | prešlo | Job `licenses` v CI. |
-| 10 | Všetky testy v CI zelené, release build + balíčky pre 2 platformy | pozri [Záznam CI](#záznam-ci) | Release build, `.deb` a Windows zip ako artefakty CI. |
+| 10 | Všetky testy v CI zelené, release build + balíčky pre 2 platformy | prešlo | [Záznam CI](#záznam-ci): Release build, `.deb` a Windows zip ako artefakty CI. |
 
 ## MUST-HAVE funkcie (4.1)
 
@@ -89,7 +89,18 @@ kritické pre akceptačné kritériá.
 
 ## Záznam CI
 
-Doplnené po behu CI na vetve `cpp`.
+Beh [45052061572](https://github.com/MrKniha/reversa/actions/runs/45052061572)
+na vetve `cpp` (22. 11. 2026): **všetky joby zelené**.
+
+| Job | Výsledok |
+|---|---|
+| licenses | prešlo |
+| Linux (Ubuntu 24.04) | ctest 2/2 (42 C++ testov + GUI test), pytest 80/80, headless 10 vzoriek, `.deb` (2 MB) nainštalovaný a spustený |
+| Windows (Server 2022, MSVC) | ctest 2/2, pytest 80/80, headless 10 vzoriek, zip (27 MB) otestovaný s čistým `PATH` |
+
+Chyby nájdené v CI a opravené: chýbajúce `#include` pre MSVC, Python DLL sa
+nedá linkovať s `/DELAYLOAD`, CRLF v golden súboroch (pridaný `.gitattributes`),
+názov súboru v reporte pri Windows cestách, CLI test spúšťal GUI.
 
 ## Záznam postupu
 
