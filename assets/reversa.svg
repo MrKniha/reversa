@@ -1,20 +1,31 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256" width="256" height="256">
   <title>REVERSA</title>
-  <defs>
-    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
-      <stop offset="0" stop-color="#0b57d0"/>
-      <stop offset="1" stop-color="#5b21b6"/>
-    </linearGradient>
-  </defs>
-  <rect x="8" y="8" width="240" height="240" rx="56" fill="url(#bg)"/>
-  <!-- binary trace behind the letter -->
-  <g fill="#ffffff" opacity="0.14">
-    <rect x="150" y="186" width="16" height="16" rx="3"/><rect x="174" y="186" width="34" height="16" rx="3"/>
-    <rect x="150" y="210" width="34" height="16" rx="3"/><rect x="192" y="210" width="16" height="16" rx="3"/>
+  <rect x="8" y="8" width="240" height="240" rx="52" fill="#e8483d"/>
+  <g transform="translate(128 131) scale(0.47) translate(-348 -478)"><g>
+  <g stroke="#121317" stroke-linecap="round" fill="none">
+    <path d="M214 284 L178 271" stroke-width="7"/><path d="M482 284 L518 271" stroke-width="7"/>
+    <path d="M272 326 Q300 352 330 396" stroke-width="6"/><path d="M424 326 Q396 352 366 396" stroke-width="6"/>
+    <path d="M250 340 L272 388 L318 424" stroke-width="20" stroke-linejoin="round"/>
+    <path d="M446 340 L424 388 L378 424" stroke-width="20" stroke-linejoin="round"/>
+    <path d="M304 454 L238 467" stroke-width="13"/><path d="M392 454 L458 467" stroke-width="13"/>
+    <path d="M304 476 L240 505" stroke-width="13"/><path d="M392 476 L456 505" stroke-width="13"/>
+    <path d="M310 500 L256 546" stroke-width="13"/><path d="M386 500 L440 546" stroke-width="13"/>
   </g>
-  <!-- R: stem, bowl that loops back into a left arrow (reverse), leg -->
-  <path d="M78 200V60h58a42 42 0 0 1 0 84h-6" fill="none" stroke="#ffffff" stroke-width="28"
-        stroke-linecap="round" stroke-linejoin="round"/>
-  <path d="M128 144l50 56" fill="none" stroke="#ffffff" stroke-width="28" stroke-linecap="round"/>
-  <path d="M100 144l32-25v50z" fill="#22d3ee" stroke="#22d3ee" stroke-width="8" stroke-linejoin="round"/>
+  <g fill="#121317">
+    <path d="M232 266 C206 276 204 330 236 350 C262 362 282 338 272 300 C268 282 256 262 232 266 Z"/>
+    <path d="M464 266 C490 276 492 330 460 350 C434 362 414 338 424 300 C428 282 440 262 464 266 Z"/>
+    <ellipse cx="348" cy="460" rx="52" ry="72"/>
+    <rect x="304" y="534" width="88" height="26" rx="13"/>
+    <rect x="310" y="570" width="76" height="26" rx="13"/>
+    <rect x="316" y="606" width="64" height="24" rx="12"/>
+    <path d="M348 634 L408 690 L348 672 L288 690 Z" stroke="#121317" stroke-width="4" stroke-linejoin="round"/>
+  </g>
+  <g fill="#e8483d" stroke="#e8483d">
+    <rect x="236" y="268" width="9" height="44" rx="4.5" stroke="none" transform="rotate(-6 240 290)"/>
+    <rect x="451" y="268" width="9" height="44" rx="4.5" stroke="none" transform="rotate(6 456 290)"/>
+    <circle cx="328" cy="414" r="8.5" stroke="none"/><circle cx="368" cy="414" r="8.5" stroke="none"/>
+    <path d="M304 486 Q348 506 392 486" fill="none" stroke-width="9" stroke-linecap="round"/>
+  </g>
+</g>
+</g>
 </svg>
