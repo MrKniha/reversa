@@ -22,7 +22,7 @@
    (`samples/build.sh`). Malvér do repozitára nepatrí. Ikony `assets/reversa-*.png`
    a `assets/reversa.ico` sú vyrenderované z `assets/reversa.svg`; po zmene loga ich vyrenderujte znova.
 6. **Etika.** Funkcie určené na obchádzanie DRM, licenčných kontrol, aktivácií alebo anti-cheatu
-   neprijmeme (pozri README, kapitola Etika).
+   neprijmeme (pozri [docs/safety.md](docs/safety.md#etika)).
 7. **Golden súbory** (`samples/expected/*.json`, `tests/cpp/golden/*.pseudo.txt`) meňte len vedome:
    `build/bin/rvdump --expected samples`, resp. `build/bin/rvdump --pseudo samples/bin/X > tests/cpp/golden/X.pseudo.txt`,
    a v PR vysvetlite, prečo sa výsledok zmenil.
