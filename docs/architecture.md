@@ -76,8 +76,9 @@ najužitočnejší: na skripty a pluginy.
   dát je kompaktný (`std::map`, `unordered_map`, žiadne objekty na inštrukciu
   navyše).
 - **Jeden program bez závislostí.** Windows balík je zip s `reversa-gui.exe`;
-  Linux balík je `.deb` so systémovými knižnicami. Netreba Python ani
-  prehliadač. Bez Pythonu REVERSA funguje, len skripty a pluginy sú vypnuté.
+  Linux balík je `.deb` so systémovými knižnicami. Netreba inštalovať Python
+  ani prehliadač (Windows balík obsahuje vlastný Python runtime). Zostava
+  s `-DREVERSA_PYTHON=OFF` Python vôbec nepotrebuje, len skripty a pluginy sú vypnuté.
 - **Natívne GUI.** Qt Widgets je overené v nástrojoch ako Cutter, má
   dokovateľné panely, klávesové skratky, tmavý motív a funguje rovnako na
   Windows aj Linuxe. Odpadá lokálny HTTP server a s ním celá jeho útočná plocha.
