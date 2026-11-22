@@ -5,6 +5,8 @@
 #include <QTimer>
 
 #include "cli/cli.hpp"
+#include "gui/dialogs.hpp"
+#include "gui/i18n.hpp"
 #include "gui/main_window.hpp"
 #ifdef REVERSA_WITH_PYTHON
 #include "python/embed.hpp"
@@ -29,6 +31,8 @@ int run(const cli::Args& args) {
     QApplication::setApplicationName("REVERSA");
     QApplication::setOrganizationName("REVERSA");
     QApplication::setApplicationVersion(REVERSA_VERSION);
+    QApplication::setWindowIcon(app_icon());
+    set_language(pick_language(UiSettings::load(false).language));
 #ifdef REVERSA_WITH_PYTHON
     // Start Python on the main thread and release the GIL, so the analysis worker thread can call
     // plugin hooks (each call re-acquires the GIL).

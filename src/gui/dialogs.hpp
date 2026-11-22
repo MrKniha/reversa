@@ -2,6 +2,7 @@
 #pragma once
 
 #include <QDialog>
+#include <QIcon>
 #include <QKeySequence>
 #include <QString>
 #include <QStringList>
@@ -25,6 +26,7 @@ struct CommandDef {
 
 struct UiSettings {
     QString theme = "light";  // light | dark
+    QString language;         // sk en de fr zh; empty = follow the system
     int font_size = 10;
     bool hints = true;        // beginner explanations above the panels
     bool onboarding_done = false;
@@ -61,11 +63,15 @@ private:
     const std::vector<CommandDef>& commands_;
     UiSettings base_;
     QComboBox* theme_;
+    QComboBox* language_;
     QSpinBox* font_;
     QCheckBox* hints_;
     QCheckBox* onboarding_;
     std::vector<QKeySequenceEdit*> edits_;
 };
+
+// The REVERSA logo (assets/reversa.svg rendered to PNG, compiled in as a resource).
+QIcon app_icon();
 
 // Read-only table with a filter box and a "copy" button (diagnostics, plugins, relocations).
 void show_table(QWidget* parent, const QString& title, const QString& intro, const QStringList& headers,

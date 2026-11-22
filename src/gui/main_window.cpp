@@ -40,6 +40,7 @@
 #include "core/errors.hpp"
 #include "core/text.hpp"
 #include "gui/graph_view.hpp"
+#include "gui/i18n.hpp"
 #include "report/report.hpp"
 #ifdef REVERSA_WITH_PYTHON
 #include "python/embed.hpp"
@@ -125,7 +126,7 @@ void MainWindow::build_commands() {
         {"demo", tr("Skúšobná binárka"), QKeySequence()},
         {"save", tr("Uložiť projekt"), QKeySequence::Save},
         {"save_as", tr("Uložiť projekt ako…"), QKeySequence("Ctrl+Shift+S")},
-        {"undo", tr("Späť"), QKeySequence::Undo},
+        {"undo", tr("Vrátiť späť"), QKeySequence::Undo},
         {"redo", tr("Znova"), QKeySequence("Ctrl+Y")},
         {"rename", tr("Premenovať"), QKeySequence("N")},
         {"comment", tr("Komentár"), QKeySequence(";")},
@@ -200,7 +201,7 @@ QAction* MainWindow::command(const QString& id) const {
 }
 
 void MainWindow::build_ui() {
-    setWindowIcon(QApplication::style()->standardIcon(QStyle::SP_FileDialogContentsView));
+    setWindowIcon(app_icon());
     // menus
     auto* file = menuBar()->addMenu(tr("&Súbor"));
     for (auto id : {"open", "demo", "save", "save_as"}) file->addAction(command(id));
@@ -1259,9 +1260,14 @@ void MainWindow::cmd_advanced_search(const QString& kind) {
 void MainWindow::cmd_settings() {
     SettingsDialog d(settings_, command_defs_, this);
     if (d.exec() != QDialog::Accepted) return;
+    QString old_language = current_language();
     settings_ = d.result();
     settings_.save();
     apply_settings();
+    if (settings_.language != old_language) {
+        set_language(settings_.language);  // new dialogs use it at once; menus and panels after a restart
+        QMessageBox::information(this, tr("Jazyk"), tr("Jazyk sa úplne zmení po reštarte REVERSA."));
+    }
     if (d.reshow_onboarding()) cmd_onboarding();
 }
 
