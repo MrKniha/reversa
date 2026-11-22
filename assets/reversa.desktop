@@ -1,0 +1,10 @@
+[Desktop Entry]
+Type=Application
+Name=REVERSA
+GenericName=Reverse engineering
+Comment=Analýza programov bez zdrojového kódu: listing, pseudokód, x-refs, grafy
+Exec=reversa gui %f
+Icon=reversa
+Terminal=false
+Categories=Development;Debugger;
+Keywords=reverse;disassembler;decompiler;elf;pe;ctf;

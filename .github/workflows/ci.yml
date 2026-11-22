@@ -10,86 +10,88 @@ permissions:
 env:
   PYTHONIOENCODING: utf-8  # Windows runners default to cp1252, which lacks Slovak letters
 
+# Third-party actions are pinned to commit SHAs (supply-chain safety); the comment names the tag.
 jobs:
-  test:
-    name: tests (${{ matrix.os }}, Python ${{ matrix.python }})
-    runs-on: ${{ matrix.os }}
-    strategy:
-      fail-fast: false
-      matrix:
-        os: [ubuntu-latest, windows-latest]
-        python: ["3.10", "3.13"]
+  licenses:
+    runs-on: ubuntu-24.04
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-python@v5
-        with:
-          python-version: ${{ matrix.python }}
-      - name: Install (locked runtime dependencies + dev tools)
-        run: |
-          python -m pip install --upgrade pip
-          pip install --require-hashes -r requirements.lock
-          pip install -e ".[dev]"
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
       - name: License check
-        run: python scripts/check_licenses.py
-      - name: Tests with coverage
+        run: python3 scripts/check_licenses.py
+
+  linux:
+    name: Linux (build, tests, .deb)
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+      - name: Packages (system Qt 6, SQLite, Python, so the .deb depends on distribution packages)
         run: |
-          coverage run -m pytest
-          coverage report --fail-under=80
+          sudo apt-get update
+          sudo apt-get install -y ninja-build libsqlite3-dev qt6-base-dev libgl-dev python3-dev python3-venv
+      - name: Configure
+        run: cmake -S . -B build -G Ninja -DCMAKE_BUILD_TYPE=Release -DPython_EXECUTABLE=/usr/bin/python3
+      - name: Build
+        run: cmake --build build --parallel
+      - name: C++ and GUI tests
+        run: ctest --test-dir build --output-on-failure
+      - name: Python API tests
+        run: |
+          python3 -m venv .venv
+          .venv/bin/pip install --require-hashes -r tests/requirements-dev.lock
+          REVERSA_BUILD_DIR=build .venv/bin/python -m pytest -q tests/python
       - name: Headless check
-        run: python scripts/headless_check.py headless-out
+        run: python3 scripts/headless_check.py build/bin/reversa headless-out
+      - name: Package (.deb) and test the installed package
+        run: |
+          cd build && cpack -G DEB && cd ..
+          sudo apt-get install -y ./build/reversa_*.deb
+          reversa --version
+          reversa script /usr/share/reversa/examples/scripts/strcmp_callers.py samples/bin/login_x64.exe | grep check_password
+          reversa --demo --no-gui
+          reversa gui 2>&1 | grep "nie je dostupný žiadny displej"
+      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+        with:
+          name: reversa-linux-x64-deb
+          path: build/reversa_*.deb
 
-  ui-smoke:
-    runs-on: ubuntu-latest
+  windows:
+    name: Windows (build, tests, portable zip)
+    runs-on: windows-2022
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-python@v5
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+      - uses: actions/setup-python@a26af69be951a213d495a4c3e4e4022e16d87065 # v5.6.0
         with:
           python-version: "3.12"
-      - uses: actions/setup-node@v4
+      - uses: jurplel/install-qt-action@d325aaf2a8baeeda41ad0b5d39f84a6af9bcf005 # v4.3.0
         with:
-          node-version: "20"
-      - run: pip install --require-hashes -r requirements.lock && pip install -e .
-      - run: npm install --no-save playwright@1.48.2 && npx playwright install --with-deps chromium
-      - run: node tests/ui/smoke.mjs
-
-  package:
-    name: package (${{ matrix.os }})
-    needs: [test]
-    runs-on: ${{ matrix.os }}
-    strategy:
-      matrix:
-        include:
-          - os: ubuntu-latest
-            exe: dist/reversa
-            artifact: reversa-linux-x64
-          - os: windows-latest
-            exe: dist/reversa.exe
-            artifact: reversa-windows-x64
-    steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-python@v5
-        with:
-          python-version: "3.12"
-      - name: Wheel
-        run: |
-          pip install build
-          python -m build
-      - name: Standalone executable (no Python needed on the target machine)
+          version: "6.8.3"
+          arch: win64_msvc2022_64
+          cache: true
+      - name: Configure (SQLite from vcpkg, version locked by vcpkg.json)
+        shell: bash
+        run: >
+          cmake -S . -B build -G "Visual Studio 17 2022" -A x64
+          -DCMAKE_TOOLCHAIN_FILE=C:/vcpkg/scripts/buildsystems/vcpkg.cmake
+          -DVCPKG_TARGET_TRIPLET=x64-windows-static-md
+          -DPython_EXECUTABLE="$(python -c 'import sys; print(sys.executable)')"
+      - name: Build
+        run: cmake --build build --config Release --parallel
+      - name: C++ and GUI tests
+        run: ctest --test-dir build -C Release --output-on-failure
+      - name: Python API tests
         shell: bash
         run: |
-          pip install --require-hashes -r requirements.lock
-          pip install . pyinstaller==6.22.3
-          pyinstaller --onefile --name reversa --collect-all reversa --collect-all capstone src/reversa/__main__.py
-      - name: Smoke test the executable
+          python -m pip install --require-hashes -r tests/requirements-dev.lock
+          REVERSA_BUILD_DIR=build python -m pytest -q tests/python
+      - name: Headless check
+        shell: bash
+        run: python scripts/headless_check.py build/bin/reversa.exe headless-out
+      - name: Portable package (Qt via windeployqt, bundled Python runtime)
         shell: bash
         run: |
-          ${{ matrix.exe }} --version
-          ${{ matrix.exe }} --demo --no-gui
-          ${{ matrix.exe }} analyze samples/bin/login_x64.exe --report report.md --no-plugins
-      - uses: actions/upload-artifact@v4
+          cmake --install build --config Release --prefix dist/reversa
+          python scripts/package_windows.py dist/reversa reversa-windows-x64.zip
+      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
         with:
-          name: ${{ matrix.artifact }}
-          path: |
-            dist/*.whl
-            dist/*.tar.gz
-            ${{ matrix.exe }}
+          name: reversa-windows-x64
+          path: reversa-windows-x64.zip

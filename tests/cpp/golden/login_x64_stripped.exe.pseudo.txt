@@ -1,0 +1,1541 @@
+== sub_140001000 140001000
+// Dočasný pseudokód (REVERSA MVP): typy sú odhadnuté z veľkosti prístupov, overte v listingu.
+void sub_140001000()
+{
+    return;
+}
+== sub_140001010 140001010
+// Dočasný pseudokód (REVERSA MVP): typy sú odhadnuté z veľkosti prístupov, overte v listingu.
+int64_t sub_140001010()
+{
+    int64_t v1;
+    int32_t v2;
+    int16_t v3;
+    
+    v2 = 0;
+    *(int32_t *)(data_140004480) = 1;
+    *(int32_t *)(data_140004490) = 1;
+    *(int32_t *)(data_1400044a0) = 1;
+    v1 = data_140004430;
+    if (*(int16_t *)(v1) == 0x5a4d) {
+        v1 += *(int32_t *)(v1 + 60);
+        if (*(int32_t *)(v1) == 0x4550) {
+            v3 = *(int16_t *)(v1 + 24);
+            if (v3 == 0x10b) {
+                if ((unsigned)*(int32_t *)(v1 + 116) > 14) {
+                    v2 = *(int32_t *)(v1 + 232) != 0;
+                }
+            } else if (v3 == 0x20b) {
+                if ((unsigned)*(int32_t *)(v1 + 132) > 14) {
+                    v2 = *(int32_t *)(v1 + 248) != 0;
+                }
+            }
+        }
+    }
+    v1 = data_140004470;
+    data_14000700c = v2;
+    if (*(int32_t *)(v1) == 0) {
+        __set_app_type(1);
+    } else {
+        __set_app_type(2);
+    }
+    *(int32_t *)(sub_1400026e0()) = *(int32_t *)(data_140004540);
+    *(int32_t *)(sub_1400026f0()) = *(int32_t *)(data_140004520);
+    sub_1400016c0();
+    if (*(int32_t *)(data_1400043e0) == 1) {
+        sub_140001e30(data_140004560);
+        return 0;
+    } else {
+        return 0;
+    }
+}
+== sub_140001140 140001140
+// Dočasný pseudokód (REVERSA MVP): typy sú odhadnuté z veľkosti prístupov, overte v listingu.
+void sub_140001140()
+{
+    int64_t stack_20;
+    int32_t v1;
+    
+    data_140007004 = *(int32_t *)(data_140004570);
+    v1 = *(int32_t *)(data_140004530);
+    stack_20 = data_140007004;
+    __getmainargs(data_140007028, data_140007020, data_140007018, v1);
+    return;
+}
+== sub_140001190 140001190
+// Dočasný pseudokód (REVERSA MVP): typy sú odhadnuté z veľkosti prístupov, overte v listingu.
+int32_t sub_140001190()
+{
+    int64_t v1;
+    int64_t v2;
+    int64_t v3;
+    int64_t v4;
+    int64_t v5;
+    int64_t v6;
+    int64_t v7;
+    int64_t v8;
+    int64_t __gs_30;
+    
+    v1 = Sleep;
+    v6 = 0;
+    v8 = *(int64_t *)(__gs_30 + 8);
+    while (true) {
+        v3 = v6;
+        __asm("lock cmpxchg qword ptr [rbx], rsi");
+        if (v3 != 0) {
+            if (v8 == v3) {
+                break;
+            } else {
+                (*v1)(0x3e8);
+                continue;
+            }
+        } else {
+            goto label_1400011de;
+        }
+    }
+    v8 = data_1400044d0;
+    v6 = 1;
+    if (*(int32_t *)(v8) != 1) {
+    label_1400011f2:
+        if (*(int32_t *)(v8) == 0) {
+            v7 = data_140004510;
+            v5 = data_140004500;
+            *(int32_t *)(v8) = 1;
+            _initterm(v5, v7);
+        } else {
+            data_140007008 = 1;
+        }
+        if (*(int32_t *)(v8) == 1) {
+        label_140001364:
+            _initterm(data_1400044e0, data_1400044f0);
+            *(int32_t *)(v8) = 2;
+            if (v6 == 0) {
+            label_140001385:
+                __asm("xchg qword ptr [rbx], rax");
+            }
+        } else {
+        label_140001211:
+            if (v6 == 0) {
+                goto label_140001385;
+            }
+        }
+    } else {
+    label_14000134f:
+        _amsg_exit(31);
+        if (*(int32_t *)(v8) != 1) {
+            goto label_140001211;
+        } else {
+            goto label_140001364;
+        }
+    }
+    v3 = *(int64_t *)(data_140004420);
+    if (v3 != 0) {
+        (*v3)(0, 2, 0);
+    }
+    sub_140001a90();
+    *(int64_t *)(data_1400044b0) = SetUnhandledExceptionFilter(data_140004550);
+    sub_140002710(sub_140001000);
+    sub_1400018a0();
+    v4 = data_140007028;
+    v6 = v4 + 1 << 3;
+    v3 = malloc(v6);
+    v2 = data_140007020;
+    v1 = v3;
+    if (v4 <= 0) {
+        v6 = v3;
+    } else {
+        v6 -= 8;
+        v4 = 0;
+        while (true) {
+            v8 = strlen(*(int64_t *)(v2 + v4)) + 1;
+            v3 = malloc(v8);
+            *(int64_t *)(v1 + v4) = v3;
+            v7 = *(int64_t *)(v2 + v4);
+            v4 += 8;
+            memcpy(v3, v7, v8);
+            if (v6 != v4) {
+                continue;
+            } else {
+                break;
+            }
+        }
+        v6 += v1;
+    }
+    *(int64_t *)(v6) = 0;
+    data_140007020 = v1;
+    sub_1400016a0();
+    v5 = data_140007028;
+    *(int64_t *)(*(int64_t *)(data_140004440)) = data_140007018;
+    v3 = sub_140001526(v5, data_140007020);
+    v5 = data_14000700c;
+    data_140007010 = v3;
+    if (v5 == 0) {
+        exit(v3);
+    } else if (data_140007008 == 0) {
+        _cexit();
+        return data_140007010;
+    } else {
+        return v3;
+    }
+label_1400011de:
+    v8 = data_1400044d0;
+    v6 = 0;
+    if (*(int32_t *)(v8) == 1) {
+        goto label_14000134f;
+    } else {
+        goto label_1400011f2;
+    }
+}
+== sub_1400013e0 1400013e0
+// Dočasný pseudokód (REVERSA MVP): typy sú odhadnuté z veľkosti prístupov, overte v listingu.
+void sub_1400013e0()
+{
+    *(int32_t *)(data_140004470) = 1;
+    sub_140001190();
+    return;
+}
+== entry 140001410
+// Dočasný pseudokód (REVERSA MVP): typy sú odhadnuté z veľkosti prístupov, overte v listingu.
+void entry()
+{
+    *(int32_t *)(data_140004470) = 0;
+    sub_140001190();
+    return;
+}
+== sub_140001440 140001440
+// Dočasný pseudokód (REVERSA MVP): typy sú odhadnuté z veľkosti prístupov, overte v listingu.
+void sub_140001440()
+{
+    _onexit();
+    __asm("sbb eax, eax");
+    return;
+}
+== sub_140001460 140001460
+// Dočasný pseudokód (REVERSA MVP): typy sú odhadnuté z veľkosti prístupov, overte v listingu.
+void sub_140001460()
+{
+    sub_140001440(sub_140001470);
+    return;
+}
+== sub_140001470 140001470
+// Dočasný pseudokód (REVERSA MVP): typy sú odhadnuté z veľkosti prístupov, overte v listingu.
+void sub_140001470()
+{
+    return;
+}
+== sub_140001480 140001480
+// Dočasný pseudokód (REVERSA MVP): typy sú odhadnuté z veľkosti prístupov, overte v listingu.
+int64_t sub_140001480(int64_t a1)
+{
+    int64_t local_10;
+    int64_t arg_10;
+    int64_t v1;
+    
+    arg_10 = a1;
+    local_10 = 0x61737265766572;
+    v1 = &local_10 + strlen(&local_10);
+    *(int32_t *)(v1) = 0x36323032;
+    *(char *)(v1 + 4) = 0;
+    return strcmp(arg_10, &local_10) == 0;
+}
+== sub_1400014db 1400014db
+// Dočasný pseudokód (REVERSA MVP): typy sú odhadnuté z veľkosti prístupov, overte v listingu.
+int64_t sub_1400014db(int64_t a1)
+{
+    int64_t arg_10;
+    int32_t v1;
+    
+    arg_10 = a1;
+    if (strcmp(arg_10, "admin") != 0) {
+        v1 = strcmp(arg_10, "student") == 0;
+    } else {
+        v1 = 1;
+    }
+    return v1;
+}
+== sub_140001526 140001526
+// Dočasný pseudokód (REVERSA MVP): typy sú odhadnuté z veľkosti prístupov, overte v listingu.
+int64_t sub_140001526(int32_t a1, int64_t a2)
+{
+    int32_t arg_10;
+    int64_t arg_18;
+    int32_t v1;
+    
+    arg_10 = a1;
+    arg_18 = a2;
+    sub_1400016a0();
+    if (arg_10 > 2) {
+        if (sub_1400014db(*(int64_t *)(arg_18 + 8)) != 0) {
+            if (sub_140001480(*(int64_t *)(arg_18 + 16)) == 0) {
+                puts("Wrong password.");
+                v1 = 1;
+            } else {
+                puts("Access granted. Flag: CTF{xrefs_are_your_friend}");
+                v1 = 0;
+            }
+        } else {
+            puts("Unknown user.");
+            v1 = 1;
+        }
+    } else {
+        puts("Usage: login <user> <password>");
+        v1 = 2;
+    }
+    return v1;
+}
+== sub_1400015d0 1400015d0
+// Dočasný pseudokód (REVERSA MVP): typy sú odhadnuté z veľkosti prístupov, overte v listingu.
+void sub_1400015d0()
+{
+    int64_t v1;
+    int64_t v2;
+    
+    v1 = *(int64_t *)(data_140003000);
+    if (v1 != 0) {
+        while (true) {
+            (*v1)();
+            v1 = data_140003000;
+            v2 = v1 + 8;
+            v1 = *(int64_t *)(v1 + 8);
+            data_140003000 = v2;
+            if (v1 != 0) {
+                continue;
+            } else {
+                break;
+            }
+        }
+    }
+    return;
+}
+== sub_140001620 140001620
+// Dočasný pseudokód (REVERSA MVP): typy sú odhadnuté z veľkosti prístupov, overte v listingu.
+void sub_140001620()
+{
+    int64_t v1;
+    int32_t v2;
+    int64_t v3;
+    int32_t v4;
+    int64_t v5;
+    int64_t v6;
+    
+    v5 = data_1400043f0;
+    v2 = *(int64_t *)(v5);
+    v4 = v2;
+    if (v2 == -1) {
+        v2 = 0;
+        while (true) {
+            v1 = v2 + 1;
+            v4 = v2;
+            v2 = v1;
+            if (*(int64_t *)(v5 + v1 * 8) != 0) {
+                continue;
+            } else {
+                break;
+            }
+        }
+    }
+    if (v4 != 0) {
+        v3 = v5 + v4 * 8;
+        v6 = v5 + (v4 - (v4 - 1)) * 8 - 8;
+        while (true) {
+            *(int64_t *)(v3)();
+            v3 -= 8;
+            if (v3 != v6) {
+                continue;
+            } else {
+                break;
+            }
+        }
+    }
+    sub_140001440(sub_1400015d0);
+    return;
+}
+== sub_1400016a0 1400016a0
+// Dočasný pseudokód (REVERSA MVP): typy sú odhadnuté z veľkosti prístupov, overte v listingu.
+void sub_1400016a0()
+{
+    if (data_140007030 == 0) {
+        data_140007030 = 1;
+        sub_140001620();
+        return;
+    } else {
+        return;
+    }
+}
+== sub_1400016c0 1400016c0
+// Dočasný pseudokód (REVERSA MVP): typy sú odhadnuté z veľkosti prístupov, overte v listingu.
+int32_t sub_1400016c0()
+{
+    return 0;
+}
+== sub_1400016d0 1400016d0
+// Dočasný pseudokód (REVERSA MVP): typy sú odhadnuté z veľkosti prístupov, overte v listingu.
+int32_t sub_1400016d0(int64_t a1, int32_t a2)
+{
+    if (a2 == 3) {
+    label_1400016f0:
+        sub_1400021a0();
+        return 1;
+    } else if (a2 == 0) {
+        goto label_1400016f0;
+    } else {
+        return 1;
+    }
+}
+== sub_140001700 140001700
+// Dočasný pseudokód (REVERSA MVP): typy sú odhadnuté z veľkosti prístupov, overte v listingu.
+int32_t sub_140001700(int64_t a1, int32_t a2)
+{
+    int64_t v1;
+    int64_t v2;
+    int64_t v3;
+    
+    v1 = data_1400043d0;
+    if (*(int32_t *)(v1) != 2) {
+        *(int32_t *)(v1) = 2;
+    }
+    if (a2 == 2) {
+        v2 = data_140009058;
+        v3 = data_140009058;
+        if (v2 == v3) {
+        label_140001728:
+            return 1;
+        } else {
+            while (true) {
+                v1 = *(int64_t *)(v2);
+                if (v1 != 0) {
+                    (*v1)();
+                }
+                v2 += 8;
+                if (v2 != v3) {
+                    continue;
+                } else {
+                    break;
+                }
+            }
+            return 1;
+        }
+    } else if (a2 == 1) {
+        sub_1400021a0();
+        return 1;
+    } else {
+        goto label_140001728;
+    }
+}
+== sub_140001790 140001790
+// Dočasný pseudokód (REVERSA MVP): typy sú odhadnuté z veľkosti prístupov, overte v listingu.
+int32_t sub_140001790()
+{
+    return 0;
+}
+== sub_1400017a0 1400017a0
+// Dočasný pseudokód (REVERSA MVP): typy sú odhadnuté z veľkosti prístupov, overte v listingu.
+int64_t sub_1400017a0(int64_t a1)
+{
+    int64_t v1;
+    int64_t v2;
+    int64_t v3;
+    int64_t v4;
+    
+    __asm("movups xmmword ptr [rbp], xmm6");
+    __asm("movups xmmword ptr [rbp + 0x10], xmm7");
+    __asm("movups xmmword ptr [rbp + 0x20], xmm8");
+    if ((unsigned)*(int32_t *)(a1) > 6) {
+        v2 = "Unknown error";
+        __asm("movsd xmm8, qword ptr [rcx + 0x20]");
+        __asm("movsd xmm7, qword ptr [rcx + 0x18]");
+        __asm("movsd xmm6, qword ptr [rcx + 0x10]");
+        v4 = *(int64_t *)(a1 + 8);
+        v1 = sub_140002720(2);
+        __asm("movsd qword ptr [rsp + 0x30], xmm8");
+        __asm("movsd qword ptr [rsp + 0x28], xmm7");
+        __asm("movsd qword ptr [rsp + 0x20], xmm6");
+        fprintf(v1, "_matherr(): %s in %s(%g, %g)  (retval=%g)\n", v2, v4);
+        __asm("movups xmm6, xmmword ptr [rbp]");
+        __asm("movups xmm7, xmmword ptr [rbp + 0x10]");
+        __asm("movups xmm8, xmmword ptr [rbp + 0x20]");
+        return 0;
+    } else {
+        v3 = data_140004224;
+        goto **(int32_t *)(v3 + *(int32_t *)(a1) * 4) + v3;  // nepriamy skok (napr. switch) – zatiaľ nerozbalený
+    }
+}
+== sub_1400018a0 1400018a0
+// Dočasný pseudokód (REVERSA MVP): typy sú odhadnuté z veľkosti prístupov, overte v listingu.
+void sub_1400018a0()
+{
+    __asm("fninit");
+    return;
+}
+== sub_1400018b0 1400018b0
+// Dočasný pseudokód (REVERSA MVP): typy sú odhadnuté z veľkosti prístupov, overte v listingu.
+void sub_1400018b0(int64_t a1, int64_t a2, int64_t a3, int64_t a4)
+{
+    int64_t stack_30;
+    
+    v1 = &stack_30;
+    *(int64_t *)(v1 + 40) = a2;
+    *(int64_t *)(v1 + 48) = a3;
+    *(int64_t *)(v1 + 56) = a4;
+    *(int64_t *)(v1 - 8) = v1 + 40;
+    fwrite("Mingw-w64 runtime failure:\n", 1, 27, sub_140002720(2));
+    vfprintf(sub_140002720(2), a1, *(int64_t *)(v1 - 8));
+    abort();
+}
+== sub_140001920 140001920
+// Dočasný pseudokód (REVERSA MVP): typy sú odhadnuté z veľkosti prístupov, overte v listingu.
+int64_t sub_140001920(int64_t a1)
+{
+    int64_t stack_50;
+    int64_t v1;
+    int32_t v2;
+    int64_t v3;
+    int64_t v5;
+    int64_t v6;
+    int64_t v7;
+    int64_t v8;
+    
+    v4 = &stack_50;
+    v8 = data_1400070a4;
+    v5 = a1;
+    if (v8 <= 0) {
+    label_140001a50:
+        v8 = 0;
+    label_140001978:
+        v3 = sub_1400023d0(v5);
+        v6 = v3;
+        if (v3 == 0) {
+        label_140001a72:
+            sub_1400018b0("Address %p has no image-section", v5);
+        } else {
+            v5 = v8 + v8 * 4 << 3;
+            v3 = data_1400070a8 + v5;
+            *(int64_t *)(v3 + 32) = v6;
+            *(int32_t *)(v3) = 0;
+            *(int64_t *)(data_1400070a8 + v5 + 24) = sub_140002510() + *(int32_t *)(v6 + 12);
+            if (VirtualQuery() == 0) {
+                sub_1400018b0("  VirtualQuery failed for %d bytes at address %p", *(int32_t *)(v6 + 8), *(int64_t *)(data_1400070a8 + v5 + 24));
+                goto label_140001a72;
+            } else {
+                v3 = *(int32_t *)(v4 - 12);
+                if ((v3 - 4 & 0xfffffffb) == 0) {
+                label_1400019ec:
+                    data_1400070a4++;
+                label_1400019f3:
+                    return v3;
+                } else if ((v3 - 64 & 0xffffffbf) != 0) {
+                    v7 = *(int64_t *)(v4 - 24);
+                    v5 += data_1400070a8;
+                    *(int64_t *)(v5 + 8) = *(int64_t *)(v4 - 48);
+                    *(int64_t *)(v5 + 16) = v7;
+                    v3 = VirtualProtect();
+                    if (v3 != 0) {
+                        goto label_1400019ec;
+                    } else {
+                        sub_1400018b0("  VirtualProtect failed with code 0x%x", GetLastError());
+                        goto label_140001a50;
+                    }
+                } else {
+                    goto label_1400019ec;
+                }
+            }
+        }
+    } else {
+        v2 = 0;
+        v3 = data_1400070a8 + 24;
+        while (true) {
+            v1 = *(int64_t *)(v3);
+            if ((unsigned)v5 < v1) {
+            label_14000196b:
+                v2++;
+                v3 += 40;
+                if (v2 != v8) {
+                    continue;
+                } else {
+                    break;
+                }
+            } else if ((unsigned)v5 < v1 + *(int32_t *)(*(int64_t *)(v3 + 8) + 8)) {
+                goto label_1400019f3;
+            } else {
+                goto label_14000196b;
+            }
+        }
+        goto label_140001978;
+    }
+}
+== sub_140001a90 140001a90
+// Dočasný pseudokód (REVERSA MVP): typy sú odhadnuté z veľkosti prístupov, overte v listingu.
+int64_t sub_140001a90()
+{
+    int64_t stack_20;
+    int64_t stack_30;
+    int32_t v1;
+    int64_t v2;
+    int64_t v3;
+    int32_t v4;
+    int64_t v5;
+    int64_t v6;
+    int64_t v7;
+    int32_t v8;
+    int64_t v9;
+    int32_t v10;
+    int64_t v11;
+    
+    v1 = data_1400070a0;
+    if (v1 == 0) {
+        data_1400070a0 = 1;
+        sub_140002450();
+        sub_1400026a0();
+        v2 = data_140004400;
+        v7 = data_140004410;
+        data_1400070a4 = 0;
+        data_1400070a8 = &stack_30;
+        v6 = v2 - v7;
+        if (v6 <= 7) {
+        label_140001ab1:
+            return v6;
+        } else {
+            v10 = *(int32_t *)(v7);
+            if (v6 > 11) {
+            label_140001c30:
+                if (v10 != 0) {
+                label_140001da0:
+                    if ((unsigned)v7 >= v2) {
+                        goto label_140001ab1;
+                    } else {
+                        v3 = data_140004430;
+                        while (true) {
+                            v11 = *(int32_t *)(v7 + 4);
+                            v9 = *(int32_t *)(v7);
+                            v7 += 8;
+                            v11 += v3;
+                            v9 += *(int32_t *)(v11);
+                            v6 = sub_140001920(v11);
+                            *(int32_t *)(v11) = v9;
+                            if ((unsigned)v7 < v2) {
+                                continue;
+                            } else {
+                                break;
+                            }
+                        }
+                    label_140001ca0:
+                        if (data_1400070a4 <= 0) {
+                            goto label_140001ab1;
+                        } else {
+                            v11 = VirtualProtect;
+                            v7 = 0;
+                            while (true) {
+                                v6 = data_1400070a8 + v7;
+                                if (*(int32_t *)(v6) != 0) {
+                                    v6 = (*v11)(*(int64_t *)(v6 + 8), *(int64_t *)(v6 + 16));
+                                }
+                                v1++;
+                                v7 += 40;
+                                if (v1 < data_1400070a4) {
+                                    continue;
+                                } else {
+                                    break;
+                                }
+                            }
+                            goto label_140001ab1;
+                        }
+                    }
+                } else {
+                    v6 = *(int32_t *)(v7 + 4);
+                    if ((v6 | *(int32_t *)(v7 + 8)) != 0) {
+                    label_140001b3a:
+                        if (v6 != 0) {
+                            goto label_140001da0;
+                        } else if (*(int32_t *)(v7 + 8) != 1) {
+                        label_140001de0:
+                            sub_1400018b0("  Unknown pseudo relocation protocol version %d.\n");
+                        } else {
+                            v7 += 12;
+                            if ((unsigned)v7 >= v2) {
+                                goto label_140001ab1;
+                            } else {
+                                v3 = data_140004430;
+                                v4 = 0xffffffff;
+                                while (true) {
+                                    v10 = *(int32_t *)(v7 + 8);
+                                    v6 = *(int32_t *)(v7) + v3;
+                                    v8 = v10;
+                                    v5 = *(int64_t *)(v6);
+                                    v9 = *(int32_t *)(v7 + 4) + v3;
+                                    if (v8 == 32) {
+                                        v11 = *(int32_t *)(v9);
+                                        v10 &= 192;
+                                        if (v11 >= 0) {
+                                            v11 = v11 - v6 + v5;
+                                            if (v10 == 0) {
+                                            label_140001d1b:
+                                                if (v11 > v4) {
+                                                    break;
+                                                } else if (v11 <= -0x80000001) {
+                                                    break;
+                                                } else {
+                                                label_140001d37:
+                                                    v6 = sub_140001920(v9);
+                                                    *(int32_t *)(v9) = v11;
+                                                label_140001bc2:
+                                                    v7 += 12;
+                                                    if ((unsigned)v7 >= v2) {
+                                                        goto label_140001ca0;
+                                                    } else {
+                                                        continue;
+                                                    }
+                                                }
+                                            } else {
+                                                goto label_140001d37;
+                                            }
+                                        } else {
+                                            v11 = (v11 | -0x100000000) - v6 + v5;
+                                            if (v10 != 0) {
+                                                goto label_140001d37;
+                                            } else {
+                                                goto label_140001d1b;
+                                            }
+                                        }
+                                    } else if (cond_unknown) {
+                                        if (v8 == 8) {
+                                            v11 = *(char *)(v9);
+                                            v10 &= 192;
+                                            if (v11 >= 0) {
+                                                v11 = v11 - v6 + v5;
+                                                if (v10 == 0) {
+                                                label_140001c73:
+                                                    if (v11 > 255) {
+                                                        break;
+                                                    } else if (v11 < -128) {
+                                                        break;
+                                                    } else {
+                                                    label_140001c82:
+                                                        v7 += 12;
+                                                        v6 = sub_140001920(v9);
+                                                        *(char *)(v9) = v11;
+                                                        if ((unsigned)v7 < v2) {
+                                                            continue;
+                                                        } else {
+                                                            goto label_140001c9a;
+                                                        }
+                                                    }
+                                                } else {
+                                                    goto label_140001c82;
+                                                }
+                                            } else {
+                                                v11 = (v11 | -0x100) - v6 + v5;
+                                                if (v10 != 0) {
+                                                    goto label_140001c82;
+                                                } else {
+                                                    goto label_140001c73;
+                                                }
+                                            }
+                                        } else if (v8 != 16) {
+                                            goto label_140001dd2;
+                                        } else {
+                                            v11 = *(int16_t *)(v9);
+                                            v10 &= 192;
+                                            if (v11 >= 0) {
+                                                v11 = v11 - v6 + v5;
+                                                if (v10 == 0) {
+                                                label_140001ba5:
+                                                    if (v11 < -0x8000) {
+                                                        break;
+                                                    } else if (v11 > 0xffff) {
+                                                        break;
+                                                    } else {
+                                                    label_140001bb7:
+                                                        v6 = sub_140001920(v9);
+                                                        *(int16_t *)(v9) = v11;
+                                                        goto label_140001bc2;
+                                                    }
+                                                } else {
+                                                    goto label_140001bb7;
+                                                }
+                                            } else {
+                                                v11 = (v11 | -0x10000) - v6 + v5;
+                                                if (v10 != 0) {
+                                                    goto label_140001bb7;
+                                                } else {
+                                                    goto label_140001ba5;
+                                                }
+                                            }
+                                        }
+                                    } else if (v8 != 64) {
+                                        goto label_140001dd2;
+                                    } else {
+                                        v11 = *(int64_t *)(v9) - v6 + v5;
+                                        v8 = v10 & 192;
+                                        if (v8 != 0) {
+                                            v6 = sub_140001920(v9);
+                                            *(int64_t *)(v9) = v11;
+                                            goto label_140001bc2;
+                                        } else if (v11 < 0) {
+                                            goto label_140001bc2;
+                                        } else {
+                                            break;
+                                        }
+                                    }
+                                }
+                                stack_20 = v11;
+                                v6 = sub_1400018b0("%d bit pseudo relocation at %p out of range, targeting %p, yielding the value %p.\n", v8, v9);
+                                goto label_140001c30;
+                            }
+                        }
+                    } else {
+                        v7 += 12;
+                    label_140001b2d:
+                        v6 = *(int32_t *)(v7);
+                        if (v6 != 0) {
+                            goto label_140001da0;
+                        } else {
+                            v6 = *(int32_t *)(v7 + 4);
+                            goto label_140001b3a;
+                        }
+                    }
+                }
+            } else {
+                goto label_140001b2d;
+            }
+        }
+    } else {
+        goto label_140001ab1;
+    }
+label_140001c9a:
+    goto label_140001ca0;
+label_140001dd2:
+    sub_1400018b0("  Unknown pseudo relocation bit size %d.\n", v8);
+    goto label_140001de0;
+}
+== sub_140001df0 140001df0
+// Dočasný pseudokód (REVERSA MVP): typy sú odhadnuté z veľkosti prístupov, overte v listingu.
+void sub_140001df0(int32_t a1, int64_t a2)
+{
+    int32_t local_30;
+    int64_t local_28;
+    int64_t v1;
+    int64_t v2;
+    
+    v1 = data_1400070b0;
+    __asm("unpcklpd xmm2, xmm3");
+    if (v1 != 0) {
+        __asm("movsd xmm0, qword ptr [rbp + 0x30]");
+        local_30 = a1;
+        v2 = &local_30;
+        local_28 = a2;
+        __asm("movups xmmword ptr [rbp - 0x20], xmm2");
+        __asm("movsd qword ptr [rbp - 0x10], xmm0");
+        (*v1)(v2);
+    }
+    return;
+}
+== sub_140001e30 140001e30
+// Dočasný pseudokód (REVERSA MVP): typy sú odhadnuté z veľkosti prístupov, overte v listingu.
+void sub_140001e30(int64_t a1)
+{
+    data_1400070b0 = a1;
+    __setusermatherr();
+    return;
+}
+== sub_140001e40 140001e40
+// Dočasný pseudokód (REVERSA MVP): typy sú odhadnuté z veľkosti prístupov, overte v listingu.
+int32_t sub_140001e40(int64_t a1)
+{
+    int32_t v1;
+    int64_t v2;
+    
+    v2 = *(int64_t *)(a1);
+    v1 = *(int32_t *)(v2);
+    if ((v1 & 0x20ffffff) == 0x20474343) {
+        if ((*(char *)(v2 + 4) & 1) != 0) {
+        label_140001e67:
+            if ((unsigned)v1 > 0xc0000096) {
+            label_140001eb7:
+                v1 = data_1400070d0;
+                if (v1 == 0) {
+                    v1 = 0;
+                label_140001f32:
+                    return v1;
+                } else {
+                    goto *v1;  // nepriamy skok (napr. switch) – zatiaľ nerozbalený
+                }
+            } else if ((unsigned)v1 <= 0xc000008b) {
+                if (v1 == 0xc0000005) {
+                    v1 = signal(11, 0);
+                    if (v1 == 1) {
+                        signal(11, 1);
+                    label_140001f10:
+                        v1 = 0xffffffff;
+                        goto label_140001f32;
+                    } else if (v1 == 0) {
+                        goto label_140001eb7;
+                    } else {
+                        (*v1)(11);
+                        goto label_140001f10;
+                    }
+                } else if (cond_unknown) {
+                    if (v1 != 0x80000002) {
+                        goto label_140001eb7;
+                    } else {
+                        goto label_140001f10;
+                    }
+                } else if (v1 == 0xc0000008) {
+                    goto label_140001f10;
+                } else if (v1 != 0xc000001d) {
+                    goto label_140001eb7;
+                } else {
+                    v1 = signal(4, 0);
+                    if (v1 == 1) {
+                        signal(4, 1);
+                        goto label_140001f10;
+                    } else if (v1 == 0) {
+                        goto label_140001eb7;
+                    } else {
+                        (*v1)(4);
+                        goto label_140001f10;
+                    }
+                }
+            } else {
+                v1 += 0x3fffff73;
+                if ((unsigned)v1 > 9) {
+                    goto label_140001f10;
+                } else {
+                    v2 = data_1400043a0;
+                    goto **(int32_t *)(v2 + v1 * 4) + v2;  // nepriamy skok (napr. switch) – zatiaľ nerozbalený
+                }
+            }
+        } else {
+            goto label_140001f10;
+        }
+    } else {
+        goto label_140001e67;
+    }
+}
+== sub_140002000 140002000
+// Dočasný pseudokód (REVERSA MVP): typy sú odhadnuté z veľkosti prístupov, overte v listingu.
+void sub_140002000()
+{
+    int64_t v1;
+    int64_t v2;
+    int64_t v3;
+    int64_t v4;
+    int64_t v5;
+    int64_t v6;
+    
+    v2 = data_140007100;
+    EnterCriticalSection(v2);
+    v4 = data_1400070e0;
+    if (v4 != 0) {
+        v1 = TlsGetValue;
+        v5 = GetLastError;
+        while (true) {
+            v6 = (*v1)(*(int32_t *)(v4));
+            v3 = (*v5)();
+            if (v6 != 0) {
+                if (v3 == 0) {
+                    *(int64_t *)(v4 + 8)(v6);
+                }
+            }
+            v4 = *(int64_t *)(v4 + 16);
+            if (v4 != 0) {
+                continue;
+            } else {
+                break;
+            }
+        }
+    }
+    LeaveCriticalSection(v2);
+    return;
+}
+== sub_140002080 140002080
+// Dočasný pseudokód (REVERSA MVP): typy sú odhadnuté z veľkosti prístupov, overte v listingu.
+int32_t sub_140002080(int32_t a1, int64_t a2)
+{
+    int64_t v1;
+    int64_t v2;
+    int32_t v3;
+    int64_t v4;
+    
+    v3 = a1;
+    v4 = a2;
+    if (data_1400070e8 != 0) {
+        v1 = calloc(1, 24);
+        v2 = v1;
+        if (v1 == 0) {
+            v1 |= 0xffffffff;
+        } else {
+            *(int64_t *)(v1 + 8) = v4;
+            v4 = data_140007100;
+            *(int32_t *)(v1) = v3;
+            EnterCriticalSection(v4);
+            v1 = data_1400070e0;
+            data_1400070e0 = v2;
+            *(int64_t *)(v2 + 16) = v1;
+            LeaveCriticalSection(v4);
+        label_14000209c:
+            v1 = 0;
+        }
+    } else {
+        goto label_14000209c;
+    }
+    return v1;
+}
+== sub_140002100 140002100
+// Dočasný pseudokód (REVERSA MVP): typy sú odhadnuté z veľkosti prístupov, overte v listingu.
+int32_t sub_140002100(int32_t a1)
+{
+    int64_t v1;
+    int32_t v2;
+    int64_t v3;
+    int64_t v4;
+    int64_t v5;
+    
+    v2 = a1;
+    if (data_1400070e8 != 0) {
+        v5 = data_140007100;
+        EnterCriticalSection(v5);
+        v3 = data_1400070e0;
+        if (v3 != 0) {
+            v4 = 0;
+            while (true) {
+                v1 = *(int64_t *)(v3 + 16);
+                if (v1 != v2) {
+                    v4 = v3;
+                    if (v1 == 0) {
+                        break;
+                    } else {
+                        v3 = v1;
+                        continue;
+                    }
+                } else {
+                    goto label_140002165;
+                }
+            }
+        }
+    label_140002173:
+        LeaveCriticalSection(v5);
+        return 0;
+    } else {
+        return 0;
+    }
+label_140002165:
+    if (v4 == 0) {
+        data_1400070e0 = v1;
+    } else {
+        *(int64_t *)(v4 + 16) = v1;
+    }
+    free(v3);
+    goto label_140002173;
+}
+== sub_1400021a0 1400021a0
+// Dočasný pseudokód (REVERSA MVP): typy sú odhadnuté z veľkosti prístupov, overte v listingu.
+int32_t sub_1400021a0(int64_t a1, int32_t a2)
+{
+    int64_t v1;
+    
+    if (a2 == 2) {
+        sub_1400018a0();
+        return 1;
+    } else {
+        if (cond_unknown) {
+            if (a2 == 3) {
+                if (data_1400070e8 != 0) {
+                    sub_140002000();
+                }
+            }
+        } else if (a2 == 0) {
+            if (data_1400070e8 != 0) {
+                sub_140002000();
+            }
+            if (data_1400070e8 == 1) {
+                v1 = data_1400070e0;
+                if (v1 != 0) {
+                    while (true) {
+                        a1 = v1;
+                        v1 = *(int64_t *)(v1 + 16);
+                        free(a1);
+                        if (v1 != 0) {
+                            continue;
+                        } else {
+                            break;
+                        }
+                    }
+                }
+                data_1400070e0 = 0;
+                data_1400070e8 = 0;
+                DeleteCriticalSection(data_140007100);
+            }
+        } else {
+            if (data_1400070e8 == 0) {
+                InitializeCriticalSection(data_140007100);
+            }
+            data_1400070e8 = 1;
+        }
+        return 1;
+    }
+}
+== sub_1400022a0 1400022a0
+// Dočasný pseudokód (REVERSA MVP): typy sú odhadnuté z veľkosti prístupov, overte v listingu.
+int32_t sub_1400022a0(int64_t a1)
+{
+    int32_t v1;
+    int64_t v2;
+    
+    v1 = 0;
+    if (*(int16_t *)(a1) != 0x5a4d) {
+    label_1400022b8:
+        return v1;
+    } else {
+        v2 = a1 + *(int32_t *)(a1 + 60);
+        if (*(int32_t *)(v2) == 0x4550) {
+            return *(int16_t *)(v2 + 24) == 0x20b;
+        } else {
+            goto label_1400022b8;
+        }
+    }
+}
+== sub_1400022d0 1400022d0
+// Dočasný pseudokód (REVERSA MVP): typy sú odhadnuté z veľkosti prístupov, overte v listingu.
+int64_t sub_1400022d0(int64_t a1, int64_t a2)
+{
+    int64_t v1;
+    int64_t v2;
+    int64_t v3;
+    int64_t v4;
+    
+    v4 = a1 + *(int32_t *)(a1 + 60);
+    v1 = *(int16_t *)(v4 + 6);
+    v3 = v4 + *(int16_t *)(v4 + 20) + 24;
+    if (v1 == 0) {
+    label_14000231d:
+        v3 = 0;
+    } else {
+        v4 = v1 - 1;
+        v2 = v3 + (v4 + v4 * 4) * 8 + 40;
+        while (true) {
+            v1 = *(int32_t *)(v3 + 12);
+            v4 = v1;
+            if ((unsigned)a2 < v1) {
+            label_140002314:
+                v3 += 40;
+                if (v3 != v2) {
+                    continue;
+                } else {
+                    goto label_14000231d;
+                }
+            } else if ((unsigned)a2 < v4 + *(int32_t *)(v3 + 8)) {
+                break;
+            } else {
+                goto label_140002314;
+            }
+        }
+    }
+    return v3;
+}
+== sub_140002320 140002320
+// Dočasný pseudokód (REVERSA MVP): typy sú odhadnuté z veľkosti prístupov, overte v listingu.
+int64_t sub_140002320(int64_t a1)
+{
+    int64_t v1;
+    int64_t v2;
+    int64_t v3;
+    int64_t v4;
+    int64_t v5;
+    
+    v5 = a1;
+    if ((unsigned)strlen(a1) > 8) {
+    label_1400023b8:
+        return 0;
+    } else {
+        v4 = data_140004430;
+        v2 = 0;
+        if (*(int16_t *)(v4) != 0x5a4d) {
+        label_1400023a6:
+            return v2;
+        } else {
+            v1 = *(int32_t *)(v4 + 60) + v4;
+            if (*(int32_t *)(v1) != 0x4550) {
+                goto label_1400023a6;
+            } else if (*(int16_t *)(v1 + 24) != 0x20b) {
+                goto label_1400023a6;
+            } else {
+                v2 = v1 + *(int16_t *)(v1 + 20) + 24;
+                v4 = *(int16_t *)(v1 + 6);
+                if (v4 == 0) {
+                    goto label_1400023b8;
+                } else {
+                    v1 = v4 - 1;
+                    v3 = v2 + (v1 + v1 * 4) * 8 + 40;
+                    while (true) {
+                        if (strncmp(v2, v5, 8) != 0) {
+                            v2 += 40;
+                            if (v2 == v3) {
+                                break;
+                            } else {
+                                continue;
+                            }
+                        } else {
+                            goto label_1400023a6;
+                        }
+                    }
+                    goto label_1400023b8;
+                }
+            }
+        }
+    }
+}
+== sub_1400023d0 1400023d0
+// Dočasný pseudokód (REVERSA MVP): typy sú odhadnuté z veľkosti prístupov, overte v listingu.
+int32_t sub_1400023d0(int64_t a1)
+{
+    int64_t v1;
+    int64_t v2;
+    int64_t v3;
+    int64_t v4;
+    int64_t v5;
+    
+    v5 = data_140004430;
+    v3 = 0;
+    if (*(int16_t *)(v5) != 0x5a4d) {
+    label_1400023f0:
+        return v3;
+    } else {
+        v1 = *(int32_t *)(v5 + 60) + v5;
+        if (*(int32_t *)(v1) == 0x4550) {
+            if (*(int16_t *)(v1 + 24) != 0x20b) {
+                goto label_1400023f0;
+            } else {
+                v4 = a1 - v5;
+                v3 = v1 + *(int16_t *)(v1 + 20) + 24;
+                v1 = *(int16_t *)(v1 + 6);
+                if (v1 == 0) {
+                label_14000244d:
+                    return 0;
+                } else {
+                    v5 = v1 - 1;
+                    v2 = v3 + (v5 + v5 * 4) * 8 + 40;
+                    while (true) {
+                        v1 = *(int32_t *)(v3 + 12);
+                        v5 = v1;
+                        if ((unsigned)v4 < v1) {
+                        label_140002444:
+                            v3 += 40;
+                            if (v3 != v2) {
+                                continue;
+                            } else {
+                                goto label_14000244d;
+                            }
+                        } else if ((unsigned)v4 < v5 + *(int32_t *)(v3 + 8)) {
+                            break;
+                        } else {
+                            goto label_140002444;
+                        }
+                    }
+                    goto label_1400023f0;
+                }
+            }
+        } else {
+            goto label_1400023f0;
+        }
+    }
+}
+== sub_140002450 140002450
+// Dočasný pseudokód (REVERSA MVP): typy sú odhadnuté z veľkosti prístupov, overte v listingu.
+int64_t sub_140002450()
+{
+    int64_t v1;
+    int32_t v2;
+    
+    v1 = data_140004430;
+    v2 = 0;
+    if (*(int16_t *)(v1) != 0x5a4d) {
+    label_14000246f:
+        return v2;
+    } else {
+        v1 += *(int32_t *)(v1 + 60);
+        if (*(int32_t *)(v1) == 0x4550) {
+            if (*(int16_t *)(v1 + 24) != 0x20b) {
+                goto label_14000246f;
+            } else {
+                return *(int16_t *)(v1 + 6);
+            }
+        } else {
+            goto label_14000246f;
+        }
+    }
+}
+== sub_140002490 140002490
+// Dočasný pseudokód (REVERSA MVP): typy sú odhadnuté z veľkosti prístupov, overte v listingu.
+int32_t sub_140002490(int64_t a1)
+{
+    int64_t v1;
+    int64_t v2;
+    int64_t v3;
+    
+    v1 = data_140004430;
+    v2 = 0;
+    if (*(int16_t *)(v1) != 0x5a4d) {
+    label_1400024b0:
+        return v2;
+    } else {
+        v3 = *(int32_t *)(v1 + 60) + v1;
+        if (*(int32_t *)(v3) == 0x4550) {
+            if (*(int16_t *)(v3 + 24) != 0x20b) {
+                goto label_1400024b0;
+            } else {
+                v1 = *(int16_t *)(v3 + 6);
+                v2 = v3 + *(int16_t *)(v3 + 20) + 24;
+                if (v1 == 0) {
+                label_140002500:
+                    return 0;
+                } else {
+                    v3 = v1 - 1;
+                    v3 = v2 + (v3 + v3 * 4) * 8 + 40;
+                    while (true) {
+                        if ((*(char *)(v2 + 39) & 32) == 0) {
+                        label_1400024f7:
+                            v2 += 40;
+                            if (v3 != v2) {
+                                continue;
+                            } else {
+                                goto label_140002500;
+                            }
+                        } else if (a1 == 0) {
+                            break;
+                        } else {
+                            goto label_1400024f7;
+                        }
+                    }
+                    goto label_1400024b0;
+                }
+            }
+        } else {
+            goto label_1400024b0;
+        }
+    }
+}
+== sub_140002510 140002510
+// Dočasný pseudokód (REVERSA MVP): typy sú odhadnuté z veľkosti prístupov, overte v listingu.
+int64_t sub_140002510()
+{
+    int64_t v1;
+    int64_t v2;
+    int64_t v3;
+    
+    v1 = data_140004430;
+    v3 = 0;
+    if (*(int16_t *)(v1) != 0x5a4d) {
+    label_14000252f:
+        return v3;
+    } else {
+        v2 = *(int32_t *)(v1 + 60) + v1;
+        if (*(int32_t *)(v2) == 0x4550) {
+            return *(int16_t *)(v2 + 24) == 0x20b ? v1 : v3;
+        } else {
+            goto label_14000252f;
+        }
+    }
+}
+== sub_140002550 140002550
+// Dočasný pseudokód (REVERSA MVP): typy sú odhadnuté z veľkosti prístupov, overte v listingu.
+int32_t sub_140002550(int64_t a1)
+{
+    int64_t v1;
+    int64_t v2;
+    int64_t v3;
+    int64_t v4;
+    int64_t v5;
+    
+    v5 = data_140004430;
+    v3 = 0;
+    if (*(int16_t *)(v5) != 0x5a4d) {
+    label_140002570:
+        return v3;
+    } else {
+        v1 = *(int32_t *)(v5 + 60) + v5;
+        if (*(int32_t *)(v1) == 0x4550) {
+            if (*(int16_t *)(v1 + 24) != 0x20b) {
+                goto label_140002570;
+            } else {
+                v4 = a1 - v5;
+                v2 = *(int16_t *)(v1 + 6);
+                v5 = v1 + *(int16_t *)(v1 + 20) + 24;
+                if (v2 == 0) {
+                    goto label_140002570;
+                } else {
+                    v3 = v2 - 1;
+                    v2 = v5 + (v3 + v3 * 4) * 8 + 40;
+                    while (true) {
+                        v1 = *(int32_t *)(v5 + 12);
+                        v3 = v1;
+                        if ((unsigned)v4 < v1) {
+                        label_1400025c4:
+                            v5 += 40;
+                            if (v5 != v2) {
+                                continue;
+                            } else {
+                                goto label_1400025cd;
+                            }
+                        } else if ((unsigned)v4 < v3 + *(int32_t *)(v5 + 8)) {
+                            break;
+                        } else {
+                            goto label_1400025c4;
+                        }
+                    }
+                    return ~*(int32_t *)(v5 + 36) >> 31;
+                }
+            }
+        } else {
+            goto label_140002570;
+        }
+    }
+label_1400025cd:
+    return 0;
+}
+== sub_1400025e0 1400025e0
+// Dočasný pseudokód (REVERSA MVP): typy sú odhadnuté z veľkosti prístupov, overte v listingu.
+int64_t sub_1400025e0(int32_t a1)
+{
+    int32_t v1;
+    int64_t v2;
+    int64_t v3;
+    int64_t v4;
+    int64_t v5;
+    int64_t v6;
+    int64_t v7;
+    
+    v2 = data_140004430;
+    v3 = 0;
+    v1 = a1;
+    if (*(int16_t *)(v2) != 0x5a4d) {
+    label_140002604:
+        return v3;
+    } else {
+        v6 = *(int32_t *)(v2 + 60) + v2;
+        if (*(int32_t *)(v6) == 0x4550) {
+            if (*(int16_t *)(v6 + 24) != 0x20b) {
+                goto label_140002604;
+            } else {
+                v5 = *(int32_t *)(v6 + 144);
+                if (v5 == 0) {
+                    goto label_140002604;
+                } else {
+                    v4 = *(int16_t *)(v6 + 6);
+                    v7 = v6 + *(int16_t *)(v6 + 20) + 24;
+                    if (v4 == 0) {
+                        goto label_140002604;
+                    } else {
+                        v6 = v4 - 1;
+                        v4 = v7 + (v6 + v6 * 4) * 8 + 40;
+                        while (true) {
+                            v3 = *(int32_t *)(v7 + 12);
+                            v6 = v3;
+                            if ((unsigned)v5 < v3) {
+                            label_14000265c:
+                                v7 += 40;
+                                if (v4 != v7) {
+                                    continue;
+                                } else {
+                                    goto label_140002665;
+                                }
+                            } else if ((unsigned)v5 < v6 + *(int32_t *)(v7 + 8)) {
+                                break;
+                            } else {
+                                goto label_14000265c;
+                            }
+                        }
+                        v5 += v2;
+                        while (true) {
+                            if (*(int32_t *)(v5 + 4) != 0) {
+                            label_14000268e:
+                                if (v1 > 0) {
+                                    v1--;
+                                    v5 += 20;
+                                    continue;
+                                } else {
+                                    break;
+                                }
+                            } else if (*(int32_t *)(v5 + 12) == 0) {
+                                goto label_140002665;
+                            } else {
+                                goto label_14000268e;
+                            }
+                        }
+                        return *(int32_t *)(v5 + 12) + v2;
+                    }
+                }
+            }
+        } else {
+            goto label_140002604;
+        }
+    }
+label_140002665:
+    return 0;
+}
+== sub_1400026a0 1400026a0
+// Dočasný pseudokód (REVERSA MVP): typy sú odhadnuté z veľkosti prístupov, overte v listingu.
+void sub_1400026a0()
+{
+    int64_t stack_18;
+    int64_t v1;
+    int64_t v2;
+    
+    __asm("push rcx");
+    __asm("push rax");
+    v2 = &stack_18;
+    if ((unsigned)v1 >= 0x1000) {
+        while (true) {
+            v2 -= 0x1000;
+            *(int64_t *)(v2) = *(int64_t *)(v2);
+            v1 -= 0x1000;
+            if ((unsigned)v1 > 0x1000) {
+                continue;
+            } else {
+                break;
+            }
+        }
+    }
+    v2 -= v1;
+    *(int64_t *)(v2) = *(int64_t *)(v2);
+    __asm("pop rax");
+    __asm("pop rcx");
+    return;
+}
+== sub_1400026e0 1400026e0
+// Dočasný pseudokód (REVERSA MVP): typy sú odhadnuté z veľkosti prístupov, overte v listingu.
+int64_t sub_1400026e0()
+{
+    return *(int64_t *)(data_140004460);
+}
+== sub_1400026f0 1400026f0
+// Dočasný pseudokód (REVERSA MVP): typy sú odhadnuté z veľkosti prístupov, overte v listingu.
+int64_t sub_1400026f0()
+{
+    return *(int64_t *)(data_140004450);
+}
+== sub_140002700 140002700
+// Dočasný pseudokód (REVERSA MVP): typy sú odhadnuté z veľkosti prístupov, overte v listingu.
+int64_t sub_140002700()
+{
+    return data_140007170;
+}
+== sub_140002710 140002710
+// Dočasný pseudokód (REVERSA MVP): typy sú odhadnuté z veľkosti prístupov, overte v listingu.
+int64_t sub_140002710(int64_t a1)
+{
+    __asm("xchg qword ptr [rip + 0x4a56], rax");
+    return a1;
+}
+== sub_140002720 140002720
+// Dočasný pseudokód (REVERSA MVP): typy sú odhadnuté z veľkosti prístupov, overte v listingu.
+int64_t sub_140002720(int32_t a1)
+{
+    return __iob_func() + (a1 + a1 * 2 << 4);
+}
+== sub_140002860 140002860
+// Dočasný pseudokód (REVERSA MVP): typy sú odhadnuté z veľkosti prístupov, overte v listingu.
+void sub_140002860()
+{
+    sub_140001460();
+    return;
+}

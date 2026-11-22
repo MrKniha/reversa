@@ -12,3 +12,4 @@ node_modules/
 /report*.md
 /report*.html
 headless-out/
+build-*/
