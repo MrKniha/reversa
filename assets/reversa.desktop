@@ -2,7 +2,11 @@
 Type=Application
 Name=REVERSA
 GenericName=Reverse engineering
-Comment=Analýza programov bez zdrojového kódu: listing, pseudokód, x-refs, grafy
+Comment=Analyse programs without source code: listing, pseudocode, x-refs, graphs
+Comment[sk]=Analýza programov bez zdrojového kódu: listing, pseudokód, x-refs, grafy
+Comment[de]=Programme ohne Quellcode analysieren: Listing, Pseudocode, X-Refs, Graphen
+Comment[fr]=Analyser des programmes sans code source : listing, pseudo-code, références croisées, graphes
+Comment[zh_CN]=无需源代码即可分析程序：反汇编、伪代码、交叉引用、图
 Exec=reversa gui %f
 Icon=reversa
 Terminal=false
