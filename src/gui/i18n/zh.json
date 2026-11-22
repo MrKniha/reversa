@@ -65,7 +65,7 @@
  "&Zobraziť": "视图(&V)",
  "Pomo&c": "帮助(&H)",
  "O programe REVERSA": "关于 REVERSA",
- "<b>REVERSA %1</b><br>Open-source nástroj na reverzné inžinierstvo (MIT).<br>Statická analýza – analyzovaný program sa nikdy nespúšťa.<br>Knižnice: Qt (LGPL-3.0), Capstone, pybind11 (BSD-3-Clause), SQLite (public domain).": "<b>REVERSA %1</b><br>开源逆向工程工具（MIT 许可）。<br>静态分析——被分析的程序永远不会运行。<br>使用的库：Qt（LGPL-3.0）、Capstone、pybind11（BSD-3-Clause）、SQLite（公有领域）。",
+ "<b>REVERSA %1</b><br>Open-source nástroj na reverzné inžinierstvo (MIT).<br>Statická analýza – analyzovaný program sa nikdy nespúšťa.<br>Knižnice: Qt (LGPL-3.0), Capstone (BSD-3-Clause), SQLite (public domain).": "<b>REVERSA %1</b><br>开源逆向工程工具（MIT 许可）。<br>静态分析——被分析的程序永远不会运行。<br>使用的库：Qt（LGPL-3.0）、Capstone（BSD-3-Clause）、SQLite（公有领域）。",
  "Hlavný panel": "主工具栏",
  "Hľadať funkciu, reťazec alebo adresu (Ctrl+F)…": "搜索函数、字符串或地址（Ctrl+F）…",
  "Pokročilé": "高级",
@@ -190,9 +190,6 @@
  "Symbol": "符号",
  "Addend": "加数",
  "Pluginy sú vypnuté (--no-plugins).": "插件已禁用（--no-plugins）。",
- "Python nie je dostupný, pluginy sú vypnuté: %1": "Python 不可用，插件已禁用：%1",
- "Pluginy sa načítavajú z priečinkov plugins/ v používateľskom priečinku REVERSA a z volieb --plugins. Python %1.": "插件从 REVERSA 用户文件夹中的 plugins/ 文件夹以及 --plugins 选项加载。Python %1。",
- "Táto zostava REVERSA je bez Pythonu – skripty a pluginy nie sú dostupné.": "此 REVERSA 版本不含 Python——脚本和插件不可用。",
  "Verzia": "版本",
  "Stav": "状态",
  "Háčiky": "钩子",
@@ -219,5 +216,6 @@
  "Volá": "调用",
  "Kto to používa (x-refs)": "谁在使用（交叉引用）",
  "Nikto – na túto adresu v kóde ani v dátach nič neukazuje.": "无——代码和数据中都没有指向此地址的内容。",
- "Čo to používa": "它使用了什么"
+ "Čo to používa": "它使用了什么",
+ "Pluginy sú knižnice .so/.dll v C alebo C++. Načítavajú sa z priečinka %1, z premennej REVERSA_PLUGIN_PATH a z volieb --plugins. Bežia priamo v REVERSA – inštalujte len pluginy, ktorým dôverujete.": "插件是用 C 或 C++ 编写的 .so/.dll 库。它们从文件夹 %1、REVERSA_PLUGIN_PATH 变量以及 --plugins 选项加载。插件直接在 REVERSA 中运行，请只安装您信任的插件。"
 }

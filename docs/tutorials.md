@@ -145,7 +145,7 @@ listing je úplne iný. Všimnite si:
 reversa analyze samples/bin/login_x64.elf --report report.md
 reversa analyze samples/bin/login_x64.elf --pseudocode main
 reversa search samples/bin/login_x64.elf --insn "call.*strcmp"
-reversa script examples/scripts/strcmp_callers.py samples/bin/login_x64.elf
+reversa script build/bin/examples/scripts/strcmp_callers.so samples/bin/login_x64.elf
 ```
 
 Report `report.md` obsahuje prehľad súboru, sekcie, importy, funkcie, reťazce,

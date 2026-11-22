@@ -19,9 +19,6 @@
 #include "gui/graph_view.hpp"
 #include "gui/i18n.hpp"
 #include "gui/main_window.hpp"
-#ifdef REVERSA_WITH_PYTHON
-#include "python/embed.hpp"
-#endif
 
 using namespace rv;
 using namespace rv::gui;
@@ -187,13 +184,10 @@ private Q_SLOTS:
         QCOMPARE(finished.at(0).at(0).toBool(), w.session() != nullptr);
     }
 
-    // Python plugins run their hooks on the analysis worker thread (GIL handling) and add views.
+    // Native plugins run their hooks on the analysis worker thread and add views.
     void plugins_on_worker_thread() {
-#ifdef REVERSA_WITH_PYTHON
-        if (!py::available()) QSKIP("Python is not available");
-        py::release_gil_for_threads();
         cli::Args args;
-        args.plugin_dirs.push_back(std::string(REVERSA_SOURCE_DIR) + "/examples/plugins");
+        args.plugin_dirs.push_back(std::string(REVERSA_EXAMPLES_DIR) + "/plugins");
         MainWindow w(args);
         w.show_error = [](const QString&, const QString& t, const QString&) { QFAIL(qPrintable(t)); };
         w.open_demo();
@@ -205,13 +199,10 @@ private Q_SLOTS:
         w.tabs()->setCurrentIndex(10);
         auto* combo = w.findChild<QComboBox*>("views_combo");
         combo->setCurrentIndex(combo->findText("Hello plugin"));
-        QVERIFY(w.findChild<QTextBrowser*>("views")->toPlainText().contains("Analyzovaných funkcií"));
+        QVERIFY(w.findChild<QTextBrowser*>("views")->toPlainText().contains("Functions analysed"));
         bool crash_reported = false;  // the crashing example plugin is isolated and reported
         for (auto& d : w.session()->diagnostics()) crash_reported |= d.message.find("crashing") != std::string::npos;
         QVERIFY(crash_reported);
-#else
-        QSKIP("built without Python");
-#endif
     }
 
     void onboarding_and_settings() {

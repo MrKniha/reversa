@@ -100,6 +100,12 @@ std::unique_ptr<Session> Session::open_project(const std::string& path) {
     return s;
 }
 
+Session::~Session() {
+    // Views registered by plugins are destroyed before the plugins (declaration order), so the
+    // plugin libraries are still loaded while their views go away.
+    if (plugins) plugins->on_unload();
+}
+
 // ------------------------------------------------------------ analysis
 Analysis& Session::analyze(Progress progress, const std::atomic<bool>* cancel) {
     if (plugins) plugins->on_load();
