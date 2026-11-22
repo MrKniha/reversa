@@ -1,0 +1,35 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1000 300" width="1000" height="300">
+  <title>REVERSA – reverse engineering</title>
+  <rect width="1000" height="300" rx="24" fill="#121317"/>
+  <g transform="translate(150 150) scale(0.58) translate(-348 -478)"><g>
+  <g stroke="#e8483d" stroke-linecap="round" fill="none">
+    <path d="M214 284 L178 271" stroke-width="7"/><path d="M482 284 L518 271" stroke-width="7"/>
+    <path d="M272 326 Q300 352 330 396" stroke-width="6"/><path d="M424 326 Q396 352 366 396" stroke-width="6"/>
+    <path d="M250 340 L272 388 L318 424" stroke-width="20" stroke-linejoin="round"/>
+    <path d="M446 340 L424 388 L378 424" stroke-width="20" stroke-linejoin="round"/>
+    <path d="M304 454 L238 467" stroke-width="13"/><path d="M392 454 L458 467" stroke-width="13"/>
+    <path d="M304 476 L240 505" stroke-width="13"/><path d="M392 476 L456 505" stroke-width="13"/>
+    <path d="M310 500 L256 546" stroke-width="13"/><path d="M386 500 L440 546" stroke-width="13"/>
+  </g>
+  <g fill="#e8483d">
+    <path d="M232 266 C206 276 204 330 236 350 C262 362 282 338 272 300 C268 282 256 262 232 266 Z"/>
+    <path d="M464 266 C490 276 492 330 460 350 C434 362 414 338 424 300 C428 282 440 262 464 266 Z"/>
+    <ellipse cx="348" cy="460" rx="52" ry="72"/>
+    <rect x="304" y="534" width="88" height="26" rx="13"/>
+    <rect x="310" y="570" width="76" height="26" rx="13"/>
+    <rect x="316" y="606" width="64" height="24" rx="12"/>
+    <path d="M348 634 L408 690 L348 672 L288 690 Z" stroke="#e8483d" stroke-width="4" stroke-linejoin="round"/>
+  </g>
+  <g fill="#121317" stroke="#121317">
+    <rect x="236" y="268" width="9" height="44" rx="4.5" stroke="none" transform="rotate(-6 240 290)"/>
+    <rect x="451" y="268" width="9" height="44" rx="4.5" stroke="none" transform="rotate(6 456 290)"/>
+    <circle cx="328" cy="414" r="8.5" stroke="none"/><circle cx="368" cy="414" r="8.5" stroke="none"/>
+    <path d="M304 486 Q348 506 392 486" fill="none" stroke-width="9" stroke-linecap="round"/>
+  </g>
+</g>
+</g>
+  <text x="300" y="168" font-family="'Archivo Black','Arial Black','Helvetica Neue',Arial,sans-serif" font-weight="900"
+        font-size="124" letter-spacing="-3" fill="#e9eaee">REVERSA</text>
+  <text x="304" y="222" font-family="'JetBrains Mono',Consolas,'DejaVu Sans Mono',monospace" font-size="27"
+        letter-spacing="11" fill="#e8483d">REVERSE ENGINEERING</text>
+</svg>
