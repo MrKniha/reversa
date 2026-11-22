@@ -162,7 +162,7 @@ private Q_SLOTS:
         QFile(empty).open(QIODevice::WriteOnly);
         w.open_path(empty);
         QCOMPARE(errors.size(), 2);
-        QVERIFY(errors.last().contains("prázdny"));
+        QVERIFY(errors.last().contains("empty"));
 
         // theme switch and shortcuts
         QCOMPARE(w.command("rename")->shortcut(), QKeySequence("N"));

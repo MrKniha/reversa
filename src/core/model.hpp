@@ -95,7 +95,7 @@ public:
     std::vector<Relocation> relocations;
     std::vector<std::string> libraries;
     std::vector<Diagnostic> diagnostics;
-    std::string compiler = "neznámy";
+    std::string compiler = "unknown";
     std::string os;
     std::vector<Addr> extra_function_starts;  // e.g. PE .pdata
     std::map<std::string, std::string> meta;   // human readable facts (elf_type, subsystem, ...)

@@ -96,7 +96,7 @@ std::string python_version() {
 
 std::shared_ptr<PluginHost> make_plugin_host(Session& s, const std::vector<std::string>& extra_dirs) {
     if (!start()) {
-        s.runtime_diagnostics.push_back({"warning", "Python nie je dostupný, pluginy sú vypnuté (" + failure + ").",
+        s.runtime_diagnostics.push_back({"warning", "Python is not available, plugins are disabled (" + failure + ").",
                                          std::nullopt, "address", failure});
         return nullptr;
     }
@@ -118,7 +118,7 @@ std::shared_ptr<PluginHost> make_plugin_host(Session& s, const std::vector<std::
         keep_alive.push_back(manager);
         return manager.cast<std::shared_ptr<PluginHost>>();
     } catch (const std::exception& e) {
-        s.runtime_diagnostics.push_back({"error", std::string("Pluginy sa nepodarilo načítať: ") + e.what(), std::nullopt, "address", e.what()});
+        s.runtime_diagnostics.push_back({"error", std::string("Could not load plugins: ") + e.what(), std::nullopt, "address", e.what()});
         return nullptr;
     }
 }
@@ -138,7 +138,7 @@ Json plugin_info(const std::shared_ptr<PluginHost>& host) {
 int run_script(const std::string& path, const std::vector<std::string>& args) {
     std::string why;
     if (!start()) {
-        std::fprintf(stderr, "Chyba: Python nie je dostupný, skript sa nedá spustiť (%s).\n", failure.c_str());
+        std::fprintf(stderr, "Error: Python is not available, cannot run the script (%s).\n", failure.c_str());
         return 1;
     }
     pyb::gil_scoped_acquire gil;

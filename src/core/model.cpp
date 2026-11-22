@@ -12,7 +12,7 @@ std::string hex(uint64_t v) { return format_hex(v); }
 
 std::string Diagnostic::friendly() const {
     if (!location) return message;
-    return message + " (" + (where == "address" ? "adresa " : "offset v súbore ") + hex(*location) + ")";
+    return message + " (" + (where == "address" ? "address " : "file offset ") + hex(*location) + ")";
 }
 
 void Binary::reindex() const {

@@ -10,7 +10,8 @@ a volaní, Python API, pluginy a natívne grafické rozhranie (Qt).
 - Architektúry: x86, x86-64, AArch64 (ARM64), ARM 32-bit (len disassembly)
 - Statická analýza: súbor sa **nikdy nespúšťa**. Bez cloudu, bez telemetrie.
 - Platformy: **Windows a Linux** (64-bit)
-- Jazyky GUI: angličtina (predvolená), slovenčina, nemčina, francúzština, čínština (zjednodušená)
+- Jazyky GUI: angličtina (predvolená), slovenčina, nemčina, francúzština, čínština (zjednodušená).
+  Príkazový riadok, chybové hlásenia a reporty sú po anglicky.
 - Napísané v **C++20** s grafickým rozhraním **Qt 6**; Python slúži len na skripty
   a pluginy. Prečo: [docs/architecture.md](docs/architecture.md#prečo-c-a-qt).
 - Licencia: MIT

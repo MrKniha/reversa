@@ -53,7 +53,7 @@ Binary load_raw(const std::string& path, std::shared_ptr<const Bytes> data, std:
     bool detected = !arch;
     if (!arch) arch = guess_arch(*data, &scores);
     if (std::find(ARCHES.begin(), ARCHES.end(), *arch) == ARCHES.end())
-        throw ReversaError("Neznáma architektúra '" + *arch + "'. Podporované: x86, x86-64, arm, arm64");
+        throw ReversaError("Unknown architecture '" + *arch + "'. Supported: x86, x86-64, arm, arm64");
     Binary b;
     b.path = path;
     b.data = data;
@@ -68,8 +68,8 @@ Binary load_raw(const std::string& path, std::shared_ptr<const Bytes> data, std:
         std::string s;
         for (auto& [a, v] : scores) s += (s.empty() ? "" : ", ") + a + "=" + std::to_string(v);
         b.meta["arch_scores"] = s;
-        b.warn("Surové dáta: architektúru som odhadol ako " + *arch +
-                   " podľa typických prológov funkcií. Ak je odhad zlý, zadajte ju ručne (--arch).",
+        b.warn("Raw data: architecture guessed as " + *arch +
+                   " from typical function prologues. If the guess is wrong, set it with --arch.",
                std::nullopt, "", "info");
     }
     return b;
