@@ -15,25 +15,26 @@ Capstone 5.0.9, Chromium (Playwright 1.63) pre UI test.
 | Pokrytie kódu | `coverage report` | 93 % celkovo (cieľ ≥ 80 %) |
 | UI smoke test | `node tests/ui/smoke.mjs` | `UI smoke test: OK` |
 | Licencie | `python scripts/check_licenses.py` | `Licenčná kontrola: PREŠLA` |
-| Headless | `sh scripts/headless_check.sh` | `headless check OK` (11 vzoriek, reporty .md/.html, projekty) |
+| Headless | `python scripts/headless_check.py` | `headless check OK: 10 samples` (reporty .md/.html, projekty, demo, skript) |
+| Samostatný program | PyInstaller 6.22.3 `--onefile` (Linux) | `dist/reversa --demo --no-gui` a `analyze … --report` fungujú, GUI servuje stránku |
 | Wheel | `pip wheel . --no-deps` | `reversa-0.1.0-py3-none-any.whl` |
 | Čistá inštalácia | nový venv, `pip install --require-hashes -r requirements.lock`, wheel, `reversa --demo --no-gui` | prešlo |
-| CI na GitHube | `.github/workflows/ci.yml` (Linux, Windows, macOS) | **nebolo možné overiť**: repozitár ešte nie je na GitHube |
+| CI na GitHube | `.github/workflows/ci.yml` (Linux, Windows) | **nebolo možné overiť**: repozitár ešte nie je na GitHube |
 
 ## Akceptačné kritériá (8.2)
 
 | # | Kritérium | Stav | Dôkaz |
 |---|---|---|---|
-| 1 | Inštalácia podľa README a `reversa --demo` do 5 minút | prešlo (Linux) | Čistý venv + wheel + `reversa --demo --no-gui`. GUI demo: `tests/ui/smoke.mjs`. Inštrukcie pre Windows a macOS sú v README, ale na týchto OS **nebolo možné overiť**. |
+| 1 | Inštalácia podľa README a `reversa --demo` do 5 minút | prešlo (Linux) | Čistý venv + wheel + `reversa --demo --no-gui`. GUI demo: `tests/ui/smoke.mjs`. Inštrukcie pre Windows sú v README, na Windows **nebolo možné overiť** (overí CI). macOS sa podľa rozhodnutia používateľa nepodporuje. |
 | 2 | Do 3 minút funkcie, reťazce, x-refs, call graph, pseudokód `main` bez manuálu | prešlo (automaticky), s reálnym nováčikom **nebolo možné overiť** | `smoke.mjs`: po otvorení dema je vybraná `main`, zoznam funkcií, pseudokód, x-refs v Detailoch, call graph aj CFG sa vykreslia. Onboarding (5 krokov) je v GUI. |
 | 3 | Premenovanie sa prejaví všade a prežije uloženie | prešlo | `test_rename_propagates_everywhere_and_undo_redo`, `test_roundtrip_preserves_everything`, `smoke.mjs` (premenovanie v GUI → zoznam funkcií aj pseudokód `main`, uloženie, undo). |
 | 4 | ≤ 10-riadkový skript vypíše volajúcich `strcmp` | prešlo | `examples/scripts/strcmp_callers.py` (5 riadkov kódu, 11 s docstringom): `test_strcmp_script_is_short`, `test_acceptance_script_strcmp_callers`. Výsledok zhodný s radare2 (pozri research.md). |
 | 5 | Plugin z tutoriálu sa načíta, vykoná hook, jeho pád nezloží aplikáciu | prešlo | `test_tutorial_plugin_hooks`, `test_crashing_plugin_is_isolated`, `test_bad_plugins_never_stop_loading`. |
 | 6 | Poškodená binárka: nespadne, priateľská chyba, načíta, čo vie | prešlo | `test_corrupted_elf_header_falls_back_to_raw`, `test_truncated_pe_reports_but_loads`, fuzzing `test_mutations_never_crash`, `test_truncation_at_every_boundary`, `test_random_garbage`, GUI `test_cancel_and_broken_file`. |
 | 7 | Tutoriál „prvá analýza za 10 minút" (walkthrough) | prešlo (dokument), s reálnym nováčikom **nebolo možné overiť** | README, `docs/quickstart.md`, `docs/tutorials.md` (Tutoriál 1). Kroky zodpovedajú UI krokom v `smoke.mjs`. |
-| 8 | `reversa analyze subor.exe --report report.md` headless v CI | prešlo lokálne, v CI **nebolo možné overiť** | `test_analyze_report_markdown`, `scripts/headless_check.sh` (aj `.exe` vzorky). |
+| 8 | `reversa analyze subor.exe --report report.md` headless v CI | prešlo lokálne, v CI **nebolo možné overiť** | `test_analyze_report_markdown`, `scripts/headless_check.py` (aj `.exe` vzorky). |
 | 9 | Licenčná kontrola v CI, LICENSE-THIRD-PARTY kompletný | prešlo lokálne, v CI **nebolo možné overiť** | `scripts/check_licenses.py` → PREŠLA. Jediná runtime závislosť: capstone (BSD-3-Clause). |
-| 10 | Všetky testy v CI zelené, release build + balíčky pre 2 platformy | **nebolo možné overiť** | Lokálne 126/126 testov. Wheel je čistý Python (`py3-none-any`), teda inštalovateľný na Linux, Windows aj macOS, ale otestovaný len na Linuxe. CI matica pre 3 OS je pripravená. |
+| 10 | Všetky testy v CI zelené, release build + balíčky pre 2 platformy | **nebolo možné overiť** | Lokálne 126/126 testov. CI stavia wheel a samostatný program pre Windows a Linux (`reversa-windows-x64`, `reversa-linux-x64`). Linuxový program overený lokálne, Windows až v CI. |
 
 ## MUST-HAVE funkcie (4.1)
 
@@ -96,4 +97,5 @@ z nich nie je kritická pre akceptačné kritériá.
 | 2026-11-22 | CLI, reporty, webové GUI, onboarding, slovenské texty |
 | 2026-11-22 | Fuzzing odhalil pomalú analýzu poškodených súborov. Opravené (index sekcií, cache dekódovania). |
 | 2026-11-22 | Oprava: predvolené mená `sub_…` sa dali zobraziť, ale nie vyhľadať. Regresný test pridaný. |
+| 2026-11-22 | Cieľové platformy: Windows a Linux (rozhodnutie používateľa). CI bez macOS, samostatné programy cez PyInstaller, UTF-8 výstup na Windows konzole, SQLite URI pre Windows cesty. |
 | 2026-11-22 | Dokumentácia, CI, lock súbor s hashmi, headless skript, wheel, záverečná kontrola |

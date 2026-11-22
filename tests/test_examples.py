@@ -15,10 +15,11 @@ SCRIPTS = {
 @pytest.mark.parametrize("script", sorted(SCRIPTS))
 def test_example_scripts(script, tmp_path):
     args, expected = SCRIPTS[script]
-    env = dict(os.environ, PYTHONPATH=os.path.join(ROOT, "src"), HOME=str(tmp_path))
+    env = dict(os.environ, PYTHONPATH=os.path.join(ROOT, "src"), HOME=str(tmp_path), USERPROFILE=str(tmp_path),
+               PYTHONIOENCODING="utf-8")
     extra = [str(tmp_path / "out.rvproj")] if script == "annotate_and_view.py" else []
     r = subprocess.run([sys.executable, os.path.join(EXAMPLES, "scripts", script)] + [sample(a) for a in args] + extra,
-                       capture_output=True, text=True, env=env, timeout=120)
+                       capture_output=True, text=True, encoding="utf-8", env=env, timeout=120)
     assert r.returncode == 0, r.stderr
     for e in expected:
         assert e in r.stdout

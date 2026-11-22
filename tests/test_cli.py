@@ -70,6 +70,6 @@ def test_errors_are_friendly(tmp_path, capsys):
 def test_console_entry_point_runs_as_module(tmp_path):
     env = dict(os.environ, PYTHONPATH=os.path.join(ROOT, "src"))
     r = subprocess.run([sys.executable, "-m", "reversa", "analyze", sample("login_x64.elf"), "--report",
-                        str(tmp_path / "ci.md"), "--no-plugins"], capture_output=True, text=True, env=env, timeout=120)
+                        str(tmp_path / "ci.md"), "--no-plugins"], capture_output=True, text=True, encoding="utf-8", env=env, timeout=120)
     assert r.returncode == 0, r.stderr
     assert (tmp_path / "ci.md").exists()

@@ -36,4 +36,5 @@ def fresh(name: str, **kw):
 def _isolated_home(tmp_path, monkeypatch):
     # plugins/projects must never touch the real home directory during tests
     monkeypatch.setenv("HOME", str(tmp_path / "home"))
+    monkeypatch.setenv("USERPROFILE", str(tmp_path / "home"))  # Windows expanduser
     monkeypatch.delenv("REVERSA_PLUGIN_PATH", raising=False)

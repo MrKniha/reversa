@@ -657,7 +657,7 @@ def run_gui(path: Optional[str] = None, port: int = 0, open_browser: bool = True
     httpd, state, url, _ = create_server(path, port, options)
     print("REVERSA GUI beží lokálne (nič sa neposiela na internet).")
     print(f"Otvorte v prehliadači: {url}")
-    print("Ukončenie: Ctrl+C")
+    print("Ukončenie: Ctrl+C", flush=True)
     if open_browser:
         threading.Timer(0.3, lambda: webbrowser.open(url)).start()
     try:
