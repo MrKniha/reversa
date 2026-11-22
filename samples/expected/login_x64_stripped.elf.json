@@ -1,0 +1,28 @@
+{
+  "format": "ELF",
+  "arch": "x86-64",
+  "main_found": true,
+  "user_functions_present": [
+    "main"
+  ],
+  "imports_present": [
+    "puts",
+    "strcmp",
+    "strlen"
+  ],
+  "strings_present": [
+    "Access granted. Flag: CTF{xrefs_are_your_friend}",
+    "Usage: login <user> <password>",
+    "admin",
+    "student"
+  ],
+  "strcmp_callers": [
+    "sub_401196",
+    "sub_401217"
+  ],
+  "main_calls": [
+    "puts",
+    "sub_401196",
+    "sub_401217"
+  ]
+}

@@ -1,0 +1,42 @@
+REVERSA – licencie tretích strán
+================================
+
+REVERSA (MIT) pri behu používa len tieto komponenty tretích strán. Úplný zoznam
+overuje skript scripts/check_licenses.py v CI (každá runtime závislosť musí byť
+uvedená tu a mať povolenú licenciu).
+
+Runtime závislosti
+------------------
+
+1. Capstone (Python bindings "capstone" + natívna knižnica libcapstone)
+   Verzia: >=5.0.1,<6 (testované 5.0.9)
+   Licencia: BSD-3-Clause
+   Copyright (c) 2013, COSEINC; Nguyen Anh Quynh and contributors
+   Zdroj: https://github.com/capstone-engine/capstone
+   Použitie: disassembler (dynamicky linkovaná knižnica, bez úprav).
+   Kompatibilita: BSD-3-Clause je kompatibilná s MIT; povinnosť: zachovať
+   copyright a text licencie pri redistribúcii (pip balík ho obsahuje).
+
+Štandardná knižnica Pythonu (CPython)
+   Licencia: PSF-2.0 (sqlite3, http.server, json, ...)
+   SQLite: public domain.
+
+Vývojové (nie sú súčasťou distribúcie)
+--------------------------------------
+- pytest – MIT
+- coverage – Apache-2.0
+- Playwright (iba UI smoke test v CI) – Apache-2.0
+
+Inšpirácia (bez prebratia kódu)
+-------------------------------
+Dizajnové vzory a algoritmy sme študovali v projektoch Ghidra (Apache-2.0),
+radare2 (LGPL-3.0), rizin/Cutter (LGPL-3.0/GPL-3.0), angr (BSD-2-Clause),
+RetDec (MIT), LIEF (Apache-2.0), Detect It Easy (MIT), binwalk (MIT).
+Z týchto projektov nie je skopírovaný žiadny zdrojový kód – pozri docs/research.md.
+
+Testovacie vzorky
+-----------------
+samples/bin/* sú skompilované z vlastných zdrojákov samples/src/*.c (MIT)
+skriptom samples/build.sh. Obsahujú štartovací kód runtime knižníc (glibc,
+MinGW-w64 CRT), ktorý je pod licenciami s výnimkou pre runtime
+(LGPL-2.1 + výnimka / GCC Runtime Library Exception / ZPL / public domain).

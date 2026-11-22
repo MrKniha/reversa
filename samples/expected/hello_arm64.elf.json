@@ -1,0 +1,27 @@
+{
+  "format": "ELF",
+  "arch": "arm64",
+  "main_found": true,
+  "user_functions_present": [
+    "classify",
+    "greet",
+    "main",
+    "sum_to"
+  ],
+  "imports_present": [
+    "printf",
+    "puts"
+  ],
+  "strings_present": [
+    "Done.",
+    "sum_to(%d) = %d\n"
+  ],
+  "strcmp_callers": [],
+  "main_calls": [
+    "classify",
+    "greet",
+    "printf",
+    "puts",
+    "sum_to"
+  ]
+}

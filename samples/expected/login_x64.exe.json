@@ -1,0 +1,31 @@
+{
+  "format": "PE",
+  "arch": "x86-64",
+  "main_found": true,
+  "user_functions_present": [
+    "check_password",
+    "check_user",
+    "main"
+  ],
+  "imports_present": [
+    "puts",
+    "strcmp",
+    "strlen"
+  ],
+  "strings_present": [
+    "Access granted. Flag: CTF{xrefs_are_your_friend}",
+    "Usage: login <user> <password>",
+    "admin",
+    "student"
+  ],
+  "strcmp_callers": [
+    "check_password",
+    "check_user"
+  ],
+  "main_calls": [
+    "check_password",
+    "check_user",
+    "main",
+    "puts"
+  ]
+}
