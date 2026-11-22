@@ -42,9 +42,7 @@
 #include "gui/graph_view.hpp"
 #include "gui/i18n.hpp"
 #include "report/report.hpp"
-#ifdef REVERSA_WITH_PYTHON
-#include "python/embed.hpp"
-#endif
+#include "plugins/native.hpp"
 
 namespace rv::gui {
 
@@ -234,7 +232,7 @@ void MainWindow::build_ui() {
         QMessageBox::about(this, tr("O programe REVERSA"),
                            tr("<b>REVERSA %1</b><br>Open-source nástroj na reverzné inžinierstvo (MIT).<br>"
                               "Statická analýza – analyzovaný program sa nikdy nespúšťa.<br>"
-                              "Knižnice: Qt (LGPL-3.0), Capstone, pybind11 (BSD-3-Clause), SQLite (public domain).")
+                              "Knižnice: Qt (LGPL-3.0), Capstone (BSD-3-Clause), SQLite (public domain).")
                                .arg(REVERSA_VERSION));
     });
 
@@ -571,9 +569,7 @@ void MainWindow::start_session(std::unique_ptr<Session> s, const QString& label)
     selected_var_.clear();
     history_.clear();
     seen_revision_ = 0;
-#ifdef REVERSA_WITH_PYTHON
-    if (!args_.no_plugins) session_->plugins = py::make_plugin_host(*session_, args_.plugin_dirs);
-#endif
+    if (!args_.no_plugins) session_->plugins = plugins::load(*session_, args_.plugin_dirs);
     event_sub_ = session_->events.subscribe("*", [this](const Event&) {
         QMetaObject::invokeMethod(this, [this] { schedule_refresh(); }, Qt::QueuedConnection);
     });
@@ -1302,15 +1298,13 @@ void MainWindow::cmd_relocations() {
 void MainWindow::cmd_plugins() {
     std::vector<QStringList> rows;
     QString intro;
-#ifdef REVERSA_WITH_PYTHON
-    std::string why;
     if (args_.no_plugins) intro = tr("Pluginy sú vypnuté (--no-plugins).");
-    else if (!py::available(&why)) intro = tr("Python nie je dostupný, pluginy sú vypnuté: %1").arg(q(why));
     else {
-        intro = tr("Pluginy sa načítavajú z priečinkov plugins/ v používateľskom priečinku REVERSA a z volieb --plugins. "
-                   "Python %1.").arg(q(py::python_version()));
+        intro = tr("Pluginy sú knižnice .so/.dll v C alebo C++. Načítavajú sa z priečinka %1, z premennej "
+                   "REVERSA_PLUGIN_PATH a z volieb --plugins. Bežia priamo v REVERSA – inštalujte len pluginy, "
+                   "ktorým dôverujete.").arg(q(plugins::default_dirs().front()));
         if (session_ && session_->plugins) {
-            Json info = py::plugin_info(session_->plugins);
+            Json info = plugins::info(session_->plugins);
             for (auto& p : info.as_array()) {
                 QStringList hooks;
                 for (auto& h : p.get("hooks").as_array()) hooks << q(h.as_string());
@@ -1319,9 +1313,6 @@ void MainWindow::cmd_plugins() {
             }
         }
     }
-#else
-    intro = tr("Táto zostava REVERSA je bez Pythonu – skripty a pluginy nie sú dostupné.");
-#endif
     show_table(this, tr("Pluginy"), intro, {tr("Meno"), tr("Verzia"), tr("Stav"), tr("Háčiky"), tr("Chyba"), tr("Popis")}, rows);
 }
 

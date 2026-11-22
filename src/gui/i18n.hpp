@@ -1,5 +1,5 @@
 // GUI languages. Source strings are Slovak; translations are JSON tables in src/gui/i18n/<code>.json,
-// compiled into the binary as Qt resources and checked by scripts/i18n.py.
+// compiled into the binary as Qt resources and checked by tools/i18n_check.cpp.
 #pragma once
 
 #include <QCoreApplication>

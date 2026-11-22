@@ -1,131 +1,143 @@
-# Tutoriál: napíšte si plugin
+# Tutoriál: napíšte si plugin v C++
 
 Plugin rozširuje REVERSA o vlastnú logiku: reaguje na udalosti (načítanie súboru,
-nájdená funkcia, premenovanie) a môže pridať vlastný pohľad. Pluginy používajú
-rovnaké Python API ako skripty (pozri [scripting-tutorial.md](scripting-tutorial.md)).
+nájdená funkcia, premenovanie) a môže pridať vlastný pohľad. Plugin je zdieľaná
+knižnica (`.so` na Linuxe, `.dll` na Windows) v C alebo C++. Používa rovnaké
+rozhranie ako skripty (pozri [scripting-tutorial.md](scripting-tutorial.md)).
 
-> **Bezpečnosť:** plugin je bežný Python kód. Beží v procese REVERSA **bez
-> sandboxu** a má rovnaké práva ako vy. Inštalujte iba pluginy, ktorých kód ste
-> si prečítali alebo ktorým dôverujete.
+> **Bezpečnosť:** plugin je natívny kód. Beží v procese REVERSA **bez sandboxu**
+> a má rovnaké práva ako vy. Inštalujte iba pluginy, ktorých kód ste si prečítali
+> alebo ktorým dôverujete.
 
-## 1. Štruktúra pluginu
+## 1. Kód pluginu
 
-Plugin je priečinok s dvomi súbormi:
+S pomocníkom [sdk.hpp](../sdk/include/reversa/sdk.hpp) je plugin trieda odvodená
+od `reversa::Plugin`. Všetky háčiky sú nepovinné. Člen `program` je otvorený
+program (rovnaké API ako v skriptoch).
 
+```cpp
+#include <reversa/sdk.hpp>
+
+#include <string>
+#include <vector>
+
+struct HelloPlugin : reversa::Plugin {
+    int functions = 0;
+    std::vector<std::string> renames;
+
+    void on_load() override {
+        program.log("[hello-plugin] loaded file: " + program.path());
+        program.add_view("Hello plugin", [this] {
+            return "Functions analysed: " + std::to_string(functions) + "\nRenames: " + std::to_string(renames.size());
+        });
+    }
+    void on_function_analyzed(const reversa::Function& f) override {
+        functions++;
+        if (f.name == "main") program.set_comment(f.addr, "hello-plugin: the program starts here");
+    }
+    void on_rename(reversa::Addr, const std::string& old_name, const std::string& new_name) override {
+        renames.push_back(old_name + " -> " + new_name);
+        program.log("[hello-plugin] " + old_name + " -> " + new_name);
+    }
+    void on_unload() override { program.log("[hello-plugin] saw " + std::to_string(functions) + " functions"); }
+};
+
+REVERSA_PLUGIN(HelloPlugin, "hello-plugin", "1.0.0", "Counts functions and reacts to renames.")
 ```
-hello_plugin/
-├── plugin.json     # manifest
-└── plugin.py       # kód
-```
 
-`plugin.json`:
-
-```json
-{
-  "name": "hello-plugin",
-  "version": "1.0.0",
-  "api_version": "1.0",
-  "entry": "plugin.py",
-  "description": "Počíta funkcie a reaguje na premenovanie."
-}
-```
-
-- `api_version` musí mať rovnaké hlavné číslo ako REVERSA (teraz `1`). Inak sa
-  plugin nenačíta a v zozname pluginov má stav *incompatible*.
-- `entry` musí byť súbor vnútri priečinka pluginu.
-
-## 2. Kód pluginu
-
-`plugin.py` definuje funkciu `register(api)`. Dostane objekt `Program` a vráti
-objekt s háčikmi (hooks). Všetky háčiky sú nepovinné.
-
-```python
-class HelloPlugin:
-    def __init__(self):
-        self.functions = 0
-        self.renames = []
-
-    def on_load(self, program):
-        print(f"[hello-plugin] načítaný súbor: {program.path}")
-
-    def on_function_analyzed(self, program, func):
-        self.functions += 1
-        if func.name == "main":
-            program.comment(func.addr, "hello-plugin: tu začína program")
-
-    def on_rename(self, program, addr, old, new):
-        self.renames.append((addr, old, new))
-        print(f"[hello-plugin] {old} -> {new}")
-
-    def on_unload(self, program):
-        print(f"[hello-plugin] videl som {self.functions} funkcií")
-
-
-def register(api):
-    plugin = HelloPlugin()
-    api.add_view("Hello plugin",
-                 lambda p: f"Analyzovaných funkcií: {plugin.functions}\nPremenovaní: {len(plugin.renames)}")
-    return plugin
-```
+Celý súbor: [examples/plugins/hello_plugin.cpp](../examples/plugins/hello_plugin.cpp).
 
 | Háčik | Kedy sa volá |
 |---|---|
-| `on_load(program)` | po načítaní súboru, pred analýzou |
-| `on_function_analyzed(program, func)` | raz pre každú nájdenú funkciu |
-| `on_rename(program, addr, old, new)` | po každom premenovaní (aj pri undo/redo) |
-| `on_unload(program)` | pri zatváraní súboru alebo ukončení |
+| `on_load()` | po načítaní súboru, pred analýzou |
+| `on_function_analyzed(func)` | raz pre každú nájdenú funkciu |
+| `on_rename(addr, old, new)` | po každom premenovaní (aj pri undo/redo) |
+| `on_unload()` | pri zatváraní súboru alebo ukončení |
 
-Ak `register` nevráti nič, REVERSA hľadá háčiky ako funkcie priamo v module.
+`REVERSA_PLUGIN` exportuje funkciu `reversa_plugin()`, ktorá vráti štruktúru
+`rv_plugin` s menom, verziou, popisom a verziou API. Pre každý otvorený súbor
+vznikne nový objekt pluginu.
+
+Plugin v čistom C vyplní štruktúru `rv_plugin` sám, pozri
+[sdk/include/reversa/plugin.h](../sdk/include/reversa/plugin.h) a testovací plugin
+[tests/cpp/plugins/counter.c](../tests/cpp/plugins/counter.c).
+
+## 2. Preklad
+
+```bash
+# Linux
+g++ -std=c++17 -shared -fPIC -o hello_plugin.so hello_plugin.cpp
+```
+
+```bat
+:: Windows (Developer Command Prompt pre Visual Studio)
+cl /std:c++17 /EHsc /LD /I C:\reversa\bin\sdk\include hello_plugin.cpp
+```
+
+Plugin nepotrebuje linkovať REVERSA. Všetko volá cez tabuľku funkcií, ktorú dostane
+pri načítaní.
 
 ## 3. Inštalácia a spustenie
 
-Skopírujte priečinok pluginu do `~/.reversa/plugins/` (Windows:
-`%USERPROFILE%\.reversa\plugins\`). Prípadne použite premennú prostredia
-`REVERSA_PLUGIN_PATH` alebo prepínač `--plugins`:
+Skopírujte knižnicu do `~/.reversa/plugins/` (Windows:
+`%USERPROFILE%\.reversa\plugins\`). Môže byť aj v podpriečinku, napríklad
+`plugins/hello/hello_plugin.so`. Ďalšie priečinky pridáte premennou prostredia
+`REVERSA_PLUGIN_PATH` (oddeľovač `:` na Linuxe, `;` na Windows) alebo prepínačom
+`--plugins`:
 
 ```bash
-reversa analyze samples/bin/hello_x64.elf --plugins examples/plugins
-reversa gui samples/bin/hello_x64.elf --plugins examples/plugins
+reversa analyze samples/bin/hello_x64.elf --plugins build/bin/examples/plugins
+reversa gui samples/bin/hello_x64.elf --plugins build/bin/examples/plugins
 ```
 
 Výstup v termináli:
 
 ```
-[hello-plugin] načítaný súbor: .../samples/bin/hello_x64.elf
+[hello-plugin] loaded file: .../samples/bin/hello_x64.elf
 ```
 
 V GUI nájdete pluginy v menu **Pokročilé → Pluginy** (meno, verzia, stav, háčiky,
 počet volaní). Pohľad „Hello plugin“ je na karte **Pohľady**. Ak pluginy nechcete,
 použite `--no-plugins`.
 
-## 4. Čo keď plugin spadne
+## 4. Čo keď plugin zlyhá
 
-V `examples/plugins/crashing_plugin` je plugin, ktorý zámerne vyhodí výnimku
-v `on_function_analyzed`. REVERSA:
+V [examples/plugins/crashing_plugin.cpp](../examples/plugins/crashing_plugin.cpp)
+je plugin, ktorý zámerne vyhodí výnimku v `on_function_analyzed`. REVERSA:
 
-1. zachytí výnimku a plugin **vypne** (stav *failed*),
-2. zapíše chybu do diagnostiky (s tracebackom pre autora pluginu),
+1. dostane od háčika chybu (makro `REVERSA_PLUGIN` výnimku zachytí) a plugin
+   **vypne** (stav *failed*),
+2. zapíše chybu do diagnostiky aj s textom výnimky,
 3. pokračuje v analýze. Ostatné pluginy bežia ďalej.
 
 ```
-! error: Plugin 'crashing-plugin' spadol v on_function_analyzed a bol vypnutý. REVERSA pokračuje ďalej.
+! error: Plugin 'crashing-plugin' failed in on_function_analyzed and was disabled. REVERSA continues.
 ```
 
-Rovnako sa správa plugin, ktorý sa nedá ani načítať (syntaktická chyba, chýbajúci
-súbor). Toto správanie overujú testy `tests/python/test_plugins.py` a
-`tests/gui/test_gui.cpp` (háčiky bežia aj na pracovnom vlákne analýzy v GUI).
+Rovnako sa správa knižnica, ktorá sa nedá načítať, nemá funkciu
+`reversa_plugin()` alebo je preložená pre inú verziu API (stav *incompatible*).
+Toto správanie overujú testy [tests/cpp/test_plugins.cpp](../tests/cpp/test_plugins.cpp)
+a `tests/gui/test_gui.cpp` (háčiky bežia aj na pracovnom vlákne analýzy v GUI).
+
+> Natívny plugin môže zhodiť celú aplikáciu, napríklad zlým ukazovateľom. REVERSA
+> zachytí chyby, ktoré plugin ohlási, ale nie pád pamäte. Aj preto inštalujte len
+> pluginy, ktorým dôverujete.
 
 ## 5. Väčší príklad: kryptografické konštanty
 
-[examples/plugins/crypto_constants](../examples/plugins/crypto_constants) hľadá
-v súbore známe konštanty (AES S-box, SHA-256, MD5, CRC32) cez
+[examples/plugins/crypto_constants.cpp](../examples/plugins/crypto_constants.cpp)
+hľadá v súbore známe konštanty (AES S-box, SHA-256, MD5, CRC32) cez
 `program.search_bytes(...)`. Ku každému nálezu pridá záložku a vytvorí pohľad
-„Krypto konštanty“. Podobne fungujú pluginy FindCrypt pre IDA a Ghidra.
+„Crypto constants“. Podobne fungujú pluginy FindCrypt pre IDA a Ghidra.
 
 ## Tipy
 
 - Háčik `on_function_analyzed` sa volá veľakrát. Robte v ňom len rýchle veci.
-- Na anotácie použite API (`program.rename`, `program.comment`,
-  `program.bookmark`), aby fungovalo undo a uloženie do projektu.
+- Háčiky môžu bežať na pracovnom vlákne analýzy. REVERSA volania na jeden program
+  serializuje, takže zámky v plugine netreba.
+- Na anotácie použite API (`rename`, `set_comment`, `set_bookmark`), aby fungovalo
+  undo a uloženie do projektu.
 - Plugin by nemal sieťovo komunikovať ani spúšťať analyzovaný súbor.
   REVERSA je nástroj na statickú analýzu bez telemetrie.
+- Pluginy v Pythone (`plugin.json` + `plugin.py`) z verzie 0.1 už REVERSA
+  nenačítava.

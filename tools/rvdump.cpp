@@ -1,4 +1,7 @@
-// Developer tool: dumps analysis facts as JSON (compared against the reference implementation in CI).
+// Developer tool: dumps analysis facts as JSON.
+//   rvdump FILE                 raw facts (sections, functions, xrefs...)
+//   rvdump --pseudo FILE        pseudocode of every function (golden files tests/cpp/golden)
+//   rvdump --expected SAMPLES   regenerates SAMPLES/expected/*.json from SAMPLES/bin (check `git diff` by hand)
 #include <cstdio>
 #include <cctype>
 #include <iostream>
@@ -8,6 +11,9 @@
 #include "core/text.hpp"
 #include "session/session.hpp"
 #include "formats/formats.hpp"
+#include "facts.hpp"
+#include <filesystem>
+#include <fstream>
 
 using namespace rv;
 
@@ -22,7 +28,22 @@ static void dump_pseudo(Session& s) {
 
 int main(int argc, char** argv) {
     bool pseudo = argc > 2 && std::string(argv[1]) == "--pseudo";
-    if (argc < 2) { std::fprintf(stderr, "usage: rvdump [--pseudo] FILE\n"); return 2; }
+    if (argc < 2) { std::fprintf(stderr, "usage: rvdump [--pseudo] FILE | --expected SAMPLES_DIR\n"); return 2; }
+    if (argc > 2 && std::string(argv[1]) == "--expected") {
+        namespace fs = std::filesystem;
+        fs::path root = argv[2];
+        std::vector<fs::path> bins;
+        for (auto& e : fs::directory_iterator(root / "bin"))
+            if (e.path().filename() != "SHA256SUMS") bins.push_back(e.path());
+        std::sort(bins.begin(), bins.end());
+        fs::create_directories(root / "expected");
+        for (auto& b : bins) {
+            std::ofstream(root / "expected" / (b.filename().string() + ".json"), std::ios::binary)
+                << facts::facts(b.string()).dump(2) << "\n";
+            std::cout << "wrote " << b.filename().string() << "\n";
+        }
+        return 0;
+    }
     if (pseudo) {
         auto s = Session::open(argv[2]);
         dump_pseudo(*s);

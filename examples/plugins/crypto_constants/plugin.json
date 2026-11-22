@@ -1,7 +1,0 @@
-{
-  "name": "crypto-constants",
-  "version": "1.0.0",
-  "api_version": "1.0",
-  "entry": "plugin.py",
-  "description": "Nájde známe kryptografické konštanty (AES S-box, SHA-256, MD5, CRC32) a pridá k nim záložky."
-}
