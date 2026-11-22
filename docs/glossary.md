@@ -1,53 +1,53 @@
-# Slovník pojmov (glossary)
+# Glossary
 
-Tieto pojmy používame v celom UI, dokumentácii aj chybových hláškach rovnako. Ak pridávate text do UI,
-použite termín z tohto slovníka (a ak chýba, doplňte ho sem).
+We use these terms the same way in the GUI, the documentation and error messages. When you add a
+text to the GUI, use a term from this glossary (and add it here if it is missing).
 
-| Pojem v UI | Anglicky | Vysvetlenie |
-|---|---|---|
-| **Binárka / binárny súbor** | binary | Skompilovaný program alebo knižnica (napr. `.exe`, ELF), ktorú analyzujeme. |
-| **Formát** | file format | Spôsob, akým je binárka uložená: ELF (Linux), PE (Windows), Mach-O (macOS, zatiaľ nepodporovaný), surové dáta. |
-| **Surové dáta** | raw binary | Súbor bez hlavičky (dump firmvéru, shellcode). Architektúru a základnú adresu treba zadať alebo ich REVERSA odhadne. |
-| **Architektúra** | architecture | Typ procesora: x86 (32-bit), x86-64, ARM (32-bit), ARM64 (AArch64). |
-| **Endianita** | endianness | Poradie bajtov v čísle: little endian (najnižší bajt prvý) alebo big endian. |
-| **Sekcia** | section | Pomenovaná časť súboru, napr. `.text` (kód), `.data` (dáta), `.rodata` (konštanty), `.bss` (nulové dáta). |
-| **Segment** | segment | Časť súboru, ktorú zavádzač (loader) mapuje do pamäte; sekcie ležia v segmentoch. |
-| **Práva r/w/x** | permissions | r = čítanie, w = zápis, x = spúšťanie kódu. |
-| **Adresa** | address | Miesto v pamäti programu po zavedení (virtuálna adresa), zobrazujeme hexadecimálne, napr. `0x401000`. |
-| **Offset v súbore** | file offset | Pozícia bajtu v súbore na disku (líši sa od adresy). |
-| **RVA** | Relative Virtual Address | Adresa relatívna k základnej adrese obrazu (PE). |
-| **Základná adresa** | image base | Adresa, na ktorú sa program zavádza (napr. `0x400000`). |
-| **Vstupný bod (entry)** | entry point | Prvá inštrukcia, ktorú systém spustí. Väčšinou to nie je `main`, ale štartovací kód knižnice. |
-| **Hlavná funkcia (main)** | main | Funkcia, kde začína „vlastný“ program. V zozname funkcií je označená ★. |
-| **Funkcia** | function | Ucelený kus kódu s jedným začiatkom, ktorý sa dá zavolať. |
-| **Import** | import | Funkcia z inej knižnice (napr. `printf` z libc), ktorú program volá. V zozname je šedá. |
-| **Export** | export | Funkcia alebo dáta, ktoré binárka ponúka iným programom (typické pre knižnice/DLL). |
-| **Thunk** | thunk | Malá „prestupná“ funkcia, ktorá len skočí na import (napr. `strcmp: jmp [__imp_strcmp]`). |
-| **PLT / GOT** | Procedure Linkage Table / Global Offset Table | Tabuľky v ELF, cez ktoré program volá importy. |
-| **IAT** | Import Address Table | Tabuľka adries importov v PE. |
-| **Inštrukcia** | instruction | Jeden príkaz procesora, napr. `mov`, `call`, `jmp`. |
-| **Listing** | listing / disassembly | Výpis inštrukcií za sebou s adresami a bajtami. |
-| **Disassembler** | disassembler | Nástroj, ktorý prevádza bajty strojového kódu na čitateľné inštrukcie. |
-| **Pseudokód** | pseudocode / decompiled code | Odhad pôvodného kódu v štýle C. V REVERSA MVP je **dočasný** – typy sú len odhadnuté. |
-| **Dekompilátor** | decompiler | Nástroj, ktorý z inštrukcií vytvára pseudokód. |
-| **Premenná a1, a2…** | parameter | 1., 2. … parameter funkcie. |
-| **local_X** | local variable | Lokálna premenná uložená na zásobníku (X = posun v hexadecimálnom tvare). |
-| **vN** | temporary | Pomocná premenná, ktorá vznikla z registra procesora. |
-| **Blok** | basic block | Postupnosť inštrukcií bez skokov dovnútra alebo von okrem začiatku a konca. |
-| **CFG / Graf funkcie** | control flow graph | Graf blokov jednej funkcie a skokov medzi nimi. |
-| **Slučka** | loop | Časť kódu, ktorá sa opakuje (v grafe oranžový rámik a prerušovaná hrana späť). |
-| **Graf volaní** | call graph | Graf, ktorý ukazuje, ktorá funkcia volá ktorú. |
-| **Cross-referencia (x-ref)** | cross-reference | Odkaz z jedného miesta programu na iné: „volané z“, „čítané z“, „zapisované z“, „adresa použitá v“, „ukazovateľ v dátach“. |
-| **Reťazec** | string | Text uložený v binárke (ASCII alebo UTF-16). |
-| **Komentár** | comment | Vaša poznámka k adrese. Ukladá sa do projektu. |
-| **Záložka** | bookmark | Pomenované miesto, ku ktorému sa chcete vrátiť. |
-| **Projekt** | project (`.rvproj`) | Súbor s kópiou binárky a všetkými vašimi anotáciami (mená, komentáre, záložky). |
-| **Anotácia** | annotation | Spoločný názov pre premenovania, komentáre a záložky. |
-| **Analýza** | auto-analysis | Automatické hľadanie funkcií, reťazcov a x-refs po otvorení súboru (beží na pozadí). |
-| **Diagnostika** | diagnostics | Upozornenia z načítania (napr. poškodená časť súboru). |
-| **Plugin** | plugin | Knižnica v C/C++ (.so/.dll), ktorá reaguje na udalosti (načítanie, analýza funkcie, premenovanie). |
-| **Skript** | script | Knižnica v C/C++, ktorú spustí `reversa script` a ktorá používa API REVERSA. |
-| **Pohľad** | view | Vlastný textový výstup zo skriptu alebo pluginu, zobrazený v GUI na karte Pohľady. |
-| **Report** | report | Textové zhrnutie analýzy (Markdown alebo HTML). |
-| **Headless** | headless | Beh bez grafického rozhrania (CLI, CI). |
-| **Hex výpis** | hex dump | Bajty zobrazené hexadecimálne spolu s ASCII znakmi. |
+| Term | Explanation |
+|---|---|
+| **Binary** | A compiled program or library (for example `.exe`, ELF) that we analyse. |
+| **File format** | How a binary is stored: ELF (Linux), PE (Windows), Mach-O (macOS, not supported yet), raw data. |
+| **Raw data** | A file without a header (firmware dump, shellcode). The architecture and base address must be given, or REVERSA guesses them. |
+| **Architecture** | The processor type: x86 (32-bit), x86-64, ARM (32-bit), ARM64 (AArch64). |
+| **Endianness** | Byte order in a number: little endian (lowest byte first) or big endian. |
+| **Section** | A named part of the file, for example `.text` (code), `.data` (data), `.rodata` (constants), `.bss` (zeroed data). |
+| **Segment** | A part of the file that the loader maps into memory; sections live inside segments. |
+| **Permissions r/w/x** | r = read, w = write, x = execute code. |
+| **Address** | A location in the program's memory after loading (virtual address), shown in hex, for example `0x401000`. |
+| **File offset** | The position of a byte in the file on disk (differs from the address). |
+| **RVA** | Relative Virtual Address: an address relative to the image base (PE). |
+| **Image base** | The address the program is loaded at (for example `0x400000`). |
+| **Entry point** | The first instruction the system runs. Usually it is not `main` but the library's startup code. |
+| **Main function (main)** | The function where the "real" program starts. It is marked with ★ in the function list. |
+| **Function** | A self-contained piece of code with one start that can be called. |
+| **Import** | A function from another library (for example `printf` from libc) that the program calls. Grey in the list. |
+| **Export** | A function or data that a binary offers to other programs (typical for libraries/DLLs). |
+| **Thunk** | A small "trampoline" function that only jumps to an import (for example `strcmp: jmp [__imp_strcmp]`). |
+| **PLT / GOT** | Procedure Linkage Table / Global Offset Table: ELF tables through which a program calls imports. |
+| **IAT** | Import Address Table: the table of import addresses in PE. |
+| **Instruction** | One processor command, for example `mov`, `call`, `jmp`. |
+| **Listing** | Instructions one after another with their addresses and bytes (disassembly). |
+| **Disassembler** | A tool that turns machine code bytes into readable instructions. |
+| **Pseudocode** | An estimate of the original code in C style (decompiled code). In the REVERSA MVP it is **provisional**: types are only guessed. |
+| **Decompiler** | A tool that creates pseudocode from instructions. |
+| **Variable a1, a2…** | The 1st, 2nd … parameter of a function. |
+| **local_X** | A local variable stored on the stack (X = offset in hex). |
+| **vN** | A temporary variable created from a processor register. |
+| **Basic block** | A sequence of instructions with no jumps in or out except at the start and the end. |
+| **CFG / function graph** | Control flow graph: the blocks of one function and the jumps between them. |
+| **Loop** | Code that repeats (in the graph: an orange frame and a dashed back edge). |
+| **Call graph** | A graph that shows which function calls which. |
+| **Cross-reference (x-ref)** | A reference from one place in the program to another: "called from", "read from", "written from", "address used in", "pointer in data". |
+| **String** | Text stored in the binary (ASCII or UTF-16). |
+| **Comment** | Your note on an address. Stored in the project. |
+| **Bookmark** | A named place you want to come back to. |
+| **Project** (`.rvproj`) | A file with a copy of the binary and all your annotations (names, comments, bookmarks). |
+| **Annotation** | A common name for renames, comments and bookmarks. |
+| **Analysis** | Automatic search for functions, strings and x-refs after a file is opened (runs in the background). |
+| **Diagnostics** | Warnings from loading (for example a damaged part of the file). |
+| **Plugin** | A C/C++ library (.so/.dll) that reacts to events (loading, function analysed, rename). |
+| **Script** | A C/C++ library that `reversa script` runs and that uses the REVERSA API. |
+| **View** | Custom text output from a script or plugin, shown in the GUI on the Views tab. |
+| **Report** | A text summary of the analysis (Markdown or HTML). |
+| **Headless** | Running without a graphical interface (CLI, CI). |
+| **Hex dump** | Bytes shown in hex together with ASCII characters. |

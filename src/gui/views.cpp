@@ -43,19 +43,19 @@ QString page(const Palette& p, const QString& body) {
 // Fixed comments the decompiler (core, English) emits, mapped to the GUI's translatable source strings.
 QString decompiler_comment(const std::string& text) {
     if (text == PROVISIONAL_NOTE)
-        return T("// Dočasný pseudokód (REVERSA MVP): typy sú odhadnuté z veľkosti prístupov, overte v listingu.");
+        return T("// Provisional pseudocode (REVERSA MVP): types are guessed from access sizes, check the listing.");
     if (text == "  // indirect jump (e.g. switch): not expanded yet")
-        return T("  // nepriamy skok (napr. switch) – zatiaľ nerozbalený");
+        return T("  // indirect jump (e.g. switch): not expanded yet");
     return q(text);
 }
 
 QString xref_label(const std::string& kind) {
-    if (kind == "call") return T("volané z");
-    if (kind == "jump") return T("skok z");
-    if (kind == "read") return T("čítané z");
-    if (kind == "write") return T("zapisované z");
-    if (kind == "addr") return T("adresa použitá v");
-    if (kind == "data") return T("ukazovateľ v dátach");
+    if (kind == "call") return T("called from");
+    if (kind == "jump") return T("jump from");
+    if (kind == "read") return T("read from");
+    if (kind == "write") return T("written from");
+    if (kind == "addr") return T("address used in");
+    if (kind == "data") return T("pointer in data");
     return q(kind);
 }
 
@@ -99,22 +99,22 @@ QString listing_html(Session& s, Addr func, const Palette& p, std::optional<Addr
     const Analysis& a = *s.analysis;
     auto* fn = a.function(func);
     if (!fn) fn = a.function_containing(func);
-    if (!fn) return page(p, span(p.warn, T("Na adrese %1 nie je žiadna funkcia.").arg(hexq(func))));
+    if (!fn) return page(p, span(p.warn, T("There is no function at address %1.").arg(hexq(func))));
     QString out;
     auto comment_line = [&](const QString& text) { out += span(p.comment, "; " + text) + "\n"; };
 
     auto callers = a.callers(fn->addr, false);
     comment_line(QStringLiteral("════════ %1 %2 (%3)")
-                     .arg(fn->kind == "normal" ? T("funkcia") : T("import"), esc(s.name_of(fn->addr)),
+                     .arg(fn->kind == "normal" ? T("function") : T("import"), esc(s.name_of(fn->addr)),
                           hexq(fn->addr)));
     if (!callers.empty()) {
         QStringList names;
         for (size_t i = 0; i < callers.size() && i < 8; i++) names << anchor(callers[i], p.link, esc(s.name_of(callers[i])));
         QString more = callers.size() > 8 ? QStringLiteral(" … (+%1)").arg(callers.size() - 8) : QString();
-        out += span(p.comment, "; " + T("volaná z:") + " ") + names.join(", ") + span(p.comment, more) + "\n";
+        out += span(p.comment, "; " + T("called from:") + " ") + names.join(", ") + span(p.comment, more) + "\n";
     }
     if (fn->kind != "normal") {
-        comment_line(T("funkcia z externej knižnice%1 – jej kód nie je v tomto súbore")
+        comment_line(T("function from an external library%1: its code is not in this file")
                          .arg(fn->library.empty() ? QString() : " " + esc(fn->library)));
         if (fn->kind == "import") return page(p, out);
     }
@@ -212,11 +212,11 @@ QString details_html(Session& s, Addr addr, const Palette& p) {
     auto* fn = a.function(addr);
     auto* cont = a.function_containing(addr);
     auto* str = a.string(addr);
-    QString kind = fn ? (fn->kind == "normal" ? T("funkcia") : T("importovaná funkcia"))
-                 : str ? T("reťazec")
-                 : b.is_code(addr) ? T("kód")
-                 : b.is_mapped(addr) ? T("dáta")
-                                     : T("mimo súboru");
+    QString kind = fn ? (fn->kind == "normal" ? T("function") : T("imported function"))
+                 : str ? T("string")
+                 : b.is_code(addr) ? T("code")
+                 : b.is_mapped(addr) ? T("data")
+                                     : T("outside the file");
     QString h = QStringLiteral("<html><body style=\"color:%1\">").arg(p.text);
     h += QStringLiteral("<h3 style=\"margin:0\">%1</h3>").arg(esc(s.name_of(addr)));
     h += QStringLiteral("<p style=\"color:%1; margin-top:2px\">%2 · %3").arg(p.dim, hexq(addr), kind);
@@ -226,14 +226,14 @@ QString details_html(Session& s, Addr addr, const Palette& p) {
     auto row = [&](const QString& label, const QString& value) {
         h += QStringLiteral("<b>%1:</b> %2<br>").arg(label, value);
     };
-    if (cont && !fn) row(T("Vo funkcii"), anchor(cont->addr, p.link, esc(s.name_of(cont->addr))));
+    if (cont && !fn) row(T("In function"), anchor(cont->addr, p.link, esc(s.name_of(cont->addr))));
     if (str) row(T("Text"), span(p.string, "\"" + shorten(str->text, 300) + "\""));
     if (fn) {
-        row(T("Veľkosť"), T("%1 B, %2 inštrukcií, %3 blokov").arg(fn->size).arg(fn->insn_count).arg(fn->blocks.size()));
-        if (!fn->library.empty()) row(T("Knižnica"), esc(fn->library));
+        row(T("Size"), T("%1 B, %2 instructions, %3 blocks").arg(fn->size).arg(fn->insn_count).arg(fn->blocks.size()));
+        if (!fn->library.empty()) row(T("Library"), esc(fn->library));
     }
-    if (auto it = s.annotations.comments.find(addr); it != s.annotations.comments.end()) row(T("Komentár"), esc(it->second));
-    if (auto it = s.annotations.bookmarks.find(addr); it != s.annotations.bookmarks.end()) row(T("Záložka"), esc(it->second));
+    if (auto it = s.annotations.comments.find(addr); it != s.annotations.comments.end()) row(T("Comment"), esc(it->second));
+    if (auto it = s.annotations.bookmarks.find(addr); it != s.annotations.bookmarks.end()) row(T("Bookmark"), esc(it->second));
 
     auto list = [&](const QString& title, const std::vector<Addr>& items) {
         if (items.empty()) return;
@@ -242,17 +242,17 @@ QString details_html(Session& s, Addr addr, const Palette& p) {
         h += "</p>";
     };
     if (fn) {
-        list(T("Volané z"), a.callers(addr));
+        list(T("Called from"), a.callers(addr));
         std::vector<Addr> callees;
         for (Addr c : fn->callees)
             if (a.functions.count(c)) callees.push_back(c);
         for (Addr c : fn->tail_calls)
             if (a.functions.count(c) && !fn->callees.count(c)) callees.push_back(c);
-        list(T("Volá"), callees);
+        list(T("Calls"), callees);
     }
     auto xr = a.xrefs.to(addr);
-    h += QStringLiteral("<p><b>%1</b> (%2)<br>").arg(T("Kto to používa (x-refs)")).arg(xr.size());
-    if (xr.empty()) h += span(p.dim, T("Nikto – na túto adresu v kóde ani v dátach nič neukazuje.")) + "<br>";
+    h += QStringLiteral("<p><b>%1</b> (%2)<br>").arg(T("Who uses this (x-refs)")).arg(xr.size());
+    if (xr.empty()) h += span(p.dim, T("Nobody: nothing in the code or data points to this address.")) + "<br>";
     for (size_t i = 0; i < xr.size() && i < 500; i++) {
         auto* f = a.function_containing(xr[i].frm);
         QString where = f ? esc(s.name_of(f->addr)) + "+" + QString::number(xr[i].frm - f->addr, 16) : hexq(xr[i].frm);
@@ -261,7 +261,7 @@ QString details_html(Session& s, Addr addr, const Palette& p) {
     h += "</p>";
     auto from = a.xrefs.frm(addr);
     if (!from.empty()) {
-        h += QStringLiteral("<p><b>%1</b> (%2)<br>").arg(T("Čo to používa")).arg(from.size());
+        h += QStringLiteral("<p><b>%1</b> (%2)<br>").arg(T("What this uses")).arg(from.size());
         for (size_t i = 0; i < from.size() && i < 200; i++)
             h += span(p.dim, q(from[i].kind) + " ") + anchor(from[i].to, p.link, esc(s.name_of(from[i].to))) + "<br>";
         h += "</p>";

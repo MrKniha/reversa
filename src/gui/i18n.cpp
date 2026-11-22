@@ -33,7 +33,7 @@ private:
 
 std::unique_ptr<JsonTranslator> g_app;
 std::unique_ptr<QTranslator> g_qt;
-QString g_current = "sk";
+QString g_current = "en";
 
 bool supported(const QString& code) {
     for (auto& l : languages())
@@ -60,8 +60,8 @@ void set_language(const QString& code) {
     if (g_qt) QCoreApplication::removeTranslator(g_qt.get());
     g_app.reset();
     g_qt.reset();
-    g_current = supported(code) ? code : QStringLiteral("sk");
-    if (g_current != "sk") {
+    g_current = supported(code) ? code : QStringLiteral("en");
+    if (g_current != "en") {  // English is the source language
         auto t = std::make_unique<JsonTranslator>();
         if (t->load_json(":/i18n/" + g_current + ".json")) {
             QCoreApplication::installTranslator(t.get());
