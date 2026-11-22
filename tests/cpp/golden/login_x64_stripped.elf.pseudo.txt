@@ -1,0 +1,75 @@
+== entry 4010b0
+// Dočasný pseudokód (REVERSA MVP): typy sú odhadnuté z veľkosti prístupov, overte v listingu.
+void entry()
+{
+    __asm("push rax");
+    __asm("push rsp");
+    __libc_start_main(main);
+}
+== sub_401196 401196
+// Dočasný pseudokód (REVERSA MVP): typy sú odhadnuté z veľkosti prístupov, overte v listingu.
+int64_t sub_401196(int64_t a1)
+{
+    int64_t local_28;
+    int64_t local_20;
+    int64_t local_8;
+    int64_t v1;
+    int64_t __fs_28;
+    
+    local_28 = a1;
+    local_8 = __fs_28;
+    local_20 = 0x61737265766572;
+    v1 = &local_20 + strlen(&local_20);
+    *(int32_t *)(v1) = 0x36323032;
+    *(char *)(v1 + 4) = 0;
+    v1 = strcmp(local_28, &local_20) == 0;
+    if (local_8 - __fs_28 == 0) {
+        return v1;
+    } else {
+        __stack_chk_fail();
+    }
+}
+== sub_401217 401217
+// Dočasný pseudokód (REVERSA MVP): typy sú odhadnuté z veľkosti prístupov, overte v listingu.
+int64_t sub_401217(int64_t a1)
+{
+    int64_t local_8;
+    int32_t v1;
+    
+    local_8 = a1;
+    if (strcmp(local_8, "admin") != 0) {
+        v1 = strcmp(local_8, "student") == 0;
+    } else {
+        v1 = 1;
+    }
+    return v1;
+}
+== main 40125e
+// Dočasný pseudokód (REVERSA MVP): typy sú odhadnuté z veľkosti prístupov, overte v listingu.
+int64_t main(int32_t a1, int64_t a2)
+{
+    int64_t local_10;
+    int32_t local_4;
+    int32_t v1;
+    
+    local_4 = a1;
+    local_10 = a2;
+    if (local_4 > 2) {
+        if (sub_401217(*(int64_t *)(local_10 + 8)) != 0) {
+            if (sub_401196(*(int64_t *)(local_10 + 16)) == 0) {
+                puts("Wrong password.");
+                v1 = 1;
+            } else {
+                puts("Access granted. Flag: CTF{xrefs_are_your_friend}");
+                v1 = 0;
+            }
+        } else {
+            puts("Unknown user.");
+            v1 = 1;
+        }
+    } else {
+        puts("Usage: login <user> <password>");
+        v1 = 2;
+    }
+    return v1;
+}

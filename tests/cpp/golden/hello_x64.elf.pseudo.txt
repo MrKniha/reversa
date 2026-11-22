@@ -1,0 +1,159 @@
+== _init 401000
+// Dočasný pseudokód (REVERSA MVP): typy sú odhadnuté z veľkosti prístupov, overte v listingu.
+void _init()
+{
+    int64_t v1;
+    
+    v1 = __gmon_start__;
+    if (v1 != 0) {
+        (*v1)();
+    }
+    return;
+}
+== _start 401070
+// Dočasný pseudokód (REVERSA MVP): typy sú odhadnuté z veľkosti prístupov, overte v listingu.
+void _start()
+{
+    __asm("push rax");
+    __asm("push rsp");
+    __libc_start_main(main);
+}
+== _dl_relocate_static_pie 4010a0
+// Dočasný pseudokód (REVERSA MVP): typy sú odhadnuté z veľkosti prístupov, overte v listingu.
+void _dl_relocate_static_pie()
+{
+    return;
+}
+== deregister_tm_clones 4010b0
+// Dočasný pseudokód (REVERSA MVP): typy sú odhadnuté z veľkosti prístupov, overte v listingu.
+void deregister_tm_clones()
+{
+    int64_t v1;
+    
+    if (completed.0 == completed.0) {
+    label_4010d0:
+        return;
+    } else {
+        v1 = 0;
+        if (v1 == 0) {
+            goto label_4010d0;
+        } else {
+            goto *v1;  // nepriamy skok (napr. switch) – zatiaľ nerozbalený
+        }
+    }
+}
+== register_tm_clones 4010e0
+// Dočasný pseudokód (REVERSA MVP): typy sú odhadnuté z veľkosti prístupov, overte v listingu.
+void register_tm_clones()
+{
+    int64_t v1;
+    int64_t v2;
+    
+    v2 = completed.0 - completed.0;
+    if ((v2 >> 63) + (v2 >> 3) >> 1 == 0) {
+    label_401110:
+        return;
+    } else {
+        v1 = 0;
+        if (v1 == 0) {
+            goto label_401110;
+        } else {
+            goto *v1;  // nepriamy skok (napr. switch) – zatiaľ nerozbalený
+        }
+    }
+}
+== __do_global_dtors_aux 401120
+// Dočasný pseudokód (REVERSA MVP): typy sú odhadnuté z veľkosti prístupov, overte v listingu.
+void __do_global_dtors_aux()
+{
+    if (completed.0 != 0) {
+        return;
+    } else {
+        deregister_tm_clones();
+        completed.0 = 1;
+        return;
+    }
+}
+== frame_dummy 401150
+// Dočasný pseudokód (REVERSA MVP): typy sú odhadnuté z veľkosti prístupov, overte v listingu.
+void frame_dummy()
+{
+    register_tm_clones();
+    return;
+}
+== sum_to 401156
+// Dočasný pseudokód (REVERSA MVP): typy sú odhadnuté z veľkosti prístupov, overte v listingu.
+int32_t sum_to(int32_t a1)
+{
+    int32_t local_14;
+    int32_t local_8;
+    int32_t local_4;
+    
+    local_14 = a1;
+    local_8 = 0;
+    local_4 = 1;
+    while (local_4 <= local_14) {
+        local_8 += local_4;
+        local_4++;
+    }
+    return local_8;
+}
+== classify 401188
+// Dočasný pseudokód (REVERSA MVP): typy sú odhadnuté z veľkosti prístupov, overte v listingu.
+int32_t classify(int32_t a1)
+{
+    int32_t local_4;
+    int32_t v1;
+    
+    local_4 = a1;
+    if (local_4 >= 0) {
+        if (local_4 != 0) {
+            v1 = 1;
+        } else {
+            v1 = 0;
+        }
+    } else {
+        v1 = 0xffffffff;
+    }
+    return v1;
+}
+== greet 4011b4
+// Dočasný pseudokód (REVERSA MVP): typy sú odhadnuté z veľkosti prístupov, overte v listingu.
+void greet(int32_t a1)
+{
+    int32_t local_14;
+    int32_t local_4;
+    int32_t v1;
+    
+    local_14 = a1;
+    local_4 = 0;
+    while (local_4 < local_14) {
+        v1 = (local_4 * 0x55555556 >> 32) - (local_4 >> 31);
+        printf("%s, world #%d\n", greetings[local_4 - (v1 + v1 + v1)], local_4);
+        local_4++;
+    }
+    return;
+}
+== main 401221
+// Dočasný pseudokód (REVERSA MVP): typy sú odhadnuté z veľkosti prístupov, overte v listingu.
+int32_t main(int32_t a1, int64_t a2)
+{
+    int64_t local_20;
+    int32_t local_14;
+    int32_t local_4;
+    
+    local_14 = a1;
+    local_20 = a2;
+    local_4 = local_14 + local_14 + local_14;
+    greet(local_14);
+    printf("sum_to(%d) = %d\n", local_4, sum_to(local_4));
+    printf("classify = %d\n", classify(local_14 - 2));
+    puts("Done.");
+    return 0;
+}
+== _fini 40129c
+// Dočasný pseudokód (REVERSA MVP): typy sú odhadnuté z veľkosti prístupov, overte v listingu.
+void _fini()
+{
+    return;
+}

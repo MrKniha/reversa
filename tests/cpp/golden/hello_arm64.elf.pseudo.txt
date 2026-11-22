@@ -1,0 +1,164 @@
+== _init 638
+// Dočasný pseudokód (REVERSA MVP): typy sú odhadnuté z veľkosti prístupov, overte v listingu.
+void _init()
+{
+    call_weak_fn();
+    return;
+}
+== _start 700
+// Dočasný pseudokód (REVERSA MVP): typy sú odhadnuté z veľkosti prístupov, overte v listingu.
+void _start(int64_t a1)
+{
+    int64_t stack_0;
+    int64_t stack_8;
+    
+    __libc_start_main(data_1fff0, stack_0, &stack_8, 0, 0, a1, v1);
+}
+== call_weak_fn 734
+// Dočasný pseudokód (REVERSA MVP): typy sú odhadnuté z veľkosti prístupov, overte v listingu.
+void call_weak_fn()
+{
+    if (data_1ffe8 == 0) {
+        return;
+    } else {
+        __gmon_start__();
+        return;
+    }
+}
+== deregister_tm_clones 750
+// Dočasný pseudokód (REVERSA MVP): typy sú odhadnuté z veľkosti prístupov, overte v listingu.
+void deregister_tm_clones()
+{
+    int64_t v1;
+    
+    if (completed.0 == completed.0) {
+    label_77c:
+        return;
+    } else {
+        v1 = _ITM_deregisterTMCloneTable;
+        if (v1 == 0) {
+            goto label_77c;
+        } else {
+            goto *v1;  // nepriamy skok (napr. switch) – zatiaľ nerozbalený
+        }
+    }
+}
+== register_tm_clones 780
+// Dočasný pseudokód (REVERSA MVP): typy sú odhadnuté z veľkosti prístupov, overte v listingu.
+void register_tm_clones()
+{
+    int64_t v1;
+    
+    if ((0 >> 63) + (0 << 3) >> 1 == 0) {
+    label_7b8:
+        return;
+    } else {
+        v1 = _ITM_registerTMCloneTable;
+        if (v1 == 0) {
+            goto label_7b8;
+        } else {
+            goto *v1;  // nepriamy skok (napr. switch) – zatiaľ nerozbalený
+        }
+    }
+}
+== __do_global_dtors_aux 7c0
+// Dočasný pseudokód (REVERSA MVP): typy sú odhadnuté z veľkosti prístupov, overte v listingu.
+void __do_global_dtors_aux()
+{
+    int64_t stack_10;
+    int64_t v1;
+    
+    stack_10 = v1;
+    v1 = data_20000;
+    if ((*(char *)(v1 + 40) & 1) == 0) {
+        if (data_1ffe0 != 0) {
+            __cxa_finalize(__dso_handle);
+        }
+        deregister_tm_clones();
+        *(char *)(v1 + 40) = 1;
+    }
+    return;
+}
+== frame_dummy 810
+// Dočasný pseudokód (REVERSA MVP): typy sú odhadnuté z veľkosti prístupov, overte v listingu.
+void frame_dummy()
+{
+    register_tm_clones();
+    return;
+}
+== sum_to 818
+// Dočasný pseudokód (REVERSA MVP): typy sú odhadnuté z veľkosti prístupov, overte v listingu.
+int32_t sum_to(int32_t a1)
+{
+    int32_t stack_c;
+    int32_t stack_18;
+    int32_t stack_1c;
+    
+    stack_c = a1;
+    stack_18 = 0;
+    stack_1c = 1;
+    while (stack_1c <= stack_c) {
+        stack_18 += stack_1c;
+        stack_1c++;
+    }
+    return stack_18;
+}
+== classify 868
+// Dočasný pseudokód (REVERSA MVP): typy sú odhadnuté z veľkosti prístupov, overte v listingu.
+int32_t classify(int32_t a1)
+{
+    int32_t stack_c;
+    int32_t v1;
+    
+    stack_c = a1;
+    if (stack_c >= 0) {
+        if (stack_c != 0) {
+            v1 = 1;
+        } else {
+            v1 = 0;
+        }
+    } else {
+        v1 = -1;
+    }
+    return v1;
+}
+== greet 8a4
+// Dočasný pseudokód (REVERSA MVP): typy sú odhadnuté z veľkosti prístupov, overte v listingu.
+void greet(int32_t a1)
+{
+    int32_t stack_1c;
+    int32_t stack_2c;
+    int32_t v1;
+    
+    stack_1c = a1;
+    stack_2c = 0;
+    while (stack_2c < stack_1c) {
+        v1 = (stack_2c * 0x55555556 >> 32) - (stack_2c >> 31);
+        printf("%s, world #%d\n", greetings[stack_2c - ((v1 << 1) + v1)], stack_2c);
+        stack_2c++;
+    }
+    return;
+}
+== main 934
+// Dočasný pseudokód (REVERSA MVP): typy sú odhadnuté z veľkosti prístupov, overte v listingu.
+int32_t main(int32_t a1, int64_t a2)
+{
+    int64_t stack_10;
+    int32_t stack_1c;
+    int32_t stack_2c;
+    
+    stack_1c = a1;
+    stack_10 = a2;
+    stack_2c = (stack_1c << 1) + stack_1c;
+    greet(stack_1c);
+    printf("sum_to(%d) = %d\n", stack_2c, sum_to(stack_2c));
+    printf("classify = %d\n", classify(stack_1c - 2));
+    puts("Done.");
+    return 0;
+}
+== _fini 9b0
+// Dočasný pseudokód (REVERSA MVP): typy sú odhadnuté z veľkosti prístupov, overte v listingu.
+void _fini()
+{
+    return;
+}

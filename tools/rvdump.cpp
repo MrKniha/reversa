@@ -6,67 +6,30 @@
 
 #include "analysis/analysis.hpp"
 #include "core/text.hpp"
-#include "decompiler/decompiler.hpp"
+#include "session/session.hpp"
 #include "formats/formats.hpp"
 
 using namespace rv;
 
-// Pseudocode of every normal function, named like the session does (no user annotations).
-static void dump_pseudo(const Binary& b, const Analysis& a) {
-    std::map<Addr, std::string> syms;
-    for (auto& s : b.symbols) syms.emplace(s.addr, s.name);
-    for (auto& [ad, n] : a.auto_names)
-        if (!syms.count(ad) || n == "main") syms[ad] = n;
-    auto name_of = [&](Addr ad) -> std::string {
-        auto it = syms.find(ad);
-        if (it != syms.end() && !it->second.empty()) return it->second;
-        if (a.functions.count(ad)) return "sub_" + hex_digits(ad);
-        if (auto* st = a.string(ad)) {
-            std::string slug, cur = utf8_prefix(st->text, 24);
-            for (char c : cur) {
-                bool ok = std::isalnum(static_cast<unsigned char>(c)) && static_cast<unsigned char>(c) < 128;
-                if (ok) slug += c;
-                else if (slug.empty() || slug.back() != '_') slug += '_';
-            }
-            while (!slug.empty() && slug.front() == '_') slug.erase(0, 1);
-            while (!slug.empty() && slug.back() == '_') slug.pop_back();
-            return slug.empty() ? "str_" + hex_digits(ad) : "s_" + slug + "_" + hex_digits(ad);
-        }
-        auto* fn = a.function_containing(ad);
-        if (fn && fn->kind == "normal" && ad != fn->addr) return "loc_" + hex_digits(ad);
-        if (b.is_code(ad)) return "code_" + hex_digits(ad);
-        if (b.is_mapped(ad)) return "data_" + hex_digits(ad);
-        return "0x" + hex_digits(ad);
-    };
-    RenderNames names;
-    names.name_of = name_of;
-    names.string_at = [&](Addr ad) -> std::optional<std::string> {
-        if (auto* st = a.string(ad)) return st->text;
-        return std::nullopt;
-    };
-    names.is_symbol = [&](int64_t v) {
-        if (v < 0x100) return false;
-        Addr ad = Addr(v);
-        if (a.string_at.count(ad) || a.functions.count(ad)) return true;
-        if (v >= 0x1000) {
-            auto* s = b.section_at(ad);
-            return s && !s->executable;
-        }
-        return false;
-    };
+// Pseudocode of every normal function, named by the session (no user annotations).
+static void dump_pseudo(Session& s) {
+    auto& a = s.require_analysis();
     for (auto& [ad, f] : a.functions) {
         if (f.kind != "normal") continue;
-        std::cout << "== " << name_of(ad) << " " << hex_digits(ad) << "\n";
-        std::cout << to_text(render(decompile(a, ad), name_of(ad), names)) << "\n";
+        std::cout << "== " << s.name_of(ad) << " " << hex_digits(ad) << "\n" << s.pseudocode(ad) << "\n";
     }
 }
 
 int main(int argc, char** argv) {
     bool pseudo = argc > 2 && std::string(argv[1]) == "--pseudo";
     if (argc < 2) { std::fprintf(stderr, "usage: rvdump [--pseudo] FILE\n"); return 2; }
-    Binary b = load_file(argv[pseudo ? 2 : 1]);
+    if (pseudo) {
+        auto s = Session::open(argv[2]);
+        dump_pseudo(*s);
+        return 0;
+    }
+    Binary b = load_file(argv[1]);
     auto a = analyze(b);
-    if (pseudo) { dump_pseudo(b, *a); return 0; }
     std::string o = "{";
     o += "\"format\":\"" + b.format + "\",\"arch\":\"" + b.arch + "\",\"entry\":" + (b.entry ? std::to_string(*b.entry) : "null");
     o += ",\"sections\":[";
