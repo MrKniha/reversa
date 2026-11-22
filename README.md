@@ -1,3 +1,5 @@
+<p align="center"><img src="assets/logo.svg" width="640" alt="REVERSA – reverse engineering"></p>
+
 # REVERSA
 
 **Open-source nástroj na reverzné inžinierstvo pre začiatočníkov aj profesionálov.**
@@ -8,6 +10,7 @@ a volaní, Python API, pluginy a natívne grafické rozhranie (Qt).
 - Architektúry: x86, x86-64, AArch64 (ARM64), ARM 32-bit (len disassembly)
 - Statická analýza: súbor sa **nikdy nespúšťa**. Bez cloudu, bez telemetrie.
 - Platformy: **Windows a Linux** (64-bit)
+- Jazyky GUI: angličtina (predvolená), slovenčina, nemčina, francúzština, čínština (zjednodušená)
 - Napísané v **C++20** s grafickým rozhraním **Qt 6**; Python slúži len na skripty
   a pluginy. Prečo: [docs/architecture.md](docs/architecture.md#prečo-c-a-qt).
 - Licencia: MIT
@@ -69,7 +72,8 @@ Celý postup s riešením: [docs/quickstart.md](docs/quickstart.md) a
 | `F1` | úvodný sprievodca |
 
 Všetky skratky zmeníte v *Zobraziť → Nastavenia*. Tam nastavíte aj veľkosť
-písma a vypnete vysvetlivky pre začiatočníkov. Analýza beží na pozadí
+písma, jazyk a vypnete vysvetlivky pre začiatočníkov. Predvolený jazyk je
+angličtina; po zmene jazyka reštartujte REVERSA. Analýza beží na pozadí
 a tlačidlom *Zrušiť* v stavovom riadku ju zastavíte.
 
 ## Inštalácia
@@ -132,6 +136,7 @@ python3 -m venv .venv && .venv/bin/pip install --require-hashes -r tests/require
 REVERSA_BUILD_DIR=build .venv/bin/python -m pytest tests/python   # Python API, CLI, golden súbory
 python3 scripts/headless_check.py build/bin/reversa   # end-to-end kontrola všetkých vzoriek
 python3 scripts/check_licenses.py                     # licencie závislostí
+python3 scripts/i18n.py check                         # úplnosť prekladov GUI
 ```
 
 Na vývoj pozri [CONTRIBUTING.md](CONTRIBUTING.md).

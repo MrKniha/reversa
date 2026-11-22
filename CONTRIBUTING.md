@@ -4,8 +4,10 @@
 
 1. **Najprv issue.** Väčšiu zmenu najprv popíšte v issue, nech sa zhodneme na smere.
 2. **Kód po anglicky, dokumentácia po slovensky.** Identifikátory a komentáre v kóde píšeme
-   anglicky; README a `docs/` slovensky. Texty v GUI sú slovenské a vždy obalené v `tr(...)`,
-   aby sa dali preložiť cez Qt Linguist.
+   anglicky; README a `docs/` slovensky. Texty v GUI sú slovenské a vždy obalené v `tr(...)`
+   (mimo tried `T(...)`, v statických tabuľkách `QT_TR_NOOP(...)`). Preklady sú v
+   `src/gui/i18n/<jazyk>.json` (en, de, fr, zh); `python3 scripts/i18n.py check` v CI overí, že
+   žiadny text nechýba, a `python3 scripts/i18n.py missing` vypíše, čo treba doplniť.
 3. **Testy sú povinné.** Každá oprava chyby má regresný test, každá nová funkcia aspoň unit test.
    ```bash
    cmake -S . -B build -G Ninja -DCMAKE_BUILD_TYPE=Release && cmake --build build
@@ -19,7 +21,8 @@
    pevnú verziu (git tag vo `FetchContent`, `vcpkg.json` baseline alebo hash v lock súbore),
    musí byť zapísaná v `LICENSE-THIRD-PARTY` a povolená v `scripts/check_licenses.py`.
 5. **Žiadne binárky bez zdroja.** Testovacie binárky pridávajte len so zdrojákom a build skriptom
-   (`samples/build.sh`). Malvér do repozitára nepatrí.
+   (`samples/build.sh`). Malvér do repozitára nepatrí. Ikony `assets/reversa-*.png`
+   a `assets/reversa.ico` sú vyrenderované z `assets/reversa.svg`; po zmene loga ich vyrenderujte znova.
 6. **Etika.** Funkcie určené na obchádzanie DRM, licenčných kontrol, aktivácií alebo anti-cheatu
    neprijmeme (pozri README, kapitola Etika).
 7. **Golden súbory** (`samples/expected/*.json`, `tests/cpp/golden/*.pseudo.txt`) meňte len vedome:
