@@ -1,5 +1,5 @@
 == entry 4010b0
-// Dočasný pseudokód (REVERSA MVP): typy sú odhadnuté z veľkosti prístupov, overte v listingu.
+// Provisional pseudocode (REVERSA MVP): types are guessed from access sizes, check the listing.
 void entry()
 {
     __asm("push rax");
@@ -7,7 +7,7 @@ void entry()
     __libc_start_main(main);
 }
 == sub_401196 401196
-// Dočasný pseudokód (REVERSA MVP): typy sú odhadnuté z veľkosti prístupov, overte v listingu.
+// Provisional pseudocode (REVERSA MVP): types are guessed from access sizes, check the listing.
 int64_t sub_401196(int64_t a1)
 {
     int64_t local_28;
@@ -30,7 +30,7 @@ int64_t sub_401196(int64_t a1)
     }
 }
 == sub_401217 401217
-// Dočasný pseudokód (REVERSA MVP): typy sú odhadnuté z veľkosti prístupov, overte v listingu.
+// Provisional pseudocode (REVERSA MVP): types are guessed from access sizes, check the listing.
 int64_t sub_401217(int64_t a1)
 {
     int64_t local_8;
@@ -45,7 +45,7 @@ int64_t sub_401217(int64_t a1)
     return v1;
 }
 == main 40125e
-// Dočasný pseudokód (REVERSA MVP): typy sú odhadnuté z veľkosti prístupov, overte v listingu.
+// Provisional pseudocode (REVERSA MVP): types are guessed from access sizes, check the listing.
 int64_t main(int32_t a1, int64_t a2)
 {
     int64_t local_10;

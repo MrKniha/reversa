@@ -13,7 +13,7 @@ class Reader {
 public:
     Reader(const Bytes& data, bool big_endian = false) : d_(data), big_(big_endian) {}
 
-    void need(uint64_t off, uint64_t n, const char* what = "štruktúra presahuje koniec súboru") const {
+    void need(uint64_t off, uint64_t n, const char* what = "structure extends past the end of the file") const {
         if (off > d_.size() || n > d_.size() - off) throw ParseError(what, off);
     }
     uint64_t uint(uint64_t off, int n) const {
@@ -33,11 +33,11 @@ public:
     int32_t i32(uint64_t o) const { return int32_t(u32(o)); }
     int64_t i64(uint64_t o) const { return int64_t(u64(o)); }
     std::string raw(uint64_t o, uint64_t n) const {
-        need(o, n, "blok presahuje koniec súboru");
+        need(o, n, "block extends past the end of the file");
         return std::string(reinterpret_cast<const char*>(d_.data()) + o, n);
     }
     std::string cstr(uint64_t o, uint64_t limit = 1024) const {
-        if (o >= d_.size()) throw ParseError("reťazec mimo súboru", o);
+        if (o >= d_.size()) throw ParseError("string outside the file", o);
         uint64_t end = o;
         while (end < d_.size() && end < o + limit && d_[end]) end++;
         return utf8_lossy(std::string_view(reinterpret_cast<const char*>(d_.data()) + o, end - o));

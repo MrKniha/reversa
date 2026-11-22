@@ -10,7 +10,7 @@ namespace rv {
 using namespace rv::ir;
 
 const char* const PROVISIONAL_NOTE =
-    "// Dočasný pseudokód (REVERSA MVP): typy sú odhadnuté z veľkosti prístupov, overte v listingu.";
+    "// Provisional pseudocode (REVERSA MVP): types are guessed from access sizes, check the listing.";
 
 std::string ctype(int size) {
     switch (size) {
@@ -256,7 +256,7 @@ public:
                     Segs o = {seg("goto ", "kw"), seg("*", "op")};
                     if (s.expr) o += expr(s.expr);
                     o.push_back(seg(";", "op"));
-                    o.push_back(seg("  // nepriamy skok (napr. switch) – zatiaľ nerozbalený", "comment"));
+                    o.push_back(seg("  // indirect jump (e.g. switch): not expanded yet", "comment"));
                     line(ind, o, s.addr);
                 } else {
                     labels.insert(*s.target);
@@ -359,7 +359,7 @@ std::vector<Line> render(const Decompiled& d, const std::string& func_name, cons
     r.labels = d.labels;
     r.line(0, {seg(PROVISIONAL_NOTE, "comment")});
     if (!d.error.empty())
-        r.line(0, {seg("// Štruktúrovanie zlyhalo (" + d.error + ") – zobrazujem plochú verziu s goto.", "comment")});
+        r.line(0, {seg("// Structuring failed (" + d.error + "); showing a flat version with goto.", "comment")});
     auto size_of = [&](const std::string& k) {
         auto it = d.sizes.find(k);
         return it == d.sizes.end() ? 8 : it->second;

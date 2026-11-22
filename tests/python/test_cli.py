@@ -16,8 +16,8 @@ def test_analyze_report_markdown(tmp_path):
     code, stdout, _ = run(tmp_path, "analyze", sample("login_x64.elf"), "--report", str(out), "--no-plugins")
     assert code == 0
     text = out.read_text(encoding="utf-8")
-    assert "# Analýza: login_x64.elf" in text and "check_password" in text and "```c" in text
-    assert "Hlavná fn.:   main" in stdout
+    assert "# Analysis: login_x64.elf" in text and "check_password" in text and "```c" in text
+    assert "Main func.:   main" in stdout
 
 
 def test_analyze_html_json_project(tmp_path):
@@ -49,7 +49,7 @@ def test_info_search_script(tmp_path):
     assert "admin" in run(tmp_path, "search", sample("login_x64.elf"), "--string", "admin", "--no-plugins")[1]
     for args in (["--hex", "f3 0f 1e fa"], ["--insn", "call.*"], ["--code", r"strcmp\("]):
         code, out, err = run(tmp_path, "search", sample("login_x64.elf"), *args, "--no-plugins")
-        assert code == 0 and out and "výsledkov" in err
+        assert code == 0 and out and "results" in err
     code, out, _ = run(tmp_path, "script", os.path.join(EXAMPLES, "scripts", "strcmp_callers.py"), sample("login_x64.elf"))
     assert code == 0 and "check_password" in out
 
@@ -62,19 +62,19 @@ def test_plugins_from_command_line(tmp_path):
     assert "[hello-plugin] načítaný súbor" in out          # on_load hook
     assert "crashing-plugin" in out and "pokračuje" in out  # crash isolated, reported
     text = report.read_text(encoding="utf-8")
-    assert "## Pohľad: Hello plugin" in text and "Analyzovaných funkcií: 11" in text
+    assert "## View: Hello plugin" in text and "Analyzovaných funkcií: 11" in text
 
 
 def test_errors_are_friendly(tmp_path):
     code, _, err = run(tmp_path, "analyze", str(tmp_path / "missing.exe"))
-    assert code == 1 and "Chyba: Súbor" in err
+    assert code == 1 and "Error: File" in err
     bad = tmp_path / "bad.elf"
     bad.write_bytes(b"\x7fELF" + b"\x09" * 80)
     code, out, _ = run(tmp_path, "analyze", str(bad), "--no-plugins")
-    assert code == 0 and "poškodený" in out
+    assert code == 0 and "damaged" in out
     assert run(tmp_path, "analyze", str(bad), "--no-plugins", "--fail-on-error")[0] == 1
     if os.name != "nt":  # without arguments and without a display: help + usage error (Windows opens the GUI)
         assert run(tmp_path)[0] == 2
     code, _, err = run(tmp_path, "analyze")
-    assert code == 2 and "vyžaduje súbor" in err
+    assert code == 2 and "requires a file" in err
     assert run(tmp_path, "--version")[1].startswith("REVERSA ")

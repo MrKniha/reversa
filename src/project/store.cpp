@@ -178,7 +178,7 @@ void save_project(const std::string& path, const Bytes& data, const std::string&
     } catch (const std::exception& e) {
         std::error_code ec;
         fs::remove(path_from_utf8(tmp), ec);
-        throw ProjectError("Projekt sa nepodarilo uložiť do '" + path + "'.", e.what());
+        throw ProjectError("Could not save the project to '" + path + "'.", e.what());
     }
 }
 
@@ -189,17 +189,17 @@ ProjectData load_project(const std::string& path, const std::map<int, std::strin
     if (!fs::exists(path_from_utf8(path), ec)) throw ProjectError("Projekt '" + path + "' neexistuje.");
     Db db;
     if (sqlite3_open_v2(path.c_str(), &db.h, SQLITE_OPEN_READWRITE, nullptr) != SQLITE_OK)
-        throw ProjectError("'" + path + "' nie je platný projekt REVERSA.", db.h ? sqlite3_errmsg(db.h) : "");
+        throw ProjectError("'" + path + "' is not a valid REVERSA project.", db.h ? sqlite3_errmsg(db.h) : "");
     try {
         int version = 0;
         {
             Stmt q(db.h, "SELECT value FROM meta WHERE key='schema_version'");
-            if (!q.step()) throw std::runtime_error("chýba schema_version");
+            if (!q.step()) throw std::runtime_error("schema_version missing");
             version = std::stoi(q.col_text(0));
         }
         if (version > schema_version)
-            throw ProjectError("Projekt bol uložený novšou verziou REVERSA (schéma " + std::to_string(version) +
-                               "). Aktualizujte REVERSA.");
+            throw ProjectError("The project was saved by a newer REVERSA (schema " + std::to_string(version) +
+                               "). Update REVERSA.");
         for (int v = version + 1; v <= schema_version; v++) {
             db.exec("BEGIN");
             db.exec(migrations.at(v));
@@ -210,7 +210,7 @@ ProjectData load_project(const std::string& path, const std::map<int, std::strin
         ProjectData p;
         {
             Stmt q(db.h, "SELECT name, path, sha256, data, load_options FROM binary WHERE id=1");
-            if (!q.step()) throw std::runtime_error("chýba binárka");
+            if (!q.step()) throw std::runtime_error("binary missing");
             p.name = q.col_text(0);
             p.path = q.col_text(1);
             std::string sha = q.col_text(2);
@@ -218,7 +218,7 @@ ProjectData load_project(const std::string& path, const std::map<int, std::strin
             auto n = size_t(sqlite3_column_bytes(q.s, 3));
             auto data = std::make_shared<Bytes>(blob, blob + n);
             if (sha256_hex(*data) != sha)
-                throw ProjectError("Binárka uložená v projekte je poškodená (nesedí kontrolný súčet SHA-256).");
+                throw ProjectError("The binary stored in the project is damaged (SHA-256 checksum mismatch).");
             p.data = data;
             std::string opts = q.col_null(4) ? "{}" : q.col_text(4);
             p.load_options = load_options_from_json(Json::parse(opts.empty() ? "{}" : opts));
@@ -243,7 +243,7 @@ ProjectData load_project(const std::string& path, const std::map<int, std::strin
     } catch (const ProjectError&) {
         throw;
     } catch (const std::exception& e) {
-        throw ProjectError("Projekt '" + path + "' je poškodený alebo nie je to projekt REVERSA.", e.what());
+        throw ProjectError("Project '" + path + "' is damaged or is not a REVERSA project.", e.what());
     }
 }
 

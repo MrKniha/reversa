@@ -86,7 +86,7 @@ TEST("PE details") {
     CHECK(dir64);
     CHECK(!b.extra_function_starts.empty());  // .pdata
     CHECK(b.compiler.rfind("MinGW", 0) == 0);
-    CHECK_EQ(b.meta["subsystem"], std::string("konzola"));
+    CHECK_EQ(b.meta["subsystem"], std::string("console"));
     auto* sec = b.section_at(*b.entry);
     CHECK(sec && sec->executable);
 }
@@ -127,7 +127,7 @@ TEST("format detection and raw arch guess") {
     auto raw = load_bytes(shared(code), "shellcode.bin", o);
     CHECK(raw.format == "RAW" && raw.arch == "x86-64" && raw.entry == Addr(0x1000));
     bool guessed = false;
-    for (auto& d : raw.diagnostics) guessed |= d.message.find("odhadol") != std::string::npos;
+    for (auto& d : raw.diagnostics) guessed |= d.message.find("guessed") != std::string::npos;
     CHECK(guessed);
     LoadOptions m;
     m.arch = "x86";
@@ -161,7 +161,7 @@ TEST("load errors") {
     CHECK(throws((dir / "missing.bin").string(), ""));
     CHECK(throws(dir.string(), ""));
     std::ofstream((dir / "empty.bin").string()).close();
-    CHECK(throws((dir / "empty.bin").string(), "prázdny"));
+    CHECK(throws((dir / "empty.bin").string(), "empty"));
     fs::remove_all(dir);
 }
 
@@ -191,7 +191,7 @@ TEST("corrupted ELF header falls back to raw") {
     const Diagnostic* err = nullptr;
     for (auto& d : b.diagnostics)
         if (d.severity == "error" && !err) err = &d;
-    CHECK(err && err->message.find("poškodený") != std::string::npos && !err->detail.empty());
+    CHECK(err && err->message.find("damaged") != std::string::npos && !err->detail.empty());
 }
 
 TEST("truncated PE reports but loads") {
@@ -201,7 +201,7 @@ TEST("truncated PE reports but loads") {
     CHECK_EQ(b.format, std::string("PE"));
     bool reported = false;
     for (auto& d : b.diagnostics)
-        reported |= d.message.find("koniec súboru") != std::string::npos || d.message.find("poškodené") != std::string::npos;
+        reported |= d.message.find("end of the file") != std::string::npos || d.message.find("damaged") != std::string::npos;
     CHECK(reported);
 }
 

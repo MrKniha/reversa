@@ -406,12 +406,12 @@ std::unique_ptr<Analysis> analyze(Binary& binary, Progress progress, const std::
     auto t0 = std::chrono::steady_clock::now();
     auto a = std::make_unique<Analysis>(binary);
     auto report = [&](double f, const std::string& m) { if (progress) progress(f, m); };
-    auto check = [&] { if (cancel && cancel->load()) throw Cancelled("Analýza bola zrušená."); };
+    auto check = [&] { if (cancel && cancel->load()) throw Cancelled("Analysis cancelled."); };
     const Binary& b = binary;
 
-    report(0.02, "Hľadám importované funkcie");
+    report(0.02, "Finding imported functions");
     resolve_imports(*a, binary);
-    report(0.05, "Hľadám funkcie");
+    report(0.05, "Finding functions");
     std::vector<Addr> seeds;
     if (b.entry && b.is_code(*b.entry)) {
         seeds.push_back(*b.entry);
@@ -449,22 +449,22 @@ std::unique_ptr<Analysis> analyze(Binary& binary, Progress progress, const std::
         }
         if (++done % 25 == 0)
             report(std::min(0.75, 0.05 + 0.7 * double(done) / double(done + queue.size() + 1)),
-                   "Analyzujem funkcie (" + std::to_string(done) + ")");
+                   "Analysing functions (" + std::to_string(done) + ")");
     }
     mark_thunks(*a);
-    report(0.78, "Hľadám hlavnú funkciu");
+    report(0.78, "Finding the main function");
     find_main(*a, known);
-    report(0.82, "Hľadám reťazce");
+    report(0.82, "Finding strings");
     a->strings = find_strings(binary);
     for (size_t i = 0; i < a->strings.size(); i++) a->string_at[a->strings[i].addr] = i;
-    report(0.9, "Počítam cross-referencie");
+    report(0.9, "Computing cross-references");
     data_pointers(*a);
     if (on_function)
         for (Addr ad : a->function_order)
             if (a->functions[ad].kind == "normal") on_function(a->functions[ad]);
     a->duration = std::chrono::duration<double>(std::chrono::steady_clock::now() - t0).count();
     a->done = true;
-    report(1.0, "Analýza dokončená");
+    report(1.0, "Analysis finished");
     return a;
 }
 

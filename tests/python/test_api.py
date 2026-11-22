@@ -26,7 +26,7 @@ def test_rename_propagates_everywhere_and_undo_redo():
     assert "verify_user(" in p.main.pseudocode()                              # pseudocode
     assert p.function("verify_user").addr == p.addr("verify_user")            # name lookup
     assert any(x.function == "verify_user" for x in p.xrefs_to("strcmp"))      # xref view
-    assert p.undo().startswith("Premenovanie")
+    assert p.undo().startswith("Rename")
     assert "check_user(" in p.main.pseudocode()
     assert p.redo()
     assert "verify_user(" in p.main.pseudocode()
@@ -36,9 +36,9 @@ def test_rename_propagates_everywhere_and_undo_redo():
 
 def test_rename_validation():
     p = fresh("login_x64.elf")
-    with pytest.raises(AnnotationError, match="nesmie začínať"):
+    with pytest.raises(AnnotationError, match="must not start"):
         p.rename("main", "1abc")
-    with pytest.raises(AnnotationError, match="už používa"):
+    with pytest.raises(AnnotationError, match="already used"):
         p.rename("main", "check_user")
     with pytest.raises(AnnotationError):
         p.rename("no_such_function", "x")
@@ -101,7 +101,7 @@ def test_listener_failure_becomes_diagnostic():
     p = fresh("login_x64.elf")
     p.session.events.subscribe("renamed", lambda **kw: 1 / 0)
     p.rename("main", "start_here")
-    assert any("Poslucháč" in d.message for d in p.session.diagnostics)
+    assert any("Event listener" in d.message for d in p.session.diagnostics)
 
 
 def test_unsubscribe():
@@ -230,7 +230,7 @@ def test_variable_rename_propagates_and_undoes():
 
 def test_import_pseudocode_message():
     p = program("login_x64.elf")
-    assert "importovaná funkcia" in p.function("strcmp").pseudocode()
+    assert "imported function" in p.function("strcmp").pseudocode()
 
 
 def test_every_function_decompiles_without_crash():
@@ -238,8 +238,8 @@ def test_every_function_decompiles_without_crash():
         p = program(name)
         for f in p.functions():
             text = f.pseudocode()
-            assert text.startswith("// Dočasný pseudokód"), (name, f.name)
-            assert "Pseudokód sa nepodarilo" not in text, (name, f.name, text)
+            assert text.startswith("// Provisional pseudocode"), (name, f.name)
+            assert "Could not create pseudocode" not in text, (name, f.name, text)
 
 
 def test_segments_for_gui():

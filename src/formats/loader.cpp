@@ -23,7 +23,7 @@ std::string detect_format(const Bytes& d) {
 }
 
 Binary load_bytes(std::shared_ptr<const Bytes> data, const std::string& path, const LoadOptions& o) {
-    if (!data || data->empty()) throw LoadError("Súbor je prázdny – nie je čo analyzovať.");
+    if (!data || data->empty()) throw LoadError("The file is empty; there is nothing to analyse.");
     std::string fmt = o.force_raw ? "RAW" : detect_format(*data);
     if (fmt == "ELF" || fmt == "PE") {
         std::optional<uint64_t> off;
@@ -39,16 +39,16 @@ Binary load_bytes(std::shared_ptr<const Bytes> data, const std::string& path, co
             detail = e.what();
         }
         Binary raw = load_raw(path, data, o.arch, o.base.value_or(0));
-        std::string where = off ? " na offsete " + hex(*off) : "";
-        raw.warn("Tento súbor vyzerá ako " + fmt + ", ale je poškodený" + where + " – načítal som ho ako surové dáta.", off,
+        std::string where = off ? " at offset " + hex(*off) : "";
+        raw.warn("This file looks like " + fmt + " but is damaged" + where + "; loaded it as raw data.", off,
                  detail, "error");
         return raw;
     }
     Binary raw = load_raw(path, data, o.arch, o.base.value_or(0));
     if (fmt == "MACHO")
-        raw.warn("Mach-O (macOS) zatiaľ nie je podporovaný (plánované v plnej verzii) – zobrazujem surové dáta.", 0);
+        raw.warn("Mach-O (macOS) is not supported yet (planned for the full version); showing raw data.", 0);
     else if (fmt == "ARCHIVE")
-        raw.warn("ZIP/APK/DEX zatiaľ nie je podporovaný (plánované v plnej verzii) – zobrazujem surové dáta.", 0);
+        raw.warn("ZIP/APK/DEX is not supported yet (planned for the full version); showing raw data.", 0);
     return raw;
 }
 
@@ -56,17 +56,17 @@ Binary load_file(const std::string& path, const LoadOptions& o) {
     namespace fs = std::filesystem;
     std::error_code ec;
     fs::path p = path_from_utf8(path);
-    if (!fs::exists(p, ec)) throw LoadError("Súbor '" + path + "' neexistuje.");
-    if (fs::is_directory(p, ec)) throw LoadError("'" + path + "' je priečinok, nie súbor.");
+    if (!fs::exists(p, ec)) throw LoadError("File '" + path + "' does not exist.");
+    if (fs::is_directory(p, ec)) throw LoadError("'" + path + "' is a folder, not a file.");
     auto size = fs::file_size(p, ec);
-    if (ec) throw LoadError("Súbor '" + path + "' sa nedá prečítať.", ec.message());
+    if (ec) throw LoadError("Cannot read the file '" + path + "'.", ec.message());
     if (size > MAX_SIZE)
-        throw LoadError("Súbor má " + std::to_string(size / (1024 * 1024)) + " MB; MVP podporuje najviac 512 MB.");
+        throw LoadError("The file has " + std::to_string(size / (1024 * 1024)) + " MB; the MVP supports at most 512 MB.");
     std::ifstream f(p, std::ios::binary);
-    if (!f) throw LoadError("Súbor '" + path + "' sa nedá prečítať.");
+    if (!f) throw LoadError("Cannot read the file '" + path + "'.");
     auto data = std::make_shared<Bytes>(size);
     f.read(reinterpret_cast<char*>(data->data()), std::streamsize(size));
-    if (!f) throw LoadError("Súbor '" + path + "' sa nedá prečítať.");
+    if (!f) throw LoadError("Cannot read the file '" + path + "'.");
     return load_bytes(data, path_to_utf8(fs::absolute(p, ec)), o);
 }
 

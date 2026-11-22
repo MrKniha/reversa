@@ -1,4 +1,4 @@
-// Error hierarchy: every error carries a friendly (Slovak) message and an optional technical detail.
+// Error hierarchy: every error carries a friendly message and an optional technical detail.
 #pragma once
 #include <cstdint>
 #include <optional>

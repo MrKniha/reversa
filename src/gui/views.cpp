@@ -40,11 +40,14 @@ QString page(const Palette& p, const QString& body) {
         .arg(p.text, body);
 }
 
-// Fixed comments the decompiler (core, Slovak) emits; translated here by exact match.
-[[maybe_unused]] const char* const DECOMPILER_COMMENTS[] = {
-    QT_TR_NOOP("// Dočasný pseudokód (REVERSA MVP): typy sú odhadnuté z veľkosti prístupov, overte v listingu."),
-    QT_TR_NOOP("  // nepriamy skok (napr. switch) – zatiaľ nerozbalený"),
-};
+// Fixed comments the decompiler (core, English) emits, mapped to the GUI's translatable source strings.
+QString decompiler_comment(const std::string& text) {
+    if (text == PROVISIONAL_NOTE)
+        return T("// Dočasný pseudokód (REVERSA MVP): typy sú odhadnuté z veľkosti prístupov, overte v listingu.");
+    if (text == "  // indirect jump (e.g. switch): not expanded yet")
+        return T("  // nepriamy skok (napr. switch) – zatiaľ nerozbalený");
+    return q(text);
+}
 
 QString xref_label(const std::string& kind) {
     if (kind == "call") return T("volané z");
@@ -176,7 +179,7 @@ QString pseudocode_html(Session& s, Addr func, const Palette& p, const std::stri
     for (auto& ln : lines) {
         QString text = QString(ln.indent * 4, ' ');
         for (auto& seg : ln.segs) {
-            QString t = seg.kind == "comment" ? T(seg.text.c_str()).toHtmlEscaped() : esc(seg.text);
+            QString t = seg.kind == "comment" ? decompiler_comment(seg.text).toHtmlEscaped() : esc(seg.text);
             const std::string& k = seg.kind;
             if (k == "var") {
                 QString style = "color:" + p.text + "; text-decoration:none";
