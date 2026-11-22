@@ -133,3 +133,19 @@ std::string path_to_utf8(const std::filesystem::path& p) {
 }
 
 }  // namespace rv
+
+namespace rv {
+std::string utf8_prefix(const std::string& s, size_t chars) {
+    size_t i = 0, n = 0;
+    while (i < s.size() && n < chars) {
+        i++;
+        while (i < s.size() && (static_cast<unsigned char>(s[i]) & 0xC0) == 0x80) i++;
+        n++;
+    }
+    return s.substr(0, i);
+}
+}  // namespace rv
+
+namespace rv {
+std::string hex_digits(uint64_t v) { return format_hex(v).substr(2); }
+}  // namespace rv
