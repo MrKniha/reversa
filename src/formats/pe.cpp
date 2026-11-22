@@ -148,7 +148,7 @@ Binary load_pe(const std::string& path, std::shared_ptr<const Bytes> data) {
     const Bytes& d = *data;
     Reader r(d);
     uint32_t lfanew = r.u32(0x3C);
-    if (r.raw(lfanew, 4) != std::string("PE\0\0", 4)) throw ParseError("chýba podpis PE", lfanew);
+    if (r.raw(lfanew, 4) != std::string("PE\0\0", 4)) throw ParseError("PE signature missing", lfanew);
     r.need(lfanew + 4, 20);
     uint16_t machine = r.u16(lfanew + 4), nsec = r.u16(lfanew + 6);
     uint32_t symptr = r.u32(lfanew + 12), nsyms = r.u32(lfanew + 16);
@@ -156,7 +156,7 @@ Binary load_pe(const std::string& path, std::shared_ptr<const Bytes> data) {
     auto mit = MACHINES.find(machine);
     uint64_t opt = uint64_t(lfanew) + 24;
     uint16_t magic = r.u16(opt);
-    if (magic != 0x10B && magic != 0x20B) throw ParseError("neznámy typ voliteľnej hlavičky (" + hex(magic) + ")", opt);
+    if (magic != 0x10B && magic != 0x20B) throw ParseError("unknown optional header type (" + hex(magic) + ")", opt);
     bool plus = magic == 0x20B;
     uint32_t entry_rva = r.u32(opt + 16);
     uint64_t image_base = plus ? r.u64(opt + 24) : r.u32(opt + 28);
@@ -173,10 +173,10 @@ Binary load_pe(const std::string& path, std::shared_ptr<const Bytes> data) {
     b.base = image_base;
     if (entry_rva) b.entry = image_base + entry_rva;
     b.os = "Windows";
-    if (mit == MACHINES.end()) b.warn("Neznámy typ procesora PE (" + hex(machine) + ") – odhadujem " + b.arch + ".", lfanew + 4);
-    static const std::map<uint16_t, std::string> SUBS = {{1, "native"}, {2, "GUI"}, {3, "konzola"}, {10, "EFI"}};
+    if (mit == MACHINES.end()) b.warn("Unknown PE machine type (" + hex(machine) + "); assuming " + b.arch + ".", lfanew + 4);
+    static const std::map<uint16_t, std::string> SUBS = {{1, "native"}, {2, "GUI"}, {3, "console"}, {10, "EFI"}};
     b.meta["subsystem"] = SUBS.count(subsystem) ? SUBS.at(subsystem) : std::to_string(subsystem);
-    b.meta["dll"] = (chars & 0x2000) ? "áno" : "nie";
+    b.meta["dll"] = (chars & 0x2000) ? "yes" : "no";
 
     std::vector<Dir> dirs;
     for (uint32_t i = 0; i < std::min<uint32_t>(ndirs, 16); i++) {
@@ -197,7 +197,7 @@ Binary load_pe(const std::string& path, std::shared_ptr<const Bytes> data) {
             raw_name = r.raw(o, 8);
             vsize = r.u32(o + 8); va = r.u32(o + 12); rawsize = r.u32(o + 16); rawptr = r.u32(o + 20); flags = r.u32(o + 36);
         } catch (const ParseError& e) {
-            b.warn("Tabuľka sekcií PE je orezaná.", e.offset, e.what());
+            b.warn("PE section table is truncated.", e.offset, e.what());
             break;
         }
         std::string name = latin1_to_utf8(raw_name.substr(0, raw_name.find('\0')));
@@ -207,7 +207,7 @@ Binary load_pe(const std::string& path, std::shared_ptr<const Bytes> data) {
         uint64_t size = vsize ? vsize : rawsize;
         uint64_t fsize = std::min<uint64_t>(rawsize, size);
         if (uint64_t(rawptr) + fsize > d.size()) {
-            b.warn("Sekcia " + name + " presahuje koniec súboru – zvyšok bude prázdny.", rawptr);
+            b.warn("Section " + name + " extends past the end of the file; the rest is empty.", rawptr);
             fsize = rawptr < d.size() ? d.size() - rawptr : 0;
         }
         b.sections.push_back({name, image_base + va, size, rawptr, fsize, bool(flags & SCN_READ), bool(flags & SCN_WRITE),
@@ -216,19 +216,19 @@ Binary load_pe(const std::string& path, std::shared_ptr<const Bytes> data) {
 
     RvaOff rva_off = [&](uint64_t rva) -> uint64_t {
         auto off = b.addr_to_offset(image_base + rva);
-        if (!off) throw ParseError("RVA " + hex(rva) + " neukazuje do súboru", rva);
+        if (!off) throw ParseError("RVA " + hex(rva) + " does not point into the file", rva);
         return *off;
     };
     using Fn = void (*)(Binary&, const Reader&, const std::vector<Dir>&, const RvaOff&, bool);
     const std::pair<const char*, Fn> parts[] = {
-        {"Importy", imports}, {"Exporty", exports}, {"Relokácie", relocs}, {"Tabuľka výnimiek", pdata}};
+        {"Imports", imports}, {"Exports", exports}, {"Relocations", relocs}, {"Exception table", pdata}};
     for (auto& [label, fn] : parts) {
         try { fn(b, r, dirs, rva_off, plus); }
-        catch (const ParseError& e) { b.warn(std::string(label) + ": dáta sú poškodené – načítal som, čo sa dalo.", e.offset, e.what()); }
+        catch (const ParseError& e) { b.warn(std::string(label) + ": data is damaged; loaded what could be read.", e.offset, e.what()); }
     }
     if (symptr && nsyms) {
         try { coff_symbols(b, r, symptr, nsyms); }
-        catch (const ParseError& e) { b.warn("Tabuľka COFF symbolov je poškodená.", e.offset, e.what()); }
+        catch (const ParseError& e) { b.warn("COFF symbol table is damaged.", e.offset, e.what()); }
     }
 
     // --- compiler / packer ---
@@ -239,11 +239,11 @@ Binary load_pe(const std::string& path, std::shared_ptr<const Bytes> data) {
     }
     Bytes low(d);
     for (auto& c : low) c = uint8_t(std::tolower(c));
-    if (contains_bytes(d, "Rich", 0x40, lfanew)) b.compiler = "Microsoft Visual C++ (Rich hlavička)";
+    if (contains_bytes(d, "Rich", 0x40, lfanew)) b.compiler = "Microsoft Visual C++ (Rich header)";
     else if (crt && (contains_bytes(low, "mingw") || contains_bytes(d, "GCC: ("))) b.compiler = "MinGW-w64 GCC";
     else if (contains_bytes(d, "Go build ID")) b.compiler = "Go";
     else if (contains_bytes(d, "rust_panic")) b.compiler = "Rust (rustc)";
-    if (upx) b.warn("Súbor je pravdepodobne skomprimovaný packerom UPX – kód bude čitateľný až po rozbalení.", std::nullopt, "", "info");
+    if (upx) b.warn("The file is probably packed with UPX; the code becomes readable only after unpacking.", std::nullopt, "", "info");
     return b;
 }
 

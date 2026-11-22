@@ -61,9 +61,9 @@ bool is_elf(const Bytes& d) { return d.size() >= 4 && d[0] == 0x7f && d[1] == 'E
 
 Binary load_elf(const std::string& path, std::shared_ptr<const Bytes> data) {
     const Bytes& d = *data;
-    if (d.size() < 0x34) throw ParseError("ELF hlavička je neúplná", 0);
+    if (d.size() < 0x34) throw ParseError("ELF header is incomplete", 0);
     uint8_t cls = d[4], enc = d[5];
-    if (cls != 1 && cls != 2) throw ParseError("neznáma trieda ELF (" + std::to_string(cls) + ")", 4);
+    if (cls != 1 && cls != 2) throw ParseError("unknown ELF class (" + std::to_string(cls) + ")", 4);
     bool is64 = cls == 2;
     bool big = enc == 2;
     Reader r(d, big);
@@ -90,11 +90,11 @@ Binary load_elf(const std::string& path, std::shared_ptr<const Bytes> data) {
     if (e_entry) b.entry = e_entry;
     b.os = "Linux/Unix";
     static const std::map<uint16_t, std::string> TYPES = {
-        {1, "REL (objekt)"}, {2, "EXEC (spustiteľný)"}, {3, "DYN (PIE/knižnica)"}, {4, "CORE"}};
+        {1, "REL (object)"}, {2, "EXEC (executable)"}, {3, "DYN (PIE/library)"}, {4, "CORE"}};
     b.meta["elf_type"] = TYPES.count(e_type) ? TYPES.at(e_type) : std::to_string(e_type);
     if (mit == MACHINES.end())
-        b.warn("Architektúra ELF (e_machine=" + std::to_string(e_machine) +
-                   ") nie je podporovaná – disassembler použije x86-64 ako odhad.", 18);
+        b.warn("ELF architecture (e_machine=" + std::to_string(e_machine) +
+                   ") is not supported; the disassembler assumes x86-64.", 18);
 
     // --- program headers (segments) ---
     struct Phdr { uint32_t type, flags; uint64_t off, vaddr, filesz, memsz; };
@@ -115,7 +115,7 @@ Binary load_elf(const std::string& path, std::shared_ptr<const Bytes> data) {
             segs.push_back(p);
         }
     } catch (const ParseError& e) {
-        b.warn("Tabuľka segmentov (program headers) je poškodená – načítal som, čo sa dalo.", e.offset, e.what());
+        b.warn("Program header table is damaged; loaded what could be read.", e.offset, e.what());
     }
     std::vector<Phdr> loads;
     for (auto& s : segs)
@@ -146,7 +146,7 @@ Binary load_elf(const std::string& path, std::shared_ptr<const Bytes> data) {
             }
         }
     } catch (const ParseError& e) {
-        b.warn("Tabuľka sekcií je poškodená alebo orezaná – použijem segmenty.", e.offset, e.what());
+        b.warn("Section table is damaged or truncated; using segments.", e.offset, e.what());
     }
     std::optional<uint64_t> names_off;
     if (e_shstrndx < shdrs.size()) names_off = shdrs[e_shstrndx].offset;
@@ -166,7 +166,7 @@ Binary load_elf(const std::string& path, std::shared_ptr<const Bytes> data) {
         if (!(sh.flags & SHF_ALLOC) || sh.addr == 0) continue;
         uint64_t fsize = sh.type == SHT_NOBITS ? 0 : sh.size;
         if (fsize && (sh.offset > d.size() || fsize > d.size() - sh.offset)) {
-            b.warn("Sekcia " + sec_name(i) + " presahuje koniec súboru – zvyšok bude prázdny.", sh.offset);
+            b.warn("Section " + sec_name(i) + " extends past the end of the file; the rest is empty.", sh.offset);
             fsize = sh.offset < d.size() ? d.size() - sh.offset : 0;
         }
         b.sections.push_back({sec_name(i), sh.addr, sh.size, sh.offset, fsize, true, bool(sh.flags & SHF_WRITE),
@@ -180,7 +180,7 @@ Binary load_elf(const std::string& path, std::shared_ptr<const Bytes> data) {
                                   bool(p.flags & 2), bool(p.flags & 1)});
         }
         if (!loads.empty())
-            b.warn("Súbor nemá tabuľku sekcií – zobrazujem segmenty.",
+            b.warn("The file has no section table; showing segments.",
                    e_shoff ? std::optional<uint64_t>(e_shoff) : std::nullopt, "", "info");
     }
     for (auto& p : loads)
@@ -196,7 +196,7 @@ Binary load_elf(const std::string& path, std::shared_ptr<const Bytes> data) {
         try {
             syms = read_symbols(r, is64, sh, shdrs);
         } catch (const ParseError& e) {
-            b.warn("Tabuľka symbolov " + sec_name(i) + " je poškodená.", e.offset, e.what());
+            b.warn("Symbol table " + sec_name(i) + " is damaged.", e.offset, e.what());
             continue;
         }
         if (sh.type == SHT_DYNSYM) dynsyms = syms;
@@ -224,7 +224,7 @@ Binary load_elf(const std::string& path, std::shared_ptr<const Bytes> data) {
                 if (tag == DT_NEEDED && strtab) b.libraries.push_back(r.cstr(*strtab + val));
             }
         } catch (const ParseError& e) {
-            b.warn("Sekcia .dynamic je poškodená.", e.offset, e.what());
+            b.warn("Section .dynamic is damaged.", e.offset, e.what());
         }
     }
 
@@ -273,7 +273,7 @@ Binary load_elf(const std::string& path, std::shared_ptr<const Bytes> data) {
                 }
             }
         } catch (const ParseError& e) {
-            b.warn("Relokácie v " + sec_name(i) + " sú poškodené.", e.offset, e.what());
+            b.warn("Relocations in " + sec_name(i) + " are damaged.", e.offset, e.what());
         }
     }
     for (auto& n : import_order) b.imports.push_back(seen[n]);

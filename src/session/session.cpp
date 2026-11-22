@@ -82,7 +82,7 @@ bool valid_name(const std::string& name) {
 
 Session::Session(Binary b, LoadOptions options) : binary(std::move(b)), load_options(std::move(options)) {
     events.on_error = [this](const std::string& topic, const std::string& err) {
-        runtime_diagnostics.push_back({"error", "Poslucháč udalosti '" + topic + "' zlyhal: " + err, std::nullopt, "address", err});
+        runtime_diagnostics.push_back({"error", "Event listener '" + topic + "' failed: " + err, std::nullopt, "address", err});
     };
 }
 
@@ -218,7 +218,7 @@ void Session::edit(const std::string& description, std::function<void()> redo, s
 
 std::string Session::rename(const std::string& ref, const std::string& new_name) {
     auto addr = resolve(ref);
-    if (!addr) throw AnnotationError("Adresu alebo meno '" + ref + "' som nenašiel.");
+    if (!addr) throw AnnotationError("Address or name '" + ref + "' not found.");
     return rename(*addr, new_name);
 }
 
@@ -227,15 +227,15 @@ std::string Session::rename(Addr addr, const std::string& new_name_in) {
     if (!binary.is_mapped(addr)) {
         bool known = false;
         for (auto& [n, a] : names_index()) known = known || a == addr;
-        if (!known) throw AnnotationError("Adresa 0x" + hx(addr) + " neleží v žiadnej sekcii súboru.");
+        if (!known) throw AnnotationError("Address 0x" + hx(addr) + " is not in any section of the file.");
     }
     std::string new_name = strip(new_name_in);
     if (!new_name.empty() && !valid_name(new_name))
-        throw AnnotationError("Meno môže obsahovať písmená, číslice a _ . $ @ : (bez medzier, max. 200 znakov) "
-                              "a nesmie začínať číslicou.");
+        throw AnnotationError("A name may contain letters, digits and _ . $ @ : (no spaces, at most 200 characters) "
+                              "and must not start with a digit.");
     auto other = names_index().find(new_name);
     if (!new_name.empty() && other != names_index().end() && other->second != addr)
-        throw AnnotationError("Meno '" + new_name + "' už používa adresa 0x" + hx(other->second) + ". Zvoľte iné meno.");
+        throw AnnotationError("The name '" + new_name + "' is already used by address 0x" + hx(other->second) + ". Choose another name.");
     std::optional<std::string> old_user;
     if (annotations.names.count(addr)) old_user = annotations.names[addr];
     std::string old_display = name_of(addr);
@@ -251,14 +251,14 @@ std::string Session::rename(Addr addr, const std::string& new_name_in) {
             if (plugins) plugins->on_rename(addr, old_display, now);
         };
     };
-    edit("Premenovanie 0x" + hx(addr) + " na " + (new_name.empty() ? "(pôvodné)" : new_name),
+    edit("Rename 0x" + hx(addr) + " to " + (new_name.empty() ? "(original)" : new_name),
          apply(new_name.empty() ? std::nullopt : std::optional<std::string>(new_name)), apply(old_user));
     return name_of(addr);
 }
 
 void Session::rename_var(const std::string& func, const std::string& key, const std::string& new_name) {
     auto faddr = resolve(func);
-    if (!faddr) throw AnnotationError("Funkciu '" + func + "' som nenašiel.");
+    if (!faddr) throw AnnotationError("Function '" + func + "' not found.");
     rename_var(*faddr, key, new_name);
 }
 
@@ -266,7 +266,7 @@ void Session::rename_var(Addr func_addr, const std::string& key, const std::stri
     std::optional<Addr> faddr = func_addr;
     std::string new_name = strip(new_name_in);
     if (!new_name.empty() && !valid_name(new_name))
-        throw AnnotationError("Neplatné meno premennej (písmená, číslice, _; nesmie začínať číslicou).");
+        throw AnnotationError("Invalid variable name (letters, digits, _; must not start with a digit).");
     std::pair<Addr, std::string> k{*faddr, key};
     std::optional<std::string> old;
     if (annotations.var_names.count(k)) old = annotations.var_names[k];
@@ -280,12 +280,12 @@ void Session::rename_var(Addr func_addr, const std::string& key, const std::stri
             events.publish("var_renamed", {{"func", uint64_t(fa)}, {"key", key}, {"new", value ? EventValue(*value) : EventValue()}});
         };
     };
-    edit("Premenovanie premennej " + key, apply(new_name.empty() ? std::nullopt : std::optional<std::string>(new_name)), apply(old));
+    edit("Rename variable " + key, apply(new_name.empty() ? std::nullopt : std::optional<std::string>(new_name)), apply(old));
 }
 
 Addr Session::resolve_or_throw(const std::string& ref, const std::string& what) {
     auto addr = resolve(ref);
-    if (!addr) throw AnnotationError(what + " '" + ref + "' som nenašiel.");
+    if (!addr) throw AnnotationError(what + " '" + ref + "' not found.");
     return *addr;
 }
 
@@ -308,10 +308,10 @@ void Session::set_map(std::map<Addr, std::string>& mapping, const std::string& t
     edit(label + " 0x" + hx(a), apply(value), apply(old));
 }
 
-void Session::set_comment(const std::string& ref, const std::string& text) { set_comment(resolve_or_throw(ref, "Adresu"), text); }
-void Session::set_comment(Addr addr, const std::string& text) { set_map(annotations.comments, "comment", "Komentár", addr, text); }
-void Session::set_bookmark(const std::string& ref, const std::string& label) { set_bookmark(resolve_or_throw(ref, "Adresu"), label); }
-void Session::set_bookmark(Addr addr, const std::string& label) { set_map(annotations.bookmarks, "bookmark", "Záložka", addr, label); }
+void Session::set_comment(const std::string& ref, const std::string& text) { set_comment(resolve_or_throw(ref, "Address"), text); }
+void Session::set_comment(Addr addr, const std::string& text) { set_map(annotations.comments, "comment", "Comment", addr, text); }
+void Session::set_bookmark(const std::string& ref, const std::string& label) { set_bookmark(resolve_or_throw(ref, "Address"), label); }
+void Session::set_bookmark(Addr addr, const std::string& label) { set_map(annotations.bookmarks, "bookmark", "Bookmark", addr, label); }
 
 std::optional<std::string> Session::undo() {
     std::lock_guard<std::recursive_mutex> g(lock);
@@ -331,21 +331,21 @@ std::optional<std::string> Session::redo() {
 std::vector<Line> Session::decompile(const std::string& func) {
     require_analysis();
     auto faddr = resolve(func);
-    if (!faddr || !analysis->functions.count(*faddr)) throw AnnotationError("'" + func + "' nie je funkcia.");
+    if (!faddr || !analysis->functions.count(*faddr)) throw AnnotationError("'" + func + "' is not a function.");
     return decompile(*faddr);
 }
 
 std::vector<Line> Session::decompile(Addr faddr) {
     Analysis& a = require_analysis();
     auto it = a.functions.find(faddr);
-    if (it == a.functions.end()) throw AnnotationError("'0x" + hx(faddr) + "' nie je funkcia.");
+    if (it == a.functions.end()) throw AnnotationError("'0x" + hx(faddr) + "' is not a function.");
     const Function& fn = it->second;
     auto comment = [](std::string text, std::optional<Addr> addr) {
         return Line{0, {Seg{std::move(text), "comment", std::nullopt, ""}}, addr};
     };
     if (fn.kind != "normal") {
-        std::string lib = fn.library.empty() ? "" : " z knižnice " + fn.library;
-        return {comment("// " + name_of(faddr) + " je importovaná funkcia" + lib + " – jej kód nie je v tomto súbore.", faddr)};
+        std::string lib = fn.library.empty() ? "" : " from library " + fn.library;
+        return {comment("// " + name_of(faddr) + " is an imported function" + lib + "; its code is not in this file.", faddr)};
     }
     std::lock_guard<std::recursive_mutex> g(lock);
     auto c = decomp_cache_.find(faddr);
@@ -353,7 +353,7 @@ std::vector<Line> Session::decompile(Addr faddr) {
         try {
             c = decomp_cache_.emplace(faddr, rv::decompile(a, faddr)).first;
         } catch (const std::exception& e) {  // report instead of crashing the UI
-            return {comment(std::string("// Pseudokód sa nepodarilo vytvoriť: ") + e.what(), faddr)};
+            return {comment(std::string("// Could not create pseudocode: ") + e.what(), faddr)};
         }
     }
     RenderNames names;
@@ -407,7 +407,7 @@ Session::Hits Session::search_pseudocode(const std::string& query, bool regex) {
         try {
             rx = std::regex(query, std::regex::ECMAScript | std::regex::icase);
         } catch (const std::regex_error& e) {
-            throw ReversaError(std::string("Neplatný regulárny výraz: ") + e.what());
+            throw ReversaError(std::string("Invalid regular expression: ") + e.what());
         }
     }
     std::string ql = lower(query);

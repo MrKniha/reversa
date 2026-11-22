@@ -373,7 +373,7 @@ void bind_all(py::module_& m) {
         .def("render_view", [](Session& s, const std::string& name) -> std::string {
             for (auto& [n, f] : s.views)
                 if (n == name) return f();
-            throw AnnotationError("Pohľad '" + name + "' neexistuje.");
+            throw AnnotationError("View '" + name + "' does not exist.");
         })
         .def("subscribe", [](Session& s, const std::string& topic, py::function handler) {
             return s.events.subscribe(topic, [handler](const Event& ev) {
