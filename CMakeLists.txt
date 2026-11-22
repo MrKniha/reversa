@@ -30,6 +30,13 @@ FetchContent_MakeAvailable(capstone)
 
 find_package(SQLite3 REQUIRED)
 
+# All programs land in <build>/bin (also with multi-config generators such as Visual Studio).
+set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin)
+foreach(cfg Debug Release RelWithDebInfo MinSizeRel)
+  string(TOUPPER ${cfg} CFG)
+  set(CMAKE_RUNTIME_OUTPUT_DIRECTORY_${CFG} ${CMAKE_BINARY_DIR}/bin)
+endforeach()
+
 file(GLOB CORE_SOURCES CONFIGURE_DEPENDS
   src/core/*.cpp src/formats/*.cpp src/disasm/*.cpp src/analysis/*.cpp src/decompiler/*.cpp
   src/project/*.cpp src/session/*.cpp src/report/*.cpp)
@@ -40,12 +47,23 @@ target_compile_definitions(reversa_core PUBLIC REVERSA_VERSION="${PROJECT_VERSIO
 
 if(REVERSA_PYTHON)
   find_package(Python 3.10 COMPONENTS Interpreter Development REQUIRED)
-  find_package(pybind11 CONFIG REQUIRED)
+  FetchContent_Declare(pybind11 GIT_REPOSITORY https://github.com/pybind/pybind11.git GIT_TAG v2.13.6 GIT_SHALLOW TRUE)
+  FetchContent_MakeAvailable(pybind11)
   # Bindings shared by the `reversa` Python extension and the embedded interpreter of the app.
   add_library(reversa_bindings STATIC src/python/bindings.cpp)
   target_link_libraries(reversa_bindings PUBLIC reversa_core pybind11::pybind11)
   pybind11_add_module(_reversa src/python/module.cpp)
   target_link_libraries(_reversa PRIVATE reversa_bindings)
+  # Importable package in the build tree: <build>/bin/python/reversa/{*.py,_reversa.*}
+  set(RV_PY_OUT ${CMAKE_BINARY_DIR}/bin/python/reversa)
+  set_target_properties(_reversa PROPERTIES LIBRARY_OUTPUT_DIRECTORY ${RV_PY_OUT} LIBRARY_OUTPUT_DIRECTORY_RELEASE ${RV_PY_OUT}
+                        LIBRARY_OUTPUT_DIRECTORY_DEBUG ${RV_PY_OUT} RUNTIME_OUTPUT_DIRECTORY ${RV_PY_OUT})
+  file(GLOB RV_PY_SOURCES CONFIGURE_DEPENDS ${CMAKE_SOURCE_DIR}/python/reversa/*.py)
+  add_custom_target(reversa_python ALL
+    COMMAND ${CMAKE_COMMAND} -E make_directory ${RV_PY_OUT}
+    COMMAND ${CMAKE_COMMAND} -E copy_if_different ${RV_PY_SOURCES} ${RV_PY_OUT}
+    DEPENDS ${RV_PY_SOURCES} COMMENT "Copying the reversa Python package")
+  add_dependencies(_reversa reversa_python)
 endif()
 
 include(cmake/embed.cmake)
@@ -56,8 +74,17 @@ if(CLI_SOURCES)
   add_executable(reversa ${CLI_SOURCES} ${CMAKE_BINARY_DIR}/generated/demo_elf.cpp)
   target_link_libraries(reversa PRIVATE reversa_core)
   if(REVERSA_PYTHON)
+    target_sources(reversa PRIVATE src/python/embed.cpp)
     target_link_libraries(reversa PRIVATE reversa_bindings pybind11::embed)
     target_compile_definitions(reversa PRIVATE REVERSA_WITH_PYTHON=1)
+    add_dependencies(reversa reversa_python)
+    if(WIN32)
+      # Python is optional at runtime: delay-load its DLL so REVERSA starts without it.
+      set(RV_PY_DLL "python${Python_VERSION_MAJOR}${Python_VERSION_MINOR}.dll")
+      target_compile_definitions(reversa PRIVATE REVERSA_PYTHON_DLL="${RV_PY_DLL}")
+      target_link_options(reversa PRIVATE "/DELAYLOAD:${RV_PY_DLL}")
+      target_link_libraries(reversa PRIVATE delayimp)
+    endif()
   endif()
 endif()
 

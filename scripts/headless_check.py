@@ -2,7 +2,7 @@
 """Headless end-to-end check used by CI on Linux and Windows: analyze every sample,
 write reports and projects, run the demo and the strcmp example script.
 
-Usage: python scripts/headless_check.py [output-dir]
+Usage: python scripts/headless_check.py <path-to-reversa-executable> [output-dir]
 """
 import glob
 import os
@@ -10,8 +10,10 @@ import subprocess
 import sys
 
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-OUT = os.path.abspath(sys.argv[1] if len(sys.argv) > 1 else "headless-out")
-CLI = [sys.executable, "-m", "reversa"]
+if len(sys.argv) < 2:
+    sys.exit(__doc__)
+CLI = [os.path.abspath(sys.argv[1])]
+OUT = os.path.abspath(sys.argv[2] if len(sys.argv) > 2 else "headless-out")
 
 
 def run(*args: str) -> str:

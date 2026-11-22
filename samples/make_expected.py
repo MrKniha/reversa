@@ -1,14 +1,17 @@
 """Regenerates samples/expected/*.json (golden files) from the current analysis.
 
-Run only after verifying by hand that a change in results is correct:
-    python samples/make_expected.py && git diff samples/expected
+Run only after verifying by hand that a change in results is correct (needs a build, see README):
+    REVERSA_BUILD_DIR=build python samples/make_expected.py && git diff samples/expected
 """
 import json
 import os
 import sys
 
 HERE = os.path.dirname(os.path.abspath(__file__))
-sys.path.insert(0, os.path.join(HERE, "..", "src"))
+for _b in (os.environ.get("REVERSA_BUILD_DIR", ""), os.path.join(HERE, "..", "build")):
+    if _b and os.path.isdir(os.path.join(_b, "bin", "python")):
+        sys.path.insert(0, os.path.join(_b, "bin", "python"))
+        break
 import reversa  # noqa: E402
 
 USER_FUNCS = {"hello": ["main", "sum_to", "classify", "greet"], "login": ["main", "check_password", "check_user"]}

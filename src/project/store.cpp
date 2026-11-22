@@ -182,7 +182,9 @@ void save_project(const std::string& path, const Bytes& data, const std::string&
     }
 }
 
-ProjectData load_project(const std::string& path) {
+ProjectData load_project(const std::string& path) { return load_project(path, MIGRATIONS, SCHEMA_VERSION); }
+
+ProjectData load_project(const std::string& path, const std::map<int, std::string>& migrations, int schema_version) {
     std::error_code ec;
     if (!fs::exists(path_from_utf8(path), ec)) throw ProjectError("Projekt '" + path + "' neexistuje.");
     Db db;
@@ -195,12 +197,12 @@ ProjectData load_project(const std::string& path) {
             if (!q.step()) throw std::runtime_error("chýba schema_version");
             version = std::stoi(q.col_text(0));
         }
-        if (version > SCHEMA_VERSION)
+        if (version > schema_version)
             throw ProjectError("Projekt bol uložený novšou verziou REVERSA (schéma " + std::to_string(version) +
                                "). Aktualizujte REVERSA.");
-        for (int v = version + 1; v <= SCHEMA_VERSION; v++) {
+        for (int v = version + 1; v <= schema_version; v++) {
             db.exec("BEGIN");
-            db.exec(MIGRATIONS.at(v));
+            db.exec(migrations.at(v));
             Stmt u(db.h, "UPDATE meta SET value=? WHERE key='schema_version'");
             u.text(1, std::to_string(v)).run();
             db.exec("COMMIT");

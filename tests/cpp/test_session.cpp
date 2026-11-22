@@ -5,6 +5,7 @@
 #include "core/errors.hpp"
 #include "core/json.hpp"
 #include "core/text.hpp"
+#include "project/store.hpp"
 #include "session/session.hpp"
 #include "test.hpp"
 
@@ -139,4 +140,36 @@ TEST("json parse and dump") {
     bool threw = false;
     try { Json::parse("{bad"); } catch (const std::exception&) { threw = true; }
     CHECK(threw);
+}
+
+TEST("undo stack limit, redo cleared by a new command") {
+    UndoStack st(2);
+    std::vector<int> log;
+    for (int i = 0; i < 3; i++) st.push({std::to_string(i), [&log, i] { log.push_back(i); }, [&log, i] { log.push_back(-i); }});
+    CHECK(st.undo() == std::optional<std::string>("2"));
+    CHECK(st.undo() == std::optional<std::string>("1"));
+    CHECK(!st.undo().has_value());
+    CHECK(st.redo() == std::optional<std::string>("1"));
+    st.push({"x", [] {}, [] {}});
+    CHECK(!st.can_redo());
+    st.clear();
+    CHECK(!st.can_undo());
+    CHECK(log == std::vector<int>({0, 1, 2, -2, -1, 1}));
+}
+
+TEST("project migrations upgrade the schema step by step") {
+    auto dir = temp_dir();
+    auto s = Session::open(rvtest::sample("hello_x64.elf"));
+    std::string path = s->save((dir / "h.rvproj").string());
+    auto data = load_project(path, {{SCHEMA_VERSION + 1, "CREATE TABLE IF NOT EXISTS extra (x INTEGER);"}},
+                             SCHEMA_VERSION + 1);
+    CHECK_EQ(data.name, std::string("hello_x64.elf"));
+    bool newer = false;  // the file now carries the newer schema, so the current version refuses it
+    try {
+        load_project(path);
+    } catch (const ProjectError& e) {
+        newer = std::string(e.what()).find("novšou verziou") != std::string::npos;
+    }
+    CHECK(newer);
+    fs::remove_all(dir);
 }
