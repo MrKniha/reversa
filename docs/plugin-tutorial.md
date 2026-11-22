@@ -112,7 +112,8 @@ v `on_function_analyzed`. REVERSA:
 ```
 
 Rovnako sa správa plugin, ktorý sa nedá ani načítať (syntaktická chyba, chýbajúci
-súbor). Toto správanie overuje test `tests/test_plugins.py`.
+súbor). Toto správanie overujú testy `tests/python/test_plugins.py` a
+`tests/gui/test_gui.cpp` (háčiky bežia aj na pracovnom vlákne analýzy v GUI).
 
 ## 5. Väčší príklad: kryptografické konštanty
 

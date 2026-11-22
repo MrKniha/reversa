@@ -2,30 +2,35 @@
 
 **Open-source nástroj na reverzné inžinierstvo pre začiatočníkov aj profesionálov.**
 Disassembler, pseudokód (dekompilátor), krížové odkazy (x-refs), grafy funkcií
-a volaní, Python API, pluginy a grafické rozhranie, ktoré beží lokálne vo vašom
-prehliadači.
+a volaní, Python API, pluginy a natívne grafické rozhranie (Qt).
 
 - Formáty: ELF, PE (32/64-bit), surové dáta (firmvér)
 - Architektúry: x86, x86-64, AArch64 (ARM64), ARM 32-bit (len disassembly)
 - Statická analýza: súbor sa **nikdy nespúšťa**. Bez cloudu, bez telemetrie.
+- Platformy: **Windows a Linux** (64-bit)
+- Napísané v **C++20** s grafickým rozhraním **Qt 6**; Python slúži len na skripty
+  a pluginy. Prečo: [docs/architecture.md](docs/architecture.md#prečo-c-a-qt).
 - Licencia: MIT
 
-> Verzia 0.1.0 je MVP. Pseudokód je **dočasný**: typy sú odhadnuté. Dôležité
+> Verzia 0.2.0. Pseudokód je **dočasný**: typy sú odhadnuté. Dôležité
 > závery si overte v listingu. Známe obmedzenia sú v
-> [docs/architecture.md](docs/architecture.md#známe-obmedzenia-010).
+> [docs/architecture.md](docs/architecture.md#známe-obmedzenia).
 
 ## Rýchly štart
 
+Stiahnite hotový balík (nižšie) a spustite:
+
 ```bash
-pip install .            # z priečinka repozitára
 reversa --demo           # otvorí GUI s ukážkovou analýzou
 ```
 
-Bez grafického prostredia: `reversa --demo --no-gui`.
+Na Windows stačí dvojklik na `reversa-gui.exe`. Bez grafického prostredia:
+`reversa --demo --no-gui`.
 
 ```bash
 reversa gui program.exe                                   # GUI s vlastným súborom
-reversa analyze program.elf --report report.md            # headless report
+reversa program.exe                                       # to isté, kratšie
+reversa analyze program.elf --report report.md            # headless report (aj .html, --json)
 reversa analyze program.elf --pseudocode main             # pseudokód jednej funkcie
 reversa search program.elf --insn "call.*strcmp"          # hľadanie v inštrukciách
 reversa script examples/scripts/strcmp_callers.py program.elf
@@ -35,6 +40,7 @@ reversa gui firmware.bin --arch arm64 --base 0x8000000    # surové dáta
 ## Prvá analýza za 10 minút
 
 1. `reversa --demo`. Otvorí sa ukážkový program `login`, ktorý pýta meno a heslo.
+   Pri prvom spustení vás privíta krátky sprievodca (5 krokov).
 2. Vľavo kliknite na **★ main**, v strede na kartu **Pseudokód** (kláves `2`).
    `main` volá `check_user` a `check_password`.
 3. Na karte **Reťazce** kliknite na `Wrong password.`. Panel **Detaily** vpravo
@@ -47,57 +53,96 @@ reversa gui firmware.bin --arch arm64 --base 0x8000000    # surové dáta
 Celý postup s riešením: [docs/quickstart.md](docs/quickstart.md) a
 [docs/tutorials.md](docs/tutorials.md).
 
+## Ovládanie GUI
+
+| Kláves | Akcia |
+|---|---|
+| `Ctrl+O` / `Ctrl+S` | otvoriť súbor alebo projekt / uložiť projekt |
+| `Ctrl+F` | hľadať funkciu, reťazec alebo adresu |
+| `G` | skočiť na adresu alebo meno |
+| `1` `2` `3` `4` | listing, pseudokód, graf funkcie, graf volaní |
+| `N` | premenovať funkciu, adresu alebo vybranú premennú v pseudokóde |
+| `;` / `B` | komentár / záložka |
+| `Ctrl+Z` / `Ctrl+Y` | späť / znova |
+| `Alt+←` | späť v histórii navigácie |
+| `Ctrl+Shift+T` | svetlý / tmavý motív |
+| `F1` | úvodný sprievodca |
+
+Všetky skratky zmeníte v *Zobraziť → Nastavenia*. Tam nastavíte aj veľkosť
+písma a vypnete vysvetlivky pre začiatočníkov. Analýza beží na pozadí
+a tlačidlom *Zrušiť* v stavovom riadku ju zastavíte.
+
 ## Inštalácia
 
-REVERSA je určená pre **Windows a Linux** (64-bit). Na macOS by mala fungovať
-inštalácia cez pip, ale oficiálne ju nepodporujeme ani netestujeme.
+### Hotové balíky
 
-### Najjednoduchšie: hotový program (bez Pythonu)
+Na stránke GitHub Actions repozitára (posledný úspešný beh CI → *Artifacts*):
 
-Na stránke GitHub Actions repozitára (posledný úspešný beh CI → *Artifacts*)
-stiahnite `reversa-windows-x64` alebo `reversa-linux-x64`. Obsahuje jeden
-spustiteľný súbor:
+- **Windows:** `reversa-windows-x64` je zip. Rozbaľte ho kamkoľvek a spustite
+  `reversa\bin\reversa-gui.exe` (GUI) alebo `reversa.exe` (príkazový riadok).
+  Obsahuje Qt aj Python pre skripty a pluginy, nič ďalšie netreba inštalovať.
+  Windows SmartScreen môže varovať, lebo súbor nie je digitálne podpísaný.
+- **Linux (Ubuntu 24.04, Debian 13 a novšie):** `reversa-linux-x64-deb` obsahuje
+  balík `.deb`:
+  ```bash
+  sudo apt install ./reversa_0.2.0_amd64.deb
+  reversa --demo
+  ```
+  REVERSA sa objaví aj v ponuke aplikácií.
 
-```powershell
-reversa.exe --demo          # Windows (PowerShell alebo cmd)
-```
+### Zostavenie zo zdrojov
+
+Potrebujete C++20 kompilátor (GCC 11+, Clang 14+ alebo Visual Studio 2022),
+CMake 3.21+, Qt 6.2+, SQLite 3 a Python 3.10+ (voliteľný, pre skripty
+a pluginy). Capstone a pybind11 stiahne CMake automaticky v pevných verziách.
+
+**Linux (Debian/Ubuntu):**
+
 ```bash
-chmod +x reversa && ./reversa --demo     # Linux
-```
-
-Windows SmartScreen môže pri prvom spustení varovať, lebo súbor nie je
-digitálne podpísaný. Ak chcete istotu, nainštalujte REVERSA zo zdrojov (nižšie).
-
-### Linux zo zdrojov
-
-Potrebujete **Python 3.10 alebo novší** a prehliadač. Jediná závislosť je
-Capstone, ktorý pip nainštaluje automaticky.
-
-```bash
-sudo apt install python3 python3-venv git      # Debian/Ubuntu (Fedora: dnf install python3 git)
+sudo apt install build-essential cmake ninja-build git qt6-base-dev libgl-dev libsqlite3-dev python3-dev
 git clone https://github.com/MrKniha/reversa.git && cd reversa
-python3 -m venv .venv && . .venv/bin/activate
-pip install --require-hashes -r requirements.lock && pip install .
-reversa --demo
+cmake -S . -B build -G Ninja -DCMAKE_BUILD_TYPE=Release
+cmake --build build
+./build/bin/reversa --demo
 ```
 
-### Windows zo zdrojov
+Fedora: `sudo dnf install gcc-c++ cmake ninja-build qt6-qtbase-devel sqlite-devel python3-devel`.
 
-1. Nainštalujte Python 3.10+ z https://www.python.org/downloads/ (zaškrtnite
-   „Add python.exe to PATH") a Git z https://git-scm.com/download/win.
-2. V PowerShell:
-   ```powershell
-   git clone https://github.com/MrKniha/reversa.git; cd reversa
-   py -m venv .venv; .venv\Scripts\Activate.ps1
-   pip install --require-hashes -r requirements.lock; pip install .
-   reversa --demo
-   ```
-   Ak PowerShell odmietne spustiť `Activate.ps1`, použite
-   `Set-ExecutionPolicy -Scope CurrentUser RemoteSigned` alebo cmd:
-   `.venv\Scripts\activate.bat`.
+**Windows:** nainštalujte Visual Studio 2022 (Desktop development with C++),
+Qt 6 (Qt Online Installer, komponent MSVC 2022 64-bit), Python 3.12 z
+python.org a vcpkg (`git clone https://github.com/microsoft/vcpkg` a
+`bootstrap-vcpkg.bat`). V „x64 Native Tools Command Prompt":
 
-Inštalácia z wheel balíka: `pip install reversa-0.1.0-py3-none-any.whl`.
-Na vývoj: `pip install -e ".[dev]"` (pozri [CONTRIBUTING.md](CONTRIBUTING.md)).
+```bat
+git clone https://github.com/MrKniha/reversa.git && cd reversa
+cmake -S . -B build -A x64 -DCMAKE_TOOLCHAIN_FILE=C:\vcpkg\scripts\buildsystems\vcpkg.cmake ^
+      -DVCPKG_TARGET_TRIPLET=x64-windows-static-md -DCMAKE_PREFIX_PATH=C:\Qt\6.8.3\msvc2022_64
+cmake --build build --config Release
+build\bin\reversa.exe --demo
+```
+
+Voľby CMake: `-DREVERSA_GUI=OFF` (len príkazový riadok, bez Qt),
+`-DREVERSA_PYTHON=OFF` (bez skriptov a pluginov), `-DREVERSA_TESTS=OFF`.
+
+### Testy
+
+```bash
+ctest --test-dir build --output-on-failure            # C++ testy a GUI test (Qt offscreen)
+python3 -m venv .venv && .venv/bin/pip install --require-hashes -r tests/requirements-dev.lock
+REVERSA_BUILD_DIR=build .venv/bin/python -m pytest tests/python   # Python API, CLI, golden súbory
+python3 scripts/headless_check.py build/bin/reversa   # end-to-end kontrola všetkých vzoriek
+python3 scripts/check_licenses.py                     # licencie závislostí
+```
+
+Na vývoj pozri [CONTRIBUTING.md](CONTRIBUTING.md).
+
+### Python API mimo aplikácie
+
+Modul sa zostaví spolu s programom do `build/bin/python`:
+
+```bash
+PYTHONPATH=build/bin/python python3 -c "import reversa; p = reversa.open('samples/bin/login_x64.elf'); print([f.name for f in p.callers_of('strcmp')])"
+```
 
 ## Bezpečná analýza malvéru
 
@@ -117,7 +162,7 @@ pri práci s podozrivými súbormi dodržujte tieto pravidlá:
 6. **Pozor na skripty a pluginy.** Bežia bez sandboxu. Nepoužívajte pluginy
    z neznámych zdrojov.
 7. **Overte si hash** (SHA-256) vzorky pred a po analýze. REVERSA ho ukazuje
-   v reporte, v tooltipe názvu súboru v stavovom riadku GUI a ukladá ho do projektu.
+   v reporte, v tooltipe stavového riadku GUI a ukladá ho do projektu.
 8. **Poškodené súbory sú v poriadku.** REVERSA načíta, čo sa dá, a ohlási
    chyby v diagnostike (*Pokročilé → Diagnostika načítania*). Nespadne.
 9. **Dodržujte zákony a pravidlá organizácie.** Vzorky malvéru neposielajte
@@ -135,7 +180,7 @@ interoperabilitu a ladenie vlastného softvéru.
 licenčných kontrol, aktivácie, anti-cheat systémov alebo ochrany proti
 kopírovaniu.** Takéto príspevky neprijmeme.
 
-**Hranica patch módu:** budúci patch mód (roadmapa, nie je v 0.1.0) bude určený
+**Hranica patch módu:** budúci patch mód (roadmapa, nie je v 0.2.0) bude určený
 na úpravy **vlastných** programov alebo programov, na ktoré máte povolenie:
 opravy chýb, výučba, CTF úlohy. Nebude obsahovať automatické „crackovanie",
 hľadanie a odstraňovanie licenčných kontrol ani podobné funkcie. Za to, ako

@@ -1,71 +1,66 @@
 #!/usr/bin/env python3
-"""CI license gate: every runtime dependency must have an allowed license and be
-listed in LICENSE-THIRD-PARTY. Uses only installed package metadata (no network).
+"""CI license gate for the C++ build.
+
+Collects every third-party component the build pulls in (FetchContent_Declare in CMakeLists.txt,
+vcpkg.json dependencies, find_package(Qt6/Python/SQLite3)) and the locked test tools, then checks
+that each one has a known, allowed license and is listed in LICENSE-THIRD-PARTY. No network access.
 
 Exit code 0 = OK, 1 = problem (message explains what to fix).
 """
+import json
 import os
 import re
 import sys
-from importlib import metadata
 
-ALLOWED = {"MIT", "BSD", "BSD-2-Clause", "BSD-3-Clause", "Apache-2.0", "ISC", "PSF-2.0", "Python-2.0", "Unlicense"}
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
-
-def runtime_requirements(name: str) -> list[str]:
-    reqs = metadata.requires(name) or []
-    out = []
-    for r in reqs:
-        if "extra ==" in r or not marker_applies(r):
-            continue
-        out.append(re.split(r"[ <>=!~;\[]", r, maxsplit=1)[0])
-    return out
-
-
-def marker_applies(req: str) -> bool:
-    """Tiny evaluator for the only marker form we meet: python_version <op> "X.Y"."""
-    m = re.search(r'python_version\s*(<=|>=|<|>|==|!=)\s*"(\d+)\.(\d+)"', req)
-    if not m:
-        return True
-    cur, want = sys.version_info[:2], (int(m.group(2)), int(m.group(3)))
-    return {"<": cur < want, "<=": cur <= want, ">": cur > want, ">=": cur >= want, "==": cur == want, "!=": cur != want}[m.group(1)]
+# Known components: name -> (license, name as written in LICENSE-THIRD-PARTY).
+KNOWN = {
+    "capstone": ("BSD-3-Clause", "Capstone"),
+    "pybind11": ("BSD-3-Clause", "pybind11"),
+    "sqlite3": ("Public-Domain", "SQLite"),
+    "qt6": ("LGPL-3.0-only", "Qt"),
+    "python": ("PSF-2.0", "Python"),
+    "pytest": ("MIT", "pytest"),
+    "iniconfig": ("MIT", "iniconfig"),
+    "packaging": ("Apache-2.0", "packaging"),
+    "pluggy": ("MIT", "pluggy"),
+    "colorama": ("BSD-3-Clause", "colorama"),
+}
+# LGPL is allowed only because Qt is linked dynamically and shipped as separate, replaceable DLLs/.so.
+ALLOWED = {"MIT", "BSD-2-Clause", "BSD-3-Clause", "Apache-2.0", "ISC", "PSF-2.0", "Public-Domain", "LGPL-3.0-only"}
 
 
-def license_of(dist: str) -> str:
-    md = metadata.metadata(dist)
-    expr = md.get("License-Expression")
-    if expr:
-        return expr
-    for c in md.get_all("Classifier") or []:
-        if c.startswith("License :: OSI Approved :: "):
-            v = c.rsplit("::", 1)[1].strip()
-            return {"MIT License": "MIT", "BSD License": "BSD", "Apache Software License": "Apache-2.0",
-                    "ISC License (ISCL)": "ISC"}.get(v, v)
-    return (md.get("License") or "UNKNOWN").strip().splitlines()[0][:60]
+def read(rel: str) -> str:
+    with open(os.path.join(ROOT, rel), encoding="utf-8") as fh:
+        return fh.read()
+
+
+def components() -> list[str]:
+    cmake = read("CMakeLists.txt")
+    found = [m.lower() for m in re.findall(r"FetchContent_Declare\(\s*(\w+)", cmake)]
+    for pkg, name in (("Qt6", "qt6"), ("Python", "python"), ("SQLite3", "sqlite3")):
+        if re.search(rf"find_package\(\s*{pkg}\b", cmake):
+            found.append(name)
+    found += [d if isinstance(d, str) else d["name"] for d in json.loads(read("vcpkg.json")).get("dependencies", [])]
+    found += re.findall(r"^([A-Za-z0-9_.-]+)==", read("tests/requirements-dev.lock"), re.M)
+    return sorted(set(n.lower() for n in found))
 
 
 def main() -> int:
-    third = open(os.path.join(ROOT, "LICENSE-THIRD-PARTY"), encoding="utf-8").read().lower()
-    seen, todo, problems = set(), runtime_requirements("reversa"), []
-    while todo:
-        dep = todo.pop()
-        if dep.lower() in seen:
-            continue
-        seen.add(dep.lower())
-        try:
-            lic = license_of(dep)
-        except metadata.PackageNotFoundError:
-            problems.append(f"{dep}: nie je nainštalovaný – nedá sa overiť licencia")
-            continue
-        ok = any(a.lower() in lic.lower() for a in ALLOWED)
-        listed = dep.lower() in third
-        print(f"{dep:<20} {lic:<30} {'OK' if ok else 'NEPOVOLENÁ'}  {'uvedený' if listed else 'CHÝBA v LICENSE-THIRD-PARTY'}")
-        if not ok:
+    third = read("LICENSE-THIRD-PARTY").lower()
+    problems = []
+    for dep in components():
+        lic, listed_as = KNOWN.get(dep, ("UNKNOWN", dep))
+        ok = lic in ALLOWED
+        listed = listed_as.lower() in third
+        print(f"{dep:<12} {lic:<16} {'OK' if ok else 'NEPOVOLENÁ'}  {'uvedený' if listed else 'CHÝBA v LICENSE-THIRD-PARTY'}")
+        if dep not in KNOWN:
+            problems.append(f"{dep}: neznáma závislosť – doplňte jej licenciu do scripts/check_licenses.py")
+        elif not ok:
             problems.append(f"{dep}: licencia '{lic}' nie je na zozname povolených {sorted(ALLOWED)}")
         if not listed:
-            problems.append(f"{dep}: doplňte do LICENSE-THIRD-PARTY")
-        todo += runtime_requirements(dep)
+            problems.append(f"{dep}: doplňte '{listed_as}' do LICENSE-THIRD-PARTY")
     for p in problems:
         print("CHYBA:", p, file=sys.stderr)
     print("Licenčná kontrola:", "PREŠLA" if not problems else "NEPREŠLA")

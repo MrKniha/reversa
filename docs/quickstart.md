@@ -4,14 +4,13 @@ Cieľ: nainštalovať REVERSA, otvoriť ukážkovú binárku a nájsť v nej hes
 
 ## 1. Inštalácia (2 minúty)
 
-Potrebujete Python 3.10 alebo novší.
+Stiahnite hotový balík z GitHub Actions (posledný úspešný beh → *Artifacts*):
 
-```bash
-git clone https://github.com/MrKniha/reversa.git && cd reversa
-python3 -m venv .venv && . .venv/bin/activate     # Windows: .venv\Scripts\activate
-pip install .
-reversa --version
-```
+- **Windows:** `reversa-windows-x64` (zip). Rozbaľte ho a spustite `reversa\bin\reversa-gui.exe`.
+  Pre príkazy nižšie otvorte v priečinku `reversa\bin` príkazový riadok a píšte `reversa.exe`.
+- **Linux (Ubuntu 24.04 a novšie):** `reversa-linux-x64-deb`, potom `sudo apt install ./reversa_0.2.0_amd64.deb`.
+
+Overenie: `reversa --version`. Zostavenie zo zdrojov popisuje [README](../README.md#zostavenie-zo-zdrojov).
 
 ## 2. Ukážková analýza (1 minúta)
 
@@ -19,8 +18,8 @@ reversa --version
 reversa --demo
 ```
 
-Otvorí sa prehliadač s REVERSA (beží iba na vašom počítači, adresa `127.0.0.1`). Pri prvom spustení uvidíte
-krátkeho sprievodcu – môžete ho preskočiť. Bez grafického prostredia (server, CI) použite
+Otvorí sa okno REVERSA a na pozadí sa analyzuje ukážkový program (priebeh vidíte v stavovom riadku,
+tlačidlom *Zrušiť* analýzu zastavíte). Pri prvom spustení uvidíte krátkeho sprievodcu – môžete ho preskočiť. Bez grafického prostredia (server, CI) použite
 `reversa --demo --no-gui`: výsledky sa vypíšu do terminálu.
 
 ## 3. Tri hlavné panely

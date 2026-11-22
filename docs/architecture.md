@@ -7,115 +7,131 @@ a čo plánujeme ďalej. Pojmy vysvetľuje [slovník](glossary.md).
 
 ```
 ┌──────────────────────────────────────────────────────────────────────┐
-│ Rozhrania:  webové GUI (ui/)   CLI (cli.py)   Python API (api/)       │
-│             pluginy (plugins/)  reporty (report.py)                    │
+│ Rozhrania:  Qt GUI (src/gui)   CLI (src/cli)   reporty (src/report)   │
+│             Python API + pluginy (src/python, python/reversa)          │
 ├──────────────────────────────────────────────────────────────────────┤
-│ Služby:     Session (session.py) – otvorenie, analýza, anotácie,       │
+│ Služby:     Session (src/session) – otvorenie, analýza, anotácie,      │
 │             undo/redo, cache pseudokódu, uloženie projektu             │
-│             EventBus (core/events.py), UndoStack (core/undo.py)        │
+│             EventBus a UndoStack (src/session/events)                  │
 ├──────────────────────────────────────────────────────────────────────┤
-│ Analýza:    analysis/ – funkcie, bloky, x-refs, reťazce, grafy,        │
-│             hľadanie        decompiler/ – IR, lifting, passy,          │
+│ Analýza:    src/analysis – funkcie, bloky, x-refs, reťazce, grafy,     │
+│             hľadanie      src/decompiler – IR, lifting, passy,         │
 │             štruktúrovanie, renderer                                   │
 ├──────────────────────────────────────────────────────────────────────┤
-│ Jadro:      formats/ – ELF, PE, surové dáta (vlastné parsery)          │
-│             disasm/ – Capstone backend    core/model.py – Binary       │
-│             project/ – SQLite projekt (.rvproj) s migráciami           │
+│ Jadro:      src/formats – ELF, PE, surové dáta (vlastné parsery)       │
+│             src/disasm – Capstone   src/core – Binary, JSON, text      │
+│             src/project – SQLite projekt (.rvproj) s migráciami        │
 └──────────────────────────────────────────────────────────────────────┘
 ```
 
 Každá vrstva používa len vrstvy pod sebou. GUI, CLI aj pluginy volajú tú istú
-`Session`, preto je správanie všade rovnaké. Napríklad premenovanie zo skriptu
-sa prejaví v GUI.
+`rv::Session`, preto je správanie všade rovnaké. Napríklad premenovanie zo
+skriptu sa okamžite prejaví v GUI (cez EventBus).
 
 ## Moduly
 
 | Modul | Zodpovednosť |
 |---|---|
-| `core/model.py` | `Binary`, `Section`, `Symbol`, `Import`, `Export`, `Relocation`, `Diagnostic`. Čítanie pamäte podľa adresy (bisect cez sekcie). |
-| `core/errors.py` | Hierarchia chýb (`ReversaError` → `LoadError`, `ProjectError`, `AnnotationError`, `Cancelled`) so zrozumiteľnou správou a technickým detailom. |
-| `core/events.py` | `EventBus`: udalosti `renamed`, `commented`, `analysis_done`… Chyba jedného poslucháča neovplyvní ostatných. |
-| `core/undo.py` | `UndoStack` s príkazmi (command pattern). |
-| `formats/reader.py` | `Reader` s kontrolou hraníc. Každé čítanie mimo súboru je `ParseError`. |
-| `formats/elf.py`, `pe.py`, `raw.py` | Parsery. Poškodená časť = diagnostika, zvyšok sa načíta. |
-| `formats/loader.py` | Rozpoznanie formátu, fallback na surové dáta. |
-| `disasm/capstone_backend.py` | Prevod Capstone inštrukcií na `Insn` (tok riadenia, cieľ, odkazy). Sledovanie `adrp`+`add` pre ARM64. |
-| `analysis/analyzer.py` | Rekurzívny zostup od vstupných bodov, symbolov, exportov a `.pdata`. Noreturn funkcie, thunky PLT/IAT, hľadanie `main`. |
-| `analysis/xrefs.py`, `strings.py`, `graphs.py`, `search.py` | X-refs (call/jump/read/write/addr/data), reťazce ASCII a UTF-16, CFG a graf volaní, dominátory a slučky, hľadanie. |
-| `decompiler/` | `ir.py` (výrazy a príkazy), `lift_x86.py`, `lift_arm64.py`, `passes.py` (liveness, propagácia, DCE), `structure.py` (if/else, while, do-while, goto), `render.py` (segmenty s typom a odkazom). |
-| `project/` | Anotácie (mená, komentáre, záložky, mená premenných) a SQLite úložisko so schémou v1 a migráciami. |
-| `plugins/manager.py` | Načítanie `plugin.json`, kontrola verzie API, izolované volanie háčikov. |
-| `api/program.py` | Verejné API `Program`, `FunctionView`, `XrefView`. |
-| `ui/server.py`, `ui/static/` | Lokálny HTTP server a jednostránková aplikácia (HTML, CSS, JS bez frameworku). |
-| `cli.py`, `report.py` | Príkazový riadok a reporty (Markdown, HTML, JSON). |
+| `src/core` | `Binary`, `Section`, `Symbol`, `Import`, `Export`, `Relocation`, `Diagnostic`; `Reader` s kontrolou hraníc; chyby (`ReversaError` → `LoadError`, `ProjectError`, `AnnotationError`, `Cancelled`); vlastný `Json`; SHA-256; UTF-8 pomôcky. |
+| `src/formats` | Parsery ELF, PE a surových dát, rozpoznanie formátu, odhad architektúry. Poškodená časť = diagnostika, zvyšok sa načíta. |
+| `src/disasm` | Prevod Capstone inštrukcií na `Insn` (tok riadenia, cieľ, odkazy na pamäť). Sledovanie `adrp`+`add` pre ARM64. |
+| `src/analysis` | Rekurzívny zostup od vstupných bodov, symbolov, exportov a `.pdata`. Noreturn funkcie, thunky PLT/IAT, hľadanie `main`, x-refs, reťazce ASCII a UTF-16, CFG, dominátory, slučky, graf volaní, hľadanie. |
+| `src/decompiler` | `ir` (výrazy a príkazy), `lift` (x86, x86-64, AArch64), `passes` (propagácia, DCE), `structure` (if/else, while, do-while, goto), `render` (segmenty s typom a odkazom). |
+| `src/project` | Anotácie a SQLite úložisko so schémou v1 a migráciami. Formát je kompatibilný s projektmi z verzie 0.1 (Python). |
+| `src/session` | `Session`: mená, `resolve`, editácie cez `UndoStack`, udalosti, pohľady pluginov, uloženie. |
+| `src/report` | Reporty Markdown, HTML a JSON súhrn. |
+| `src/cli` | Príkazový riadok (`analyze`, `info`, `search`, `script`, `gui`, `--demo`). |
+| `src/python` | pybind11 väzby (`_reversa`), vstavaný interpret pre skripty a pluginy. |
+| `python/reversa` | Python balík: `Program`, `FunctionView`, `XrefView`, `PluginManager`. |
+| `src/gui` | Qt Widgets: hlavné okno, pohľady (listing, pseudokód, detaily, hex), graf (`GraphView`), dialógy (sprievodca, nastavenia). |
 
 ## Dátové toky
 
 **Otvorenie súboru:**
-`súbor → loader.detect_format → ELF/PE/RAW parser → Binary (+ diagnostiky)
-→ pluginy on_load → analyze() → Analysis → pluginy on_function_analyzed
-→ EventBus „analysis_done" → GUI / CLI`.
+`súbor → detect_format → ELF/PE/RAW parser → Binary (+ diagnostiky)
+→ pluginy on_load → analyze() na pracovnom vlákne (priebeh, zrušenie)
+→ Analysis → pluginy on_function_analyzed → EventBus „analysis_done" → GUI / CLI`.
 
 **Pseudokód:**
 `funkcia → build_cfg → lifter (Insn → IR) → passy → štruktúrovanie
-→ renderer (segmenty) → Session cache → GUI (klikateľné mená) / text`.
+→ renderer (segmenty) → Session cache → GUI (klikateľné mená a premenné) / text`.
 Cache sa zneplatní pri premenovaní, takže nové meno sa zobrazí všade.
 
 **Premenovanie:**
-`GUI/API → Session.rename → validácia → Command na UndoStack
+`GUI/API → Session::rename → validácia → Command na UndoStack
 → Annotations → EventBus „renamed" → pluginy on_rename → GUI obnoví pohľady`.
 
 **Uloženie projektu:**
-`Session.save → project/store.save_project → dočasný súbor → atómové
-premenovanie`. Projekt obsahuje SHA-256 binárky. Pri otvorení sa overí, či
-binárka sedí.
+`Session::save → save_project → dočasný súbor → atómové premenovanie`.
+Projekt obsahuje SHA-256 binárky. Pri otvorení sa overí, či binárka sedí.
 
-## Prečo takto
+## Prečo C++ a Qt
 
-**Python namiesto Rust/C++.** Cieľová skupina sú aj začiatočníci a ľudia,
-ktorí chcú písať skripty. Python je jazyk skriptov aj jadra, takže API
-nie je len tenká vrstva nad cudzím jadrom. Výkon stačí pre bežné binárky
-(analýza ukážok trvá milisekundy). Najnáročnejšia časť, disassembler, je
-v C (Capstone). Ak bude výkon problém, môžeme horúce časti prepísať do Rustu
-bez zmeny API.
+Verzia 0.1 bola v Pythone s webovým GUI v prehliadači. Od verzie 0.2 je celý
+nástroj v C++20 s natívnym rozhraním Qt 6. Python zostal len tam, kde je
+najužitočnejší: na skripty a pluginy.
+
+- **Výkon a pamäť.** Analýza, x-refs a dekompilátor bežia natívne, bez
+  interpretera. Veľké binárky (desaťtisíce funkcií) sú realistické, model
+  dát je kompaktný (`std::map`, `unordered_map`, žiadne objekty na inštrukciu
+  navyše).
+- **Jeden program bez závislostí.** Windows balík je zip s `reversa-gui.exe`;
+  Linux balík je `.deb` so systémovými knižnicami. Netreba inštalovať Python
+  ani prehliadač (Windows balík obsahuje vlastný Python runtime). Zostava
+  s `-DREVERSA_PYTHON=OFF` Python vôbec nepotrebuje, len skripty a pluginy sú vypnuté.
+- **Natívne GUI.** Qt Widgets je overené v nástrojoch ako Cutter, má
+  dokovateľné panely, klávesové skratky, tmavý motív a funguje rovnako na
+  Windows aj Linuxe. Odpadá lokálny HTTP server a s ním celá jeho útočná plocha.
+- **Python API zostáva.** pybind11 sprístupní tie isté C++ objekty
+  (`Session`, `Analysis`, …) Pythonu. Skripty a pluginy z 0.1 fungujú ďalej
+  (rovnaké `reversa.open`, `Program`, háčiky pluginov).
+- **Licencie.** Qt je pod LGPL-3.0 a linkujeme ho dynamicky (vymeniteľné
+  knižnice), čo je s MIT licenciou REVERSA v poriadku. pybind11 a Capstone sú
+  BSD-3-Clause, SQLite public domain.
+
+Cena: zostavenie je zložitejšie (CMake, kompilátor, Qt). Preto CI zostavuje
+hotové balíky pre Windows aj Linux a README popisuje zostavenie krok za krokom.
+
+## Ďalšie rozhodnutia
 
 **Capstone.** Jeden disassembler pre x86, x86-64, ARM, AArch64 a ďalšie
-architektúry, licencia BSD-3, hotové wheels pre Linux, Windows a macOS. Zydis
-a iced sú pre x86 presnejšie, ale ostatné architektúry by vyžadovali ďalšiu
-knižnicu.
+architektúry, licencia BSD-3. Zydis a iced sú pre x86 presnejšie, ale ostatné
+architektúry by vyžadovali ďalšiu knižnicu. Linkujeme ho staticky, len so
+štyrmi architektúrami, ktoré používame.
 
 **Vlastné parsery ELF a PE.** Pri analýze malvéru sú poškodené a zámerne
 pokazené hlavičky bežné. Vlastný parser s kontrolou hraníc pri každom čítaní
 vie načítať to, čo sa dá, a zvyšok ohlási ako diagnostiku. Fuzz testy
-(`tests/test_fuzz.py`) to overujú. Navyše nepridávame závislosti.
+(`tests/cpp/test_analysis.cpp`) to overujú.
 
-**Lokálne webové GUI namiesto PySide6 alebo Tauri.** Server zo štandardnej
-knižnice beží len na `127.0.0.1`, s náhodným tokenom a kontrolou hlavičky
-`Host`. Rozhranie je čisté HTML, CSS a JavaScript. Výhody: žiadna ďalšia
-závislosť (PySide6 má stovky MB a podmienky LGPL), rovnaký vzhľad na všetkých
-OS, automatické UI testy cez Playwright. Nevýhoda: potrebuje prehliadač.
-
-**Vlastné SVG rozloženie grafov.** Grafy funkcií majú zvyčajne desiatky blokov.
-Zjednodušený vrstvený algoritmus (podľa dagre a Sugiyamu) na to stačí a
-nepotrebuje CDN ani npm build. Pre veľké grafy (stovky blokov) bude treba lepší
-algoritmus (roadmapa).
+**Vlastné rozloženie grafov.** Grafy funkcií majú zvyčajne desiatky blokov.
+Zjednodušený vrstvený algoritmus (podľa dagre a Sugiyamu) v `QGraphicsView`
+na to stačí. Pre veľké grafy (stovky blokov) bude treba lepší algoritmus
+(roadmapa).
 
 **SQLite pre projekty.** Jeden súbor, atómové transakcie, verzia schémy
-a migrácie. SQLite je v štandardnej knižnici Pythonu. JSON by bol jednoduchší,
-ale pri veľkých projektoch pomalší a bez transakcií.
+a migrácie. JSON by bol jednoduchší, ale pri veľkých projektoch pomalší
+a bez transakcií.
 
 **Medzijazyk (IR) v dekompilátore.** Lifter pre každú architektúru prevedie
 inštrukcie do spoločného IR. Optimalizácie a štruktúrovanie sú potom spoločné.
 Novú architektúru pridáte napísaním jedného liftera.
 
+**Závislosti so zámkom.** Capstone a pybind11 sťahuje CMake v pevných git
+tagoch, SQLite na Windows ide cez vcpkg s pevným `builtin-baseline`, testovacie
+Python nástroje majú hashe v `tests/requirements-dev.lock` a GitHub Actions sú
+pripnuté na commity. `scripts/check_licenses.py` v CI overí licenciu každej
+závislosti.
+
 **MIT licencia.** Najjednoduchšia pre používateľov aj firmy, kompatibilná so
-všetkými našimi závislosťami (Capstone BSD-3). GPL nástroje (Unicorn, Keystone)
-preto nemôžu byť povinnou súčasťou, len voliteľnými pluginmi.
+všetkými našimi závislosťami. GPL nástroje (Unicorn, Keystone) preto nemôžu byť
+povinnou súčasťou, len voliteľnými pluginmi.
 
 **Izolácia pluginov bez sandboxu.** Každý háčik je obalený `try/except`.
-Spadnutý plugin sa vypne a REVERSA beží ďalej. Skutočný sandbox (samostatný
-proces) je v roadmape. Do vtedy dokumentácia jasne varuje, že pluginy sú
-dôveryhodný kód.
+Spadnutý plugin sa vypne a REVERSA beží ďalej. Háčiky počas analýzy bežia na
+pracovnom vlákne (GIL sa získava pri každom volaní). Skutočný sandbox
+(samostatný proces) je v roadmape. Dovtedy dokumentácia jasne varuje, že
+pluginy sú dôveryhodný kód.
 
 ## Čo sme sa naučili z existujúcich projektov
 
@@ -139,16 +155,15 @@ dôveryhodný kód.
 ## Bezpečnostný model
 
 - Iba statická analýza. Analyzovaný súbor sa nikdy nespúšťa.
-- Žiadna sieť okrem lokálneho servera GUI na `127.0.0.1`. Žiadna telemetria.
-- Server GUI: náhodný token pre každú požiadavku na `/api/`, kontrola `Host`
-  (ochrana pred DNS rebinding), bez prístupu mimo statických súborov
-  a `docs/`.
-- Upload v GUI ukladá súbory do dočasného priečinka, nespúšťa ich.
-- Pluginy a skripty nie sú sandboxované (pozri vyššie).
+- Žiadna sieť, žiadna telemetria. GUI je natívne, nič nepočúva na porte.
+- Všetky čítania zo súboru idú cez kontrolu hraníc; fuzz testy v CI.
+- Pluginy a skripty nie sú sandboxované (pozri vyššie). Načítajú sa len
+  z používateľského priečinka pluginov a z priečinkov zadaných voľbou
+  `--plugins`; voľba `--no-plugins` ich vypne.
 
 ## Plán priorít (MVP, sekcia 4.2)
 
-| Priorita | Funkcia | Stav v 0.1.0 |
+| Priorita | Funkcia | Stav v 0.2.0 |
 |---|---|---|
 | P0 | Načítanie ELF/PE, odolnosť voči poškodeniu | hotové |
 | P0 | Disassembly x86, x86-64, ARM64 (ARM 32-bit základ) | hotové |
@@ -158,7 +173,7 @@ dôveryhodný kód.
 | P0 | Premenovanie, komentáre, záložky, undo/redo, projekt | hotové |
 | P0 | Python API, pluginy s izoláciou | hotové |
 | P0 | Headless CLI, reporty | hotové |
-| P1 | Slovenské a anglické rozhranie | slovenské úplné, anglické čiastočné |
+| P1 | Slovenské a anglické rozhranie | slovenské úplné; anglický preklad chýba (texty sú pripravené cez `tr()`) |
 | P1 | Onboarding, nápoveda, slovník | hotové |
 
 ## Roadmapa (sekcia 4.3, mimo MVP)
@@ -174,11 +189,13 @@ dôveryhodný kód.
    alebo ochrany proti kopírovaniu.
 8. Debugger (lokálny, v sandboxe), kolaborácia na projekte.
 
-## Známe obmedzenia 0.1.0
+## Známe obmedzenia
 
 - `main` sa nenájde v stripped PE z mingw (chýba vzor ako `__libc_start_main`).
 - Jump tabuľky sa neriešia, nepriame skoky končia blok.
 - Floating point a SIMD inštrukcie sú v pseudokóde ako `__asm(...)`.
 - Pluginy nie sú sandboxované.
 - Mach-O, APK a iné formáty sa načítajú ako surové dáta.
-- Anglický preklad GUI je čiastočný (chýbajúce texty sú po slovensky).
+- GUI je zatiaľ len po slovensky (anglický preklad cez Qt Linguist je v pláne).
+- Listing v GUI zobrazuje jednu funkciu naraz; dáta mimo funkcií ukazuje hex
+  výpis na karte Sekcie a hex.
