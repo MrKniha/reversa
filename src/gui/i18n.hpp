@@ -15,7 +15,7 @@ struct Language {
 
 const std::vector<Language>& languages();
 
-// Saved choice if supported, else the system language if supported, else English.
+// Saved choice if supported, else English (the default language).
 QString pick_language(const QString& saved);
 
 // Install the translation for `code` (Slovak needs none) plus Qt's own dialog translations if present.

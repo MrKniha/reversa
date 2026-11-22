@@ -26,7 +26,7 @@ struct CommandDef {
 
 struct UiSettings {
     QString theme = "light";  // light | dark
-    QString language;         // sk en de fr zh; empty = follow the system
+    QString language;         // sk en de fr zh; empty = English
     int font_size = 10;
     bool hints = true;        // beginner explanations above the panels
     bool onboarding_done = false;

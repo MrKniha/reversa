@@ -5,7 +5,6 @@
 #include <QJsonDocument>
 #include <QJsonObject>
 #include <QLibraryInfo>
-#include <QLocale>
 #include <QTranslator>
 #include <memory>
 
@@ -46,16 +45,14 @@ bool supported(const QString& code) {
 
 const std::vector<Language>& languages() {
     static const std::vector<Language> L = {
-        {"sk", QString::fromUtf8("Slovenčina")}, {"en", "English"},
+        {"en", "English"}, {"sk", QString::fromUtf8("Slovenčina")},
         {"de", "Deutsch"}, {"fr", QString::fromUtf8("Français")}, {"zh", QString::fromUtf8("中文（简体）")},
     };
     return L;
 }
 
 QString pick_language(const QString& saved) {
-    if (supported(saved)) return saved;
-    QString sys = QLocale::system().name().left(2);
-    return supported(sys) ? sys : QStringLiteral("en");
+    return supported(saved) ? saved : QStringLiteral("en");
 }
 
 void set_language(const QString& code) {
