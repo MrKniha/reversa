@@ -3,6 +3,7 @@
 #include <QComboBox>
 #include <QMenuBar>
 #include <QDir>
+#include <QHeaderView>
 #include <QFile>
 #include <QSettings>
 #include <QSignalSpy>
@@ -163,10 +164,25 @@ private Q_SLOTS:
 
         // theme switch and shortcuts
         QCOMPARE(w.command("rename")->shortcut(), QKeySequence("N"));
+        auto* strings_header = w.findChild<QTableWidget*>("strings")->horizontalHeader();
+        auto window_lightness = [] { return qApp->palette().color(QPalette::Window).lightness(); };
+        bool was_dark = window_lightness() < 128;
         w.command("theme")->trigger();
         w.command("listing")->trigger();
         shot(w, "theme2");
+        QCOMPARE(window_lightness() < 128, !was_dark);
         w.command("theme")->trigger();
+        QCOMPARE(window_lightness() < 128, was_dark);
+        // the strings table keeps Text as the last column after refreshes
+        QCOMPARE(strings_header->visualIndex(1), 3);
+        // light theme stays light even when the system is dark (Fusion's standard palette follows the system)
+        if (was_dark) w.command("theme")->trigger();
+        qApp->setPalette(QPalette(QColor(50, 50, 50)));
+        w.command("theme")->trigger();
+        w.command("theme")->trigger();
+        QVERIFY(window_lightness() > 200);
+        QCOMPARE(qApp->palette().color(QPalette::Base), QColor(Qt::white));
+        QCOMPARE(qApp->palette().color(QPalette::Text), QColor(Qt::black));
         QVERIFY(w.listing_view()->toPlainText().contains("start_here:"));
     }
 

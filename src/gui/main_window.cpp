@@ -17,6 +17,7 @@
 #include <QLineEdit>
 #include <QMenuBar>
 #include <QMessageBox>
+#include <QPainter>
 #include <QPlainTextEdit>
 #include <QProgressBar>
 #include <QPushButton>
@@ -27,6 +28,7 @@
 #include <QStatusBar>
 #include <QStyle>
 #include <QStyleFactory>
+#include <QStyleHints>
 #include <QTabWidget>
 #include <QTableWidget>
 #include <QTextBrowser>
@@ -54,29 +56,33 @@ QString q(const std::string& s) { return QString::fromStdString(s); }
 std::string s8(const QString& s) { return s.toStdString(); }
 QString hexq(Addr a) { return q(hex(a)); }
 
+// Both palettes are fully explicit: Fusion's standardPalette() follows the system color scheme,
+// so on a dark Windows desktop it would turn the "Light" theme into Fusion's own grey dark palette.
 void apply_theme(bool dark) {
     qApp->setStyle(QStyleFactory::create("Fusion"));
-    QPalette p;
-    if (dark) {
-        p.setColor(QPalette::Window, QColor(37, 37, 38));
-        p.setColor(QPalette::WindowText, QColor(220, 220, 220));
-        p.setColor(QPalette::Base, QColor(30, 30, 30));
-        p.setColor(QPalette::AlternateBase, QColor(45, 45, 48));
-        p.setColor(QPalette::ToolTipBase, QColor(50, 50, 50));
-        p.setColor(QPalette::ToolTipText, QColor(230, 230, 230));
-        p.setColor(QPalette::Text, QColor(212, 212, 212));
-        p.setColor(QPalette::Button, QColor(51, 51, 55));
-        p.setColor(QPalette::ButtonText, QColor(220, 220, 220));
-        p.setColor(QPalette::Highlight, QColor(38, 79, 120));
-        p.setColor(QPalette::HighlightedText, Qt::white);
-        p.setColor(QPalette::Link, QColor(79, 193, 255));
-        p.setColor(QPalette::PlaceholderText, QColor(140, 140, 140));
-        p.setColor(QPalette::Disabled, QPalette::Text, QColor(120, 120, 120));
-        p.setColor(QPalette::Disabled, QPalette::ButtonText, QColor(120, 120, 120));
-        p.setColor(QPalette::Disabled, QPalette::WindowText, QColor(120, 120, 120));
-    } else {
-        p = qApp->style()->standardPalette();
-    }
+#if QT_VERSION >= QT_VERSION_CHECK(6, 8, 0)
+    QGuiApplication::styleHints()->setColorScheme(dark ? Qt::ColorScheme::Dark : Qt::ColorScheme::Light);
+#endif
+    const QColor window = dark ? QColor(37, 37, 38) : QColor(239, 239, 239);
+    QPalette p(dark ? QColor(220, 220, 220) : QColor(Qt::black), window, window.lighter(150), window.darker(150),
+               window.darker(130), dark ? QColor(212, 212, 212) : QColor(Qt::black),
+               dark ? QColor(30, 30, 30) : QColor(Qt::white));
+    p.setColor(QPalette::Midlight, window.darker(130).lighter(110));
+    p.setColor(QPalette::Shadow, window.darker(150).darker(135));
+    p.setColor(QPalette::AlternateBase, dark ? QColor(45, 45, 48) : QColor(247, 247, 247));
+    p.setColor(QPalette::ToolTipBase, dark ? QColor(50, 50, 50) : QColor(255, 255, 220));
+    p.setColor(QPalette::ToolTipText, dark ? QColor(230, 230, 230) : QColor(Qt::black));
+    p.setColor(QPalette::Button, dark ? QColor(51, 51, 55) : window);
+    p.setColor(QPalette::ButtonText, dark ? QColor(220, 220, 220) : QColor(Qt::black));
+    p.setColor(QPalette::BrightText, Qt::red);
+    p.setColor(QPalette::Highlight, dark ? QColor(38, 79, 120) : QColor(48, 140, 198));
+    p.setColor(QPalette::HighlightedText, Qt::white);
+    p.setColor(QPalette::Link, dark ? QColor(79, 193, 255) : QColor(11, 87, 208));
+    p.setColor(QPalette::PlaceholderText, dark ? QColor(140, 140, 140) : QColor(120, 120, 120));
+    const QColor disabled = dark ? QColor(120, 120, 120) : QColor(160, 160, 160);
+    for (auto role : {QPalette::Text, QPalette::ButtonText, QPalette::WindowText})
+        p.setColor(QPalette::Disabled, role, disabled);
+    p.setColor(QPalette::Disabled, QPalette::Highlight, QColor(145, 145, 145));
     qApp->setPalette(p);
 }
 
@@ -243,7 +249,6 @@ void MainWindow::build_ui() {
     command("save")->setIcon(style()->standardIcon(QStyle::SP_DialogSaveButton));
     command("undo")->setIcon(style()->standardIcon(QStyle::SP_ArrowBack));
     command("redo")->setIcon(style()->standardIcon(QStyle::SP_ArrowForward));
-    command("demo")->setIcon(style()->standardIcon(QStyle::SP_MediaPlay));
     for (auto id : {"open", "demo", "save", "undo", "redo"}) tb->addAction(command(id));
     tb->addSeparator();
     search_box_ = new QLineEdit;
@@ -507,6 +512,13 @@ void MainWindow::build_ui() {
 void MainWindow::apply_settings() {
     apply_theme(settings_.theme == "dark");
     pal_ = Palette::make(settings_.theme == "dark");
+    // the standard play icon is black: paint it in the text color so it shows on the dark toolbar
+    QPixmap play = style()->standardIcon(QStyle::SP_MediaPlay).pixmap(32);
+    QPainter painter(&play);
+    painter.setCompositionMode(QPainter::CompositionMode_SourceIn);
+    painter.fillRect(play.rect(), QColor(pal_.text));
+    painter.end();
+    command("demo")->setIcon(QIcon(play));
     for (auto& c : command_defs_)
         if (auto* a = command(c.id)) a->setShortcut(settings_.key(c));
     QFont mono("monospace");
@@ -771,7 +783,7 @@ void MainWindow::refresh_functions() {
     auto& a = *s.analysis;
     functions_->setSortingEnabled(false);
     functions_->clear();
-    QColor dim = palette().color(QPalette::Disabled, QPalette::Text);
+    QColor dim(pal_.dim);
     QList<QTreeWidgetItem*> items;
     for (auto& [addr, fn] : a.functions) {
         auto* it = new QTreeWidgetItem;
@@ -784,7 +796,7 @@ void MainWindow::refresh_functions() {
         it->setData(0, Qt::UserRole, qulonglong(addr));
         if (fn.kind != "normal") {
             for (int c = 0; c < 4; c++) it->setForeground(c, dim);
-            it->setToolTip(0, tr("Imported function%1").arg(fn.library.empty() ? QString() : " z " + q(fn.library)));
+            it->setToolTip(0, tr("Imported function%1").arg(fn.library.empty() ? QString() : " (" + q(fn.library) + ")"));
         }
         items << it;
     }
@@ -832,6 +844,7 @@ void MainWindow::fill_table(QTableWidget* t, const QStringList& headers, const s
                             const std::vector<Addr>& addrs) {
     t->setSortingEnabled(false);
     t->clear();
+    t->clearSpans();
     t->setColumnCount(int(headers.size()));
     t->setHorizontalHeaderLabels(headers);
     t->setRowCount(int(rows.size()));
@@ -863,8 +876,8 @@ void MainWindow::refresh_tables() {
         addrs.push_back(st.addr);
     }
     fill_table(strings_, {tr("Address"), tr("Text"), tr("Encoding"), tr("References")}, rows, addrs);
-    // put the text column last so it stretches
-    strings_->horizontalHeader()->moveSection(1, 3);
+    // put the text column last so it stretches (the header keeps its order across refreshes)
+    if (auto* h = strings_->horizontalHeader(); h->visualIndex(1) != 3) h->moveSection(h->visualIndex(1), 3);
 
     rows.clear();
     addrs.clear();
@@ -885,6 +898,7 @@ void MainWindow::refresh_tables() {
     fill_table(exports_, {tr("Name"), tr("Address"), tr("Ordinal"), tr("Forwarder")}, rows, addrs);
     if (b.exports.empty()) {
         exports_->setRowCount(1);
+        exports_->setSpan(0, 0, 1, exports_->columnCount());
         exports_->setItem(0, 0, new QTableWidgetItem(tr("This file exports nothing (common for executables).")));
     }
 
@@ -913,6 +927,7 @@ void MainWindow::refresh_tables() {
     fill_table(bookmarks_, {tr("Address"), tr("Type"), tr("Text"), tr("Function")}, rows, addrs);
     if (rows.empty()) {
         bookmarks_->setRowCount(1);
+        bookmarks_->setSpan(0, 0, 1, bookmarks_->columnCount());
         bookmarks_->setItem(0, 0, new QTableWidgetItem(tr("No bookmarks or comments yet.")));
     }
 }
