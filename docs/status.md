@@ -88,7 +88,7 @@ acceptance criteria.
 ## CI log
 
 Run [45052061572](https://github.com/MrKniha/reversa/actions/runs/45052061572) on branch `cpp`
-(22 Nov 2026): **all jobs green**. Later runs on `main` (Python removed, English everywhere) are
+(22 Nov 2026): all jobs green. Later runs on `main` (Python removed, English everywhere) are
 listed on the [Actions page](https://github.com/MrKniha/reversa/actions/workflows/ci.yml).
 
 | Job | Result |

@@ -4,13 +4,13 @@ Goal: install REVERSA, open the sample binary and find the password in it, with 
 
 ## 1. Install (2 minutes)
 
-Download a ready-made package from GitHub Actions (latest successful run → *Artifacts*):
+Download a package from GitHub Actions (open the latest successful run, then *Artifacts*):
 
-- **Windows:** `reversa-windows-x64` (zip). Unpack it and run `reversa-windows-x64\bin\reversa-gui.exe`.
+- Windows: `reversa-windows-x64` (zip). Unpack it and run `reversa-windows-x64\bin\reversa-gui.exe`.
   For the commands below, open a command prompt in the `bin` folder and type `reversa.exe`.
-- **Linux (Ubuntu 24.04 and newer):** `reversa-linux-x64-deb`, then `sudo apt install ./reversa_0.2.0_amd64.deb`.
+- Linux (Ubuntu 24.04 and newer): `reversa-linux-x64-deb`, then `sudo apt install ./reversa_0.2.0_amd64.deb`.
 
-Check: `reversa --version`. Building from source is described in [building.md](building.md).
+Check the install with `reversa --version`. To build from source, see [building.md](building.md).
 
 ## 2. Sample analysis (1 minute)
 
@@ -18,18 +18,18 @@ Check: `reversa --version`. Building from source is described in [building.md](b
 reversa --demo
 ```
 
-The REVERSA window opens and the sample program is analysed in the background (the status bar
-shows the progress, and the *Cancel* button stops the analysis). On the first start you see a
-short guide, which you can skip. Without a graphical environment (server, CI) use
+The REVERSA window opens and analyses the sample program in the background. The status bar shows
+the progress, and the *Cancel* button stops the analysis. On the first start a short guide appears;
+you can skip it. Without a graphical environment (server, CI) use
 `reversa --demo --no-gui`: the results are printed to the terminal.
 
 ## 3. The three main panels
 
 | Panel | What it shows |
 |---|---|
-| **Functions** (left) | All functions of the program. ★ = the main function `main`. Grey = imports from libraries. |
-| **Centre** | Tabs *Listing* (instructions), *Pseudocode* (readable code), *Function graph*, *Call graph*, *Strings*, *Imports*… |
-| **Details** (right) | What is at the selected address and **who uses it** (cross-references). Buttons Rename / Comment / Bookmark. |
+| Functions (left) | All functions of the program. ★ = the main function `main`. Grey = imports from libraries. |
+| Centre | Tabs *Listing* (instructions), *Pseudocode* (readable code), *Function graph*, *Call graph*, *Strings*, *Imports*… |
+| Details (right) | What is at the selected address and who uses it (cross-references). Buttons Rename / Comment / Bookmark. |
 
 ## 4. Find the password (5 minutes)
 
@@ -46,7 +46,7 @@ short guide, which you can skip. Without a graphical environment (server, CI) us
 
 ## 5. Your own file
 
-Click **Open file** or run `reversa gui /path/to/program`. Supported are ELF (x86-64, ARM64, x86,
+Click **Open file** or run `reversa gui /path/to/program`. REVERSA reads ELF (x86-64, ARM64, x86,
 ARM), PE 32/64-bit and raw data (`reversa gui firmware.bin --arch arm64 --base 0x8000000`).
 
 ## Keyboard shortcuts
@@ -66,8 +66,7 @@ ARM), PE 32/64-bit and raw data (`reversa gui firmware.bin --arch arm64 --base 0
 
 You can change every shortcut in *View → Settings*. There you also set the font size and the
 language, and turn off the hints for beginners. The default language is English; restart REVERSA
-after changing the language. The analysis runs in the background and the *Cancel* button in the
-status bar stops it.
+after changing it.
 
 ## Next
 

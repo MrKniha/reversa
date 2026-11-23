@@ -1,5 +1,5 @@
 <p align="center">
-  <img src="assets/logo.svg" width="560" alt="REVERSA – reverse engineering">
+  <img src="assets/logo.svg" width="560" alt="REVERSA reverse engineering">
 </p>
 
 <p align="center">
@@ -28,29 +28,29 @@
 
 ## What REVERSA does
 
-- **Disassembler and pseudocode** for x86, x86-64 and ARM64 (ARM 32-bit: disassembly only).
-- **Formats:** ELF, PE (32/64-bit) and raw data such as firmware.
-- **Cross-references, function graphs and a call graph.** See at once who calls what and who reads which string.
-- **Renames, comments, bookmarks** with undo/redo. Everything is saved to a `.rvproj` project.
-- **Plugins and scripts in C/C++** over a stable C interface.
-- **Reports** in Markdown, HTML and JSON, also without the GUI (`reversa analyze`).
-- **Interface** in English, Slovak, German, French and Chinese. Light and dark theme.
-- **Static analysis only.** The file is never run. No cloud, no telemetry.
+- Disassembly and pseudocode for x86, x86-64 and ARM64. ARM 32-bit gets disassembly only.
+- Loads ELF, PE (32/64-bit) and raw data such as firmware.
+- Cross-references, function graphs and a call graph show who calls what and which code reads which string.
+- Renames, comments and bookmarks with undo/redo, saved to a `.rvproj` project.
+- Plugins and scripts in C/C++ over a stable C interface.
+- Markdown, HTML and JSON reports, also without the GUI (`reversa analyze`).
+- Interface in English, Slovak, German, French and Chinese, with a light and a dark theme.
+- Static analysis only: REVERSA never runs the file. No cloud, no telemetry.
 
-> Version 0.2.0. The pseudocode is still an **estimate**: types are inferred from access sizes.
-> Check important conclusions in the listing.
+> Version 0.2.0. The pseudocode is an estimate: types are inferred from access sizes, so check
+> important conclusions in the listing.
 
 ## Installation
 
-Ready-made packages are on the [GitHub Actions](https://github.com/MrKniha/reversa/actions/workflows/ci.yml)
-page (latest successful run, then *Artifacts*).
+Download a package from [GitHub Actions](https://github.com/MrKniha/reversa/actions/workflows/ci.yml):
+open the latest successful run and scroll to *Artifacts*.
 
 | System | Package | Run |
 |---|---|---|
-| **Windows** 10/11 (64-bit) | `reversa-windows-x64` (zip) | unpack and run `bin\reversa-gui.exe` |
-| **Linux** Ubuntu 24.04+, Debian 13+ | `reversa-linux-x64-deb` | `sudo apt install ./reversa_0.2.0_amd64.deb` |
+| Windows 10/11 (64-bit) | `reversa-windows-x64` (zip) | unpack and run `bin\reversa-gui.exe` |
+| Linux Ubuntu 24.04+, Debian 13+ | `reversa-linux-x64-deb` | `sudo apt install ./reversa_0.2.0_amd64.deb` |
 
-Building from source is described in [docs/building.md](docs/building.md).
+To build from source, see [docs/building.md](docs/building.md).
 
 ## Quick start
 
@@ -79,13 +79,13 @@ Find the password in the demo in 10 minutes: [docs/quickstart.md](docs/quickstar
 ## Safety and ethics
 
 REVERSA is for learning, CTFs, malware analysis, security research and interoperability.
-**It does not and will not contain features to bypass DRM, licenses, activation
-or anti-cheat.** Analyse suspicious files in a virtual machine without a network.
-More in [docs/safety.md](docs/safety.md). Report vulnerabilities as described in [SECURITY.md](SECURITY.md).
+It has no features for bypassing DRM, licenses, activation or anti-cheat, and it never will.
+Analyse suspicious files in a virtual machine without a network; [docs/safety.md](docs/safety.md)
+has the details. To report a vulnerability, follow [SECURITY.md](SECURITY.md).
 
 ## Contributing
 
-Contributions are welcome. Rules and steps are in [CONTRIBUTING.md](CONTRIBUTING.md).
+Contributions are welcome. See [CONTRIBUTING.md](CONTRIBUTING.md) for the rules.
 
 ## License
 
@@ -94,5 +94,5 @@ Contributions are welcome. Rules and steps are in [CONTRIBUTING.md](CONTRIBUTING
 ## Acknowledgements
 
 We learned from Ghidra, radare2, Rizin, Cutter, angr, Detect It Easy, RetDec, LIEF and binwalk.
-Machine code is read by [Capstone](https://github.com/capstone-engine/capstone). No code from these
-projects is copied; details are in [docs/research.md](docs/research.md).
+[Capstone](https://github.com/capstone-engine/capstone) decodes the machine code. We copied no code
+from these projects; [docs/research.md](docs/research.md) lists what we took from each.
