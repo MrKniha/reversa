@@ -1,12 +1,11 @@
 # Research and references
 
-This document records what we based the design of REVERSA on, which tools we used during the
-research and what did (not) work. The repository data was collected on 22 Nov 2026 through the
+What the design of REVERSA is based on, which tools we used during the research, and what worked. The repository data was collected on 22 Nov 2026 through the
 GitHub API (`gh api repos/<owner>/<repo>`). Stars and the date of the last push change, so treat
 them as approximate.
 
-**No code from these projects is copied into REVERSA.** We took only ideas, conventions and proven
-practices (see the column "what we took"). The only direct dependency among them is Capstone
+REVERSA contains no code copied from these projects. We took ideas and conventions (see the column
+"What we took"). The only direct dependency among them is Capstone
 (BSD-3-Clause). See [LICENSE-THIRD-PARTY](../LICENSE-THIRD-PARTY).
 
 ## Projects
@@ -14,11 +13,11 @@ practices (see the column "what we took"). The only direct dependency among them
 | Project | URL | License (per GitHub) | ★ | last push | What we took |
 |---|---|---|---|---|---|
 | Ghidra | https://github.com/NationalSecurityAgency/ghidra | Apache-2.0 | 100 942 | 2026-11-20 | The split into listing / decompiler / graph. We changed the naming `FUN_`/`DAT_` to `sub_`/`s_`. The P-code idea: an intermediate representation (IR) between assembly and pseudocode. The extension manifest (`extension.properties`) as a model for plugin metadata. |
-| radare2 | https://github.com/radareorg/radare2 | LGPL-3.0 (GitHub: NOASSERTION) | 25 483 | 2026-11-22 | Short keyboard shortcuts and commands. We used it as an **independent check** of our results (see below). |
+| radare2 | https://github.com/radareorg/radare2 | LGPL-3.0 (GitHub: NOASSERTION) | 25 483 | 2026-11-22 | Short keyboard shortcuts and commands. We used it as an independent check of our results (see below). |
 | Rizin | https://github.com/rizinorg/rizin | LGPL-3.0 | 4 220 | 2026-11-22 | Projects as a separate file with a schema version. |
 | Cutter | https://github.com/rizinorg/cutter | GPL-3.0 | 20 250 | 2026-11-13 | GUI layout: functions on the left, tabs in the centre, details on the right. Views kept in sync by one "current address". |
 | angr | https://github.com/angr/angr | BSD-2-Clause | 9 406 | 2026-11-20 | Recursive descent for finding functions, detecting noreturn functions, the CFG structure. A complete API as a first-class interface. |
-| Capstone | https://github.com/capstone-engine/capstone | BSD-3-Clause | 9 204 | 2026-11-21 | **Dependency**: disassembler for x86, x86-64, ARM, AArch64. |
+| Capstone | https://github.com/capstone-engine/capstone | BSD-3-Clause | 9 204 | 2026-11-21 | Dependency: disassembler for x86, x86-64, ARM, AArch64. |
 | Unicorn | https://github.com/unicorn-engine/unicorn | GPL-2.0 | 9 601 | 2026-11-10 | Not used in the MVP (emulation is on the roadmap). Because of GPL-2.0 it could only be an optional plugin. |
 | Frida | https://github.com/frida/frida | wxWindows Library Licence (GitHub: NOASSERTION) | 22 892 | 2026-11-20 | Not used. Dynamic analysis is outside the MVP. |
 | pwndbg | https://github.com/pwndbg/pwndbg | MIT | 11 238 | 2026-11-19 | Clear display of context (registers, stack) as inspiration for a future debugger view. |
@@ -35,7 +34,7 @@ practices (see the column "what we took"). The only direct dependency among them
 | dagre | https://github.com/dagrejs/dagre | MIT | 5 863 | 2026-10-24 | Layered layout algorithm (Sugiyama): layers by the longest path, fewer crossings. We wrote our own simplified version. |
 | PySide6 | https://github.com/pyside/pyside-setup | LGPL-3.0 / GPL (as Qt) | 138 (mirror) | 2026-11-20 | Considered for the GUI of version 0.1. Not used (size, LGPL conditions when distributing). |
 
-## Comparing key libraries
+## How we chose the main libraries
 
 These are the decisions of version 0.1 (Python). Version 0.2 kept Capstone, the own parsers and
 SQLite, and replaced the web GUI with a native Qt GUI and the SVG graphs with `QGraphicsView`
@@ -51,7 +50,7 @@ SQLite, and replaced the web GUI with a native Qt GUI and the SVG graphs with `Q
 
 ## Log of using REA (`npx rea-agents`)
 
-The specification recommends REA. Result: **partly working**.
+The specification recommends REA. It partly worked.
 
 | Step | Command | Result |
 |---|---|---|
@@ -71,7 +70,7 @@ Before using `libcapstone.so` from the Python package `capstone 5.0.9`, we check
 (`rabin2 -I`, `rabin2 -i`, radare2 5.5.0):
 
 - x86-64, PIC, NX enabled, not stripped, partial RELRO, no stack canary.
-- Imports only from libc (malloc, free, memcpy, printf, strcmp…). **No network functions**
+- Imports only from libc (malloc, free, memcpy, printf, strcmp…). No network functions
   (socket, connect, getaddrinfo) and no process creation.
 - The BSD-3-Clause license is compatible with MIT.
 
@@ -93,6 +92,6 @@ addresses. The expected values ("golden files") are in `samples/expected/` and
 
 ## What we refused
 
-In line with the specification (section 7), REVERSA does not and will not contain features to
-bypass DRM, license checks, anti-cheat systems or copy protection. It also contains no telemetry
-and no cloud services.
+As the specification (section 7) requires, REVERSA has no features for bypassing DRM, license
+checks, anti-cheat systems or copy protection, and it never will. It also has no telemetry and no
+cloud services.

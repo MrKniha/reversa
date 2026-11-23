@@ -1,14 +1,14 @@
 # Building from source
 
-Ready-made packages for Windows and Linux are listed in the [README](../README.md#installation).
-This guide is for developers and for anyone who wants to build REVERSA themselves.
+Packages for Windows and Linux are listed in the [README](../README.md#installation). This guide
+is for developers and anyone who wants to build REVERSA themselves.
 
 ## Build
 
 You need a C++20 compiler (GCC 11+, Clang 14+ or Visual Studio 2022), CMake 3.21+, Qt 6.2+ and
 SQLite 3. CMake downloads Capstone automatically at a pinned version.
 
-**Linux (Debian/Ubuntu):**
+Linux (Debian/Ubuntu):
 
 ```bash
 sudo apt install build-essential cmake ninja-build git qt6-base-dev libgl-dev libsqlite3-dev
@@ -20,7 +20,7 @@ cmake --build build
 
 Fedora: `sudo dnf install gcc-c++ cmake ninja-build qt6-qtbase-devel sqlite-devel`.
 
-**Windows:** install Visual Studio 2022 (Desktop development with C++), Qt 6 (Qt Online
+Windows: install Visual Studio 2022 (Desktop development with C++), Qt 6 (Qt Online
 Installer, component MSVC 2022 64-bit) and vcpkg (`git clone https://github.com/microsoft/vcpkg`
 and `bootstrap-vcpkg.bat`). In the "x64 Native Tools Command Prompt":
 

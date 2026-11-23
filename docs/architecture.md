@@ -1,7 +1,6 @@
 # REVERSA architecture
 
-This document describes how REVERSA is built, why we chose to build it this way and what we plan
-next. Terms are explained in the [glossary](glossary.md).
+How REVERSA is built, why, and what comes next. Terms are explained in the [glossary](glossary.md).
 
 ## Layers
 
@@ -25,8 +24,8 @@ next. Terms are explained in the [glossary](glossary.md).
 ```
 
 Each layer uses only the layers below it. The GUI, the CLI and plugins all call the same
-`rv::Session`, so the behaviour is the same everywhere. For example, a rename from a script shows
-up in the GUI at once (through the EventBus).
+`rv::Session`, so they behave the same. A rename from a script, for example, shows up in the GUI
+at once through the EventBus.
 
 ## Modules
 
@@ -71,25 +70,25 @@ matches.
 Version 0.1 was written in Python with a web GUI in the browser. Since version 0.2 the whole tool
 is C++20 with a native Qt 6 interface, including scripts and plugins.
 
-- **Speed and memory.** Analysis, x-refs and the decompiler run natively, without an interpreter.
+- Speed and memory. Analysis, x-refs and the decompiler run natively, without an interpreter.
   Large binaries (tens of thousands of functions) are realistic, and the data model is compact
   (`std::map`, `unordered_map`, no extra objects per instruction).
-- **One program without dependencies.** The Windows package is a zip with `reversa-gui.exe`; the
+- One program without dependencies. The Windows package is a zip with `reversa-gui.exe`; the
   Linux package is a `.deb` with system libraries. You do not need Python or a browser.
-- **Native GUI.** Qt Widgets is proven in tools like Cutter, has dockable panels, keyboard
-  shortcuts and a dark theme, and works the same on Windows and Linux. There is no local HTTP
-  server and so none of its attack surface.
-- **C/C++ plugins and scripts over a stable C ABI.** A plugin or a script is a shared library that
+- Native GUI. Cutter and other tools already use Qt Widgets. It has dockable panels, keyboard
+  shortcuts and a dark theme, and works the same on Windows and Linux. Without a local HTTP server
+  there is no HTTP attack surface.
+- C/C++ plugins and scripts over a stable C ABI. A plugin or a script is a shared library that
   talks to REVERSA only through the `rv_host` function table (`sdk/include/reversa/plugin.h`). It
   does not link against REVERSA, works with any C or C++ compiler, and old plugins keep working in
   newer versions: functions are only appended to the table, and an incompatible change raises
   `RV_API_VERSION`. Python plugins and scripts from version 0.1 are no longer supported (decision
   of 2026-11-22: the whole tool in C++).
-- **Licenses.** Qt is LGPL-3.0 and we link it dynamically (replaceable libraries), which is fine
+- Licenses. Qt is LGPL-3.0 and we link it dynamically (replaceable libraries), which is fine
   with REVERSA's MIT license. Capstone is BSD-3-Clause, SQLite is public domain.
 
-The price: building is harder (CMake, a compiler, Qt). That is why CI builds ready-made packages
-for Windows and Linux and [building.md](building.md) describes the build step by step.
+The downside is a harder build (CMake, a compiler, Qt). CI therefore builds packages for Windows and
+Linux, and [building.md](building.md) describes the build step by step.
 
 ## Other decisions
 
@@ -97,9 +96,8 @@ for Windows and Linux and [building.md](building.md) describes the build step by
 license. Zydis and iced are more accurate for x86, but other architectures would need another
 library. We link it statically, with only the four architectures we use.
 
-**Own ELF and PE parsers.** In malware analysis, damaged and deliberately broken headers are
-common. An own parser that checks bounds on every read can load what is possible and report the
-rest as diagnostics. Fuzz tests (`tests/cpp/test_analysis.cpp`) check this.
+**Own ELF and PE parsers.** Malware often has damaged or deliberately broken headers. Our parsers
+check bounds on every read, load what they can and report the rest as diagnostics. Fuzz tests (`tests/cpp/test_analysis.cpp`) check this.
 
 **Own graph layout.** Function graphs usually have tens of blocks. A simplified layered algorithm
 (after dagre and Sugiyama) in `QGraphicsView` is enough for that. Large graphs (hundreds of blocks)
@@ -125,7 +123,7 @@ also turns an exception into one) disables the plugin and REVERSA keeps running.
 cannot be loaded or has a different API version is skipped and reported. A memory crash in a
 native plugin, however, ends the whole application. During the analysis, hooks run on the worker
 thread, and calls to one program are serialised. A real sandbox (a separate process) is on the
-roadmap. Until then the documentation warns clearly that plugins are trusted code.
+roadmap. Until then the documentation warns that plugins are trusted code.
 
 ## What we learned from existing projects
 
@@ -135,11 +133,10 @@ roadmap. Until then the documentation warns clearly that plugins are trusted cod
   content in the centre, details on the right.
 - **radare2 and Rizin**: short keyboard shortcuts. A project as a separate file with a format
   version.
-- **angr**: recursive descent and a list of noreturn functions matter more than prologue
+- **angr**: recursive descent and a list of noreturn functions find more than prologue
   heuristics. A complete API as a first-class interface.
-- **Detect It Easy**: detecting the compiler and packer is valuable for a beginner right after
-  opening a file.
-- **RetDec**: decompiler output must be clearly marked as an estimate.
+- **Detect It Easy**: showing the compiler and packer right after a file opens helps beginners.
+- **RetDec**: mark decompiler output as an estimate.
 - **binwalk**: firmware is often just raw data; the architecture and base address must be given by
   hand.
 - **LIEF, pyelftools, pefile**: one binary model for all formats. We also saw that libraries that
@@ -176,7 +173,7 @@ roadmap. Until then the documentation warns clearly that plugins are trusted cod
 4. A sandbox for plugins (separate process).
 5. Diffing two versions of a binary.
 6. Emulation (optional plugin with Unicorn, GPL-2.0).
-7. **Patch mode**: changing your own binaries to fix bugs and for teaching. It will never contain
+7. Patch mode: changing your own binaries to fix bugs and for teaching. It will never contain
    features to bypass DRM, licenses, anti-cheat or copy protection.
 8. A debugger (local, sandboxed), collaboration on a project.
 

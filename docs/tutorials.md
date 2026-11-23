@@ -1,13 +1,11 @@
 # Tutorials
 
 All tutorials use the sample binaries in `samples/bin/`. They are small programs that we compiled
-ourselves from the sources in `samples/src/` (checksums are in `samples/bin/SHA256SUMS`). They are
-not malware, so you can open them safely.
+ourselves from the sources in `samples/src/` (checksums are in `samples/bin/SHA256SUMS`). None of
+them is malware.
 
 If you have not run REVERSA yet, start with the [quick start](quickstart.md). Unknown terms are
 explained in the [glossary](glossary.md).
-
----
 
 ## Tutorial 1: First analysis in 10 minutes
 
@@ -22,7 +20,7 @@ explained in the [glossary](glossary.md).
 
 2. **Look at the strings (2 min).** Click the **Strings** tab. You see texts like
    `Usage: login <user> <password>`, `Wrong password.` and `Access granted. Flag: ...`.
-   Strings are the quickest clue: they tell you what the program does.
+   Strings are often the quickest clue to what a program does.
 
 3. **Who uses a string? (2 min).** Click `Wrong password.`. In the **Details** panel on the right
    you see the section *Who uses this (x-refs)*: the string is referenced from `main`. Click the
@@ -47,8 +45,6 @@ explained in the [glossary](glossary.md).
 
 **Solution:** user `admin` or `student`, password `reversa2026`, flag
 `CTF{xrefs_are_your_friend}`.
-
----
 
 ## Tutorial 2: Find the main function
 
@@ -84,9 +80,7 @@ order of functions in the file is chosen by the linker, not by the programmer. T
 `0x61737265766572` and `0x36323032`. They are strings written as numbers (little-endian). Read the
 bytes backwards: `72 65 76 65 72 73 61` = `"reversa"`, `32 30 32 36` = `"2026"`. The compiler
 optimised `strcpy`/`strcat` this way. The line `if (local_8 - __fs_28 == 0)` is a **stack canary**
-check (protection against stack overflows), not program logic.
-
----
+check (protection against stack overflows). It is not part of the program logic.
 
 ## Tutorial 3: Understand a loop
 
@@ -94,7 +88,7 @@ check (protection against stack overflows), not program logic.
 
 1. Open `samples/bin/hello_x64.elf` and select the function `sum_to`.
 2. **Graph (CFG):** switch the centre to **Function graph** (key **3**). You see blocks and one edge
-   that goes **back up**. A back edge is the sign of a loop, and REVERSA draws it in another colour.
+   that goes **back up**. A back edge means a loop, and REVERSA draws it in another colour.
    The block it leads to is the loop header.
 3. **Listing:** in the loop header you find a comparison and a conditional jump:
    ```
@@ -111,7 +105,7 @@ check (protection against stack overflows), not program logic.
    }
    return local_8;
    ```
-   Rename `local_4` to `i`, `local_8` to `total` and `local_14` to `n`. Now it is clear that the
+   Rename `local_4` to `i`, `local_8` to `total` and `local_14` to `n`. Now you can see that the
    function computes the sum 1 + 2 + … + n.
 
 **Why `while` and not `for`?** In machine code there is no difference between `for` and `while`.
@@ -121,8 +115,6 @@ The decompiler always picks one form. `for (i = 1; i <= n; i++)` is the same as
 **Exercise:** find the loop in the function `greet`. What is the value of `greetings[i % 3]` when
 `i = 4`? (Solution: `"Hello"`; you find the `greetings` table through the x-refs of the string
 `Ahoj`.)
-
----
 
 ## Tutorial 4: Same program, different architecture
 
@@ -135,8 +127,6 @@ different. Notice:
 - 32-bit Windows passes arguments on the stack (`push`), not in registers.
 - Windows PE calls DLL functions through the import table (IAT), for example
   `call dword ptr [__imp__strcmp]`.
-
----
 
 ## Tutorial 5: Without the GUI (headless)
 

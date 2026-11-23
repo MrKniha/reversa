@@ -5,8 +5,8 @@ rename) and can add its own view. A plugin is a shared library (`.so` on Linux, 
 written in C or C++. It uses the same interface as scripts (see
 [scripting-tutorial.md](scripting-tutorial.md)).
 
-> **Security:** a plugin is native code. It runs inside the REVERSA process **without a sandbox**
-> and has the same permissions as you. Only install plugins whose code you have read or that you
+> A plugin is native code. It runs inside the REVERSA process without a sandbox and has the same
+> permissions as you. Only install plugins whose code you have read or that you
 > trust.
 
 ## 1. Plugin code
@@ -102,12 +102,9 @@ of calls). The "Hello plugin" view is on the **Views** tab. If you do not want p
 ## 4. When a plugin fails
 
 [examples/plugins/crashing_plugin.cpp](../examples/plugins/crashing_plugin.cpp) throws an
-exception in `on_function_analyzed` on purpose. REVERSA:
-
-1. gets an error from the hook (the `REVERSA_PLUGIN` macro catches the exception) and **disables**
-   the plugin (status *failed*),
-2. writes the error, including the exception text, to the diagnostics,
-3. continues the analysis. The other plugins keep running.
+exception in `on_function_analyzed` on purpose. The `REVERSA_PLUGIN` macro catches the exception
+and returns an error from the hook. REVERSA then disables the plugin (status *failed*), writes the
+error and the exception text to the diagnostics, and continues the analysis with the other plugins.
 
 ```
 ! error: Plugin 'crashing-plugin' failed in on_function_analyzed and was disabled. REVERSA continues.
@@ -119,23 +116,22 @@ version (status *incompatible*) is handled the same way. The tests
 this behaviour (hooks also run on the analysis worker thread in the GUI).
 
 > A native plugin can bring down the whole application, for example with a bad pointer. REVERSA
-> catches errors that a plugin reports, but not memory crashes. That is another reason to install
-> only plugins you trust.
+> catches errors that a plugin reports, but not memory crashes, so install only plugins you trust.
 
 ## 5. A bigger example: crypto constants
 
 [examples/plugins/crypto_constants.cpp](../examples/plugins/crypto_constants.cpp) looks for
 well-known constants (AES S-box, SHA-256, MD5, CRC32) with `program.search_bytes(...)`. It adds a
 bookmark for every hit and creates the view "Crypto constants". FindCrypt plugins for IDA and
-Ghidra work in a similar way.
+Ghidra work the same way.
 
 ## Tips
 
-- The `on_function_analyzed` hook is called many times. Only do quick work in it.
+- REVERSA calls `on_function_analyzed` once per function, so keep the work in it short.
 - Hooks may run on the analysis worker thread. REVERSA serialises calls to one program, so the
   plugin needs no locks.
 - Use the API for annotations (`rename`, `set_comment`, `set_bookmark`), so undo and saving to the
   project work.
-- A plugin should not use the network or run the analysed file. REVERSA is a static analysis tool
-  without telemetry.
+- A plugin should not use the network or run the analysed file. REVERSA does static analysis only
+  and has no telemetry.
 - REVERSA no longer loads Python plugins (`plugin.json` + `plugin.py`) from version 0.1.

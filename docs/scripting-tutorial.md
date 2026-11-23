@@ -103,7 +103,7 @@ reversa gui out.rvproj
 
 ## A script in plain C
 
-`sdk.hpp` is only a convenience. A script can use the `rv_host` function table directly:
+A script can also skip `sdk.hpp` and use the `rv_host` function table directly:
 
 ```c
 #include <stdio.h>
@@ -124,7 +124,7 @@ RV_EXPORT int reversa_script(const rv_host* host, int argc, const char* const* a
   project, you see it in the GUI.
 - Text returned by an `rv_host` function is valid only until the next call on the same thread.
   `sdk.hpp` copies it into a `std::string` for you.
-- The pseudocode is **provisional** (MVP): types are guessed. Check important conclusions in the
+- The pseudocode is provisional (MVP): types are guessed. Check important conclusions in the
   listing.
 - A script runs inside the REVERSA process without a sandbox. Only run scripts you trust.
 - REVERSA no longer runs Python scripts (`.py`) from version 0.1. Rewrite them following this
