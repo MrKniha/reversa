@@ -8,7 +8,7 @@ Download a package from the [latest release](https://github.com/MrKniha/reversa/
 
 - Windows: run `reversa-windows-x64-setup.exe`, then type *REVERSA* in Windows search.
   For the commands below, tick *Add REVERSA to the system PATH* in the installer and open a new command prompt.
-- Linux (Ubuntu 24.04 and newer): `sudo apt install ./reversa_0.2.1_amd64.deb`. REVERSA shows up in the app menu.
+- Linux (Ubuntu 24.04 and newer): `sudo apt install ./reversa_0.2.2_amd64.deb`. REVERSA shows up in the app menu.
 
 Check the install with `reversa --version`. To build from source, see [building.md](building.md).
 

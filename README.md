@@ -37,7 +37,7 @@
 - Interface in English, Slovak, German, French and Chinese, with a light and a dark theme.
 - Static analysis only: REVERSA never runs the file. No cloud, no telemetry.
 
-> Version 0.2.1. The pseudocode is an estimate: types are inferred from access sizes, so check
+> Version 0.2.2. The pseudocode is an estimate: types are inferred from access sizes, so check
 > important conclusions in the listing.
 
 ## Installation
@@ -48,7 +48,7 @@ Download a package from the [latest release](https://github.com/MrKniha/reversa/
 |---|---|---|
 | Windows 10/11 (64-bit) | `reversa-windows-x64-setup.exe` | run the installer, then type *REVERSA* in Windows search |
 | Windows, portable | `reversa-windows-x64.zip` | unpack and run `bin\reversa-gui.exe` |
-| Linux Ubuntu 24.04+, Debian 13+ | `reversa_0.2.1_amd64.deb` | `sudo apt install ./reversa_0.2.1_amd64.deb`, then find REVERSA in the app menu |
+| Linux Ubuntu 24.04+, Debian 13+ | `reversa_0.2.2_amd64.deb` | `sudo apt install ./reversa_0.2.2_amd64.deb`, then find REVERSA in the app menu |
 
 Packages of every commit on `main` are also on the [Actions page](https://github.com/MrKniha/reversa/actions/workflows/ci.yml) under *Artifacts*.
 To build from source, see [docs/building.md](docs/building.md).
