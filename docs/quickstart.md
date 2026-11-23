@@ -4,11 +4,11 @@ Goal: install REVERSA, open the sample binary and find the password in it, with 
 
 ## 1. Install (2 minutes)
 
-Download a package from GitHub Actions (open the latest successful run, then *Artifacts*):
+Download a package from the [latest release](https://github.com/MrKniha/reversa/releases/latest):
 
-- Windows: `reversa-windows-x64` (zip). Unpack it and run `reversa-windows-x64\bin\reversa-gui.exe`.
-  For the commands below, open a command prompt in the `bin` folder and type `reversa.exe`.
-- Linux (Ubuntu 24.04 and newer): `reversa-linux-x64-deb`, then `sudo apt install ./reversa_0.2.0_amd64.deb`.
+- Windows: run `reversa-windows-x64-setup.exe`, then type *REVERSA* in Windows search.
+  For the commands below, tick *Add REVERSA to the system PATH* in the installer and open a new command prompt.
+- Linux (Ubuntu 24.04 and newer): `sudo apt install ./reversa_0.2.1_amd64.deb`. REVERSA shows up in the app menu.
 
 Check the install with `reversa --version`. To build from source, see [building.md](building.md).
 
