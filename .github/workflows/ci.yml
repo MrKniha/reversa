@@ -45,6 +45,7 @@ jobs:
           cd build && cpack -G DEB && cd ..
           sudo apt-get install -y ./build/reversa_*.deb
           reversa --version
+          test -f /usr/share/applications/reversa.desktop && test -f /usr/share/icons/hicolor/256x256/apps/reversa.png  # app menu entry
           reversa script /usr/lib/reversa/examples/scripts/strcmp_callers.so samples/bin/login_x64.exe | grep check_password
           # a third-party plugin built only against the installed SDK headers
           mkdir -p plugin-test && c++ -std=c++17 -shared -fPIC -o plugin-test/hello_plugin.so /usr/share/reversa/examples/plugins/hello_plugin.cpp
@@ -78,11 +79,13 @@ jobs:
         run: ctest --test-dir build -C Release --output-on-failure
       - name: Headless check
         run: build/bin/headless_check.exe build/bin/reversa.exe . headless-out
-      - name: Portable package (CPack zip, Qt via windeployqt)
+      - name: Portable zip and installer (CPack ZIP + NSIS, Qt via windeployqt)
         run: |
           cd build
           cpack -G ZIP -C Release
+          cpack -G NSIS -C Release -D CPACK_PACKAGE_FILE_NAME=reversa-windows-x64-setup
           Move-Item reversa-windows-x64.zip ..
+          Move-Item reversa-windows-x64-setup.exe ..
       - name: Test the portable package with a clean PATH (only the zip may provide Qt)
         shell: pwsh
         run: |
@@ -97,12 +100,26 @@ jobs:
           if (-not ($out -match "check_password")) { exit 1 }
           & "$bin/reversa.exe" --demo --no-gui
           if ($LASTEXITCODE -ne 0) { exit 1 }
+      - name: Test the installer (silent install, Start menu entry, run, silent uninstall)
+        shell: pwsh
+        run: |
+          Start-Process -Wait -FilePath ./reversa-windows-x64-setup.exe -ArgumentList '/S', '/D=C:\REVERSA'
+          $env:QT_QPA_PLATFORM = "offscreen"
+          & C:/REVERSA/bin/reversa.exe --version
+          if ($LASTEXITCODE -ne 0) { exit 1 }
+          $lnk = Get-ChildItem -Recurse -Filter REVERSA.lnk "$env:ProgramData\Microsoft\Windows\Start Menu", "$env:AppData\Microsoft\Windows\Start Menu"
+          $lnk
+          if (-not $lnk) { echo "no Start menu entry"; exit 1 }
+          Start-Process -Wait -FilePath C:/REVERSA/Uninstall.exe -ArgumentList '/S', '_?=C:\REVERSA'
+          if (Test-Path C:/REVERSA/bin/reversa.exe) { echo "uninstall left files"; exit 1 }
       - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
         with:
           name: reversa-windows-x64
-          path: reversa-windows-x64.zip
+          path: |
+            reversa-windows-x64.zip
+            reversa-windows-x64-setup.exe
 
-  # Pushing a tag like v0.2.0, or a manual run on main, publishes a GitHub release with both packages.
+  # Pushing a tag like v0.2.0, or a manual run on main, publishes a GitHub release with all packages.
   release:
     name: GitHub release
     if: startsWith(github.ref, 'refs/tags/v') || (github.event_name == 'workflow_dispatch' && github.ref == 'refs/heads/main')
@@ -128,5 +145,5 @@ jobs:
           GH_TOKEN: ${{ github.token }}
         run: |
           ls -l dist
-          gh release create "$TAG" dist/reversa-windows-x64.zip dist/reversa_*.deb \
+          gh release create "$TAG" dist/reversa-windows-x64-setup.exe dist/reversa-windows-x64.zip dist/reversa_*.deb \
             --target "$GITHUB_SHA" --title "REVERSA $TAG" --generate-notes

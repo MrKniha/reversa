@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.21)
-project(reversa VERSION 0.2.0 LANGUAGES C CXX)
+project(reversa VERSION 0.2.1 LANGUAGES C CXX)
 
 set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
@@ -138,6 +138,20 @@ if(WIN32)
   set(CPACK_GENERATOR ZIP)
   set(CPACK_PACKAGE_FILE_NAME reversa-windows-x64)
   set(CPACK_INCLUDE_TOPLEVEL_DIRECTORY ON)
+  # Installer: `cpack -G NSIS` -> Program Files, Start menu entry (found by Windows search),
+  # optional desktop shortcut and PATH entry, uninstaller in Settings > Apps.
+  set(CPACK_PACKAGE_INSTALL_DIRECTORY REVERSA)
+  set(CPACK_PACKAGE_EXECUTABLES reversa-gui REVERSA)
+  set(CPACK_CREATE_DESKTOP_LINKS reversa-gui)
+  set(CPACK_NSIS_PACKAGE_NAME REVERSA)
+  set(CPACK_NSIS_DISPLAY_NAME REVERSA)
+  set(CPACK_NSIS_INSTALL_ROOT "$PROGRAMFILES64")
+  set(CPACK_NSIS_MUI_ICON ${CMAKE_SOURCE_DIR}/assets/reversa.ico)
+  set(CPACK_NSIS_MUI_UNIICON ${CMAKE_SOURCE_DIR}/assets/reversa.ico)
+  set(CPACK_NSIS_INSTALLED_ICON_NAME bin\\\\reversa-gui.exe)
+  set(CPACK_NSIS_MODIFY_PATH ON)
+  set(CPACK_NSIS_ENABLE_UNINSTALL_BEFORE_INSTALL ON)
+  set(CPACK_NSIS_URL_INFO_ABOUT "https://github.com/MrKniha/reversa")
   if(TARGET reversa-gui)
     # Qt DLLs, plugins and Qt's own translations next to the executables (dynamic linking, LGPL).
     find_program(WINDEPLOYQT windeployqt HINTS "${QT6_INSTALL_PREFIX}/bin" REQUIRED)
