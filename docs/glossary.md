@@ -28,7 +28,7 @@ text to the GUI, use a term from this glossary (and add it here if it is missing
 | **Instruction** | One processor command, for example `mov`, `call`, `jmp`. |
 | **Listing** | Instructions one after another with their addresses and bytes (disassembly). |
 | **Disassembler** | A tool that turns machine code bytes into readable instructions. |
-| **Pseudocode** | An estimate of the original code in C style (decompiled code). In the REVERSA MVP it is **provisional**: types are only guessed. |
+| **Pseudocode** | An estimate of the original code in C style (decompiled code). In the REVERSA MVP it is provisional: types are only guessed. |
 | **Decompiler** | A tool that creates pseudocode from instructions. |
 | **Variable a1, a2…** | The 1st, 2nd … parameter of a function. |
 | **local_X** | A local variable stored on the stack (X = offset in hex). |
