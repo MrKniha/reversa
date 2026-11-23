@@ -3,6 +3,7 @@ name: CI
 on:
   push:
   pull_request:
+  workflow_dispatch:  # run by hand on main to release the current version without pushing a tag
 
 permissions:
   contents: read
@@ -101,20 +102,23 @@ jobs:
           name: reversa-windows-x64
           path: reversa-windows-x64.zip
 
-  # Pushing a tag like v0.2.0 publishes a GitHub release with both packages attached.
+  # Pushing a tag like v0.2.0, or a manual run on main, publishes a GitHub release with both packages.
   release:
     name: GitHub release
-    if: startsWith(github.ref, 'refs/tags/v')
+    if: startsWith(github.ref, 'refs/tags/v') || (github.event_name == 'workflow_dispatch' && github.ref == 'refs/heads/main')
     needs: [licenses, linux, windows]
     runs-on: ubuntu-24.04
     permissions:
       contents: write
     steps:
       - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
-      - name: Tag must match the CMake project version
+      - name: Release tag from the CMake project version
         run: |
           version=$(sed -n 's/^project(reversa VERSION \([0-9.]*\).*/\1/p' CMakeLists.txt)
-          test "v$version" = "$GITHUB_REF_NAME" || { echo "tag $GITHUB_REF_NAME != v$version"; exit 1; }
+          if [ "$GITHUB_REF_TYPE" = tag ] && [ "v$version" != "$GITHUB_REF_NAME" ]; then
+            echo "tag $GITHUB_REF_NAME != v$version"; exit 1
+          fi
+          echo "TAG=v$version" >> "$GITHUB_ENV"
       - uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093 # v4.3.0
         with:
           path: dist
@@ -124,5 +128,5 @@ jobs:
           GH_TOKEN: ${{ github.token }}
         run: |
           ls -l dist
-          gh release create "$GITHUB_REF_NAME" dist/reversa-windows-x64.zip dist/reversa_*.deb \
-            --title "REVERSA $GITHUB_REF_NAME" --generate-notes
+          gh release create "$TAG" dist/reversa-windows-x64.zip dist/reversa_*.deb \
+            --target "$GITHUB_SHA" --title "REVERSA $TAG" --generate-notes
