@@ -42,14 +42,14 @@
 
 ## Installation
 
-Download a package from [GitHub Actions](https://github.com/MrKniha/reversa/actions/workflows/ci.yml):
-open the latest successful run and scroll to *Artifacts*.
+Download a package from the [latest release](https://github.com/MrKniha/reversa/releases/latest).
 
 | System | Package | Run |
 |---|---|---|
-| Windows 10/11 (64-bit) | `reversa-windows-x64` (zip) | unpack and run `bin\reversa-gui.exe` |
-| Linux Ubuntu 24.04+, Debian 13+ | `reversa-linux-x64-deb` | `sudo apt install ./reversa_0.2.0_amd64.deb` |
+| Windows 10/11 (64-bit) | `reversa-windows-x64.zip` | unpack and run `bin\reversa-gui.exe` |
+| Linux Ubuntu 24.04+, Debian 13+ | `reversa_0.2.0_amd64.deb` | `sudo apt install ./reversa_0.2.0_amd64.deb` |
 
+Packages of every commit on `main` are also on the [Actions page](https://github.com/MrKniha/reversa/actions/workflows/ci.yml) under *Artifacts*.
 To build from source, see [docs/building.md](docs/building.md).
 
 ## Quick start
